@@ -28,3 +28,19 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# OS generated
+# from https://gist.github.com/kleber-swf/6e62de2ed95cd2c0f2de
+
+**/.DS_Store*
+
+**/._*
+
+**/.Spotlight-V100
+
+**/.Trashes
+**/ehthumbs.db
+
+**/[Tt]humbs.db
+
+**/[Dd]esktop.ini
