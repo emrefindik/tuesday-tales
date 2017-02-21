@@ -1,0 +1,2 @@
+Put these 2 scripts along with spatial api client.
+In GoogleMap.cs, swapMarkers shows an example of using the markers provided in Spatial Api.
