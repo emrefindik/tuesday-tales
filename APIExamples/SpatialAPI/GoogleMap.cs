@@ -80,8 +80,9 @@ public class GoogleMap : MonoBehaviour
 		usingSensor = Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running;
 #endif
 		qs += "&sensor=" + (usingSensor ? "true" : "false");
-		
-		foreach (var i in markers) {
+        qs += "&key=" + "AIzaSyCir4JM4zZaFhPTvwEk7J29PJq07DqQE7A";
+
+        foreach (var i in markers) {
 			qs += "&markers=" + string.Format ("size:{0}|color:{1}|label:{2}", i.size.ToString ().ToLower (), i.color, i.label);
 			foreach (var loc in i.locations) {
 				if (loc.address != "")
