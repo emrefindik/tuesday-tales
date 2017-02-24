@@ -6,8 +6,8 @@ public class SpatialClient2 : MonoBehaviour
 {
 
     // Test Project ID: 588fb546604ae700118697c5
-    string baseURL = "https://spatial-api-poc.herokuapp.com";
-    public string projectID = "588fb546604ae700118697c5";
+    const string baseURL = "https://spatial-api-poc.herokuapp.com";
+    public const string projectID = "588fb546604ae700118697c5";
     public List<Marker> markers = new List<Marker> { };
     public Project project;
     public bool ready = false;

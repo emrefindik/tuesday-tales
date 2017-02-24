@@ -11,8 +11,11 @@ public class MainMenuScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
-	}
+        _mainMenuCanvas.enabled = true;
+        _mapCanvas.enabled = false;
+        _pleaseWaitCanvas.enabled = false;
+        _checkedInCanvas.enabled = false;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -24,7 +27,7 @@ public class MainMenuScript : MonoBehaviour {
         _mainMenuCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = true;
 
-        // get nearby marker, if there is none, create one
+        // get nearby marker from spatial, if there is none, create one
 
         _pleaseWaitCanvas.enabled = false;
         _checkedInCanvas.enabled = true;
@@ -35,7 +38,12 @@ public class MainMenuScript : MonoBehaviour {
         _mainMenuCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = true;
 
-        // get the map info and the surrounding markers
+        GoogleMap googleMaps = GetComponent<GoogleMap>();
+
+        // get location data and plug it into googleMaps
+        // get markers from spatial and plug them into googleMaps
+
+        googleMaps.Refresh();
 
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = true;
