@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Marker : MonoBehaviour {
+/*public class Marker : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
@@ -13,4 +13,4 @@ public class Marker : MonoBehaviour {
 	void Update () {
 		
 	}
-}
+}*/
