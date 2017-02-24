@@ -97,20 +97,6 @@ public class SpatialClient2 : MonoBehaviour
 
         string url = string.Format("{0}/v1/marker", baseURL);
 
-		/*List<IMultipartFormSection> data = new List<IMultipartFormSection> ();
-		data.Add (new MultipartFormDataSection ("longitude", longitude.ToString ()));
-		data.Add (new MultipartFormDataSection ("latitude", latitude.ToString()));
-		data.Add (new MultipartFormDataSection ("name", name));
-		data.Add (new MultipartFormDataSection ("description", description));
-		data.Add (new MultipartFormDataSection ("projectId", projectID));
-		data.Add (new MultipartFormDataSection ("metadata", JsonUtility.ToJson(metadata)));
-		UnityWebRequest req = UnityWebRequest.Post (url, data);
-		yield return req.Send ();
-		if (!req.isError) {
-			Debug.Log (req.downloadHandler.text);
-		} else {
-			Debug.Log (req.error);
-		}*/
         WWWForm form = new WWWForm();
         form.AddField("longitude", longitude.ToString());
         form.AddField("latitude", latitude.ToString());
@@ -316,13 +302,13 @@ public class SpatialClient2 : MonoBehaviour
 	}
 
 	public IEnumerator AddFriend(string projectID, string friendID, string token){
-		string url = baseURL + "/v1/project-user/add-friend";
+		string url = baseURL + "/v1/project-friend/add-friend";
 		WWWForm form = new WWWForm ();
 		form.AddField ("projectId", projectID);
 		form.AddField ("friendId", friendID);
 		Dictionary<string,string> header = new Dictionary<string, string> ();
 		header ["auth-token"] = token;
-		WWW www = new WWW(url, form, header);
+		WWW www = new WWW(url, form.data, header);
 		yield return www;
 
 		// Post Process
@@ -338,16 +324,37 @@ public class SpatialClient2 : MonoBehaviour
 	}
 
 	public IEnumerator RemoveFriend(string projectID, string friendID, string token){
-		string url = baseURL + "/v1/project-user/remove-friend";
+		string url = baseURL + "/v1/project-friend/remove-friend";
 		WWWForm form = new WWWForm ();
 		form.AddField ("projectId", projectID);
 		form.AddField ("friendId", friendID);
 		Dictionary<string,string> header = new Dictionary<string, string> ();
 		header ["auth-token"] = token;
-		WWW www = new WWW(url, form, header);
+		WWW www = new WWW(url, form.data, header);
 		yield return www;
 
 		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
+
+	public IEnumerator GetFriends(string userID, string projectID){
+		string url = baseURL + "/v1/project-friend/get-friends-by-id";
+		WWWForm form = new WWWForm ();
+		form.AddField ("userId", userID);
+		form.AddField ("projectId", projectID);
+		WWW www = new WWW(url, form);
+		yield return www;
+
+		// Post Process
+		Debug.Log(url);
 		if (!string.IsNullOrEmpty(www.error))
 		{
 			print(www.error);
