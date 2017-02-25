@@ -1,21 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class SpatialClient2 : MonoBehaviour
 {
 
     // Test Project ID: 588fb546604ae700118697c5
-    string baseURL = "https://spatial-api-poc.herokuapp.com";
-    public string projectID = "588fb546604ae700118697c5";
+    const string baseURL = "https://spatial-api-poc.herokuapp.com";
+    public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // new test project ID
+
     public List<Marker> markers = new List<Marker> { };
     public Project project;
     public bool ready = false;
     public bool lastStatus = false;
+	public static SpatialClient2 single;
+	public LoginResponse user;
 
     void Start()
     {
         ready = false;
+		single = this;
     }
 
 // May not be used
@@ -57,11 +62,11 @@ public class SpatialClient2 : MonoBehaviour
     /*
      *  Get all the project information
      */
-    public IEnumerator GetProjectInfo(string projectId)
+    public IEnumerator GetProjectInfo(string projectID = PROJECT_ID)
     {
         ready = false;
 
-        string url = string.Format("{0}/v1/project/{1}", baseURL, projectId);
+        string url = string.Format("{0}/v1/project/{1}", baseURL, projectID);
         WWW www = new WWW(url);
         yield return www;
 
@@ -86,7 +91,8 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator CreateMarker(string projectID, double longitude, double latitude, string name, string description, Dictionary<string, string> metadata)
+	//Longitude must be between -180 and 180. lattitude must be between -90 and 90.
+    public IEnumerator CreateMarker(double longitude, double latitude, string name, string description, Dictionary<string, string> metadata, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -115,11 +121,11 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetMarkersByProject(string projectId)
+    public IEnumerator GetMarkersByProject(string projectID = PROJECT_ID)
     {
         ready = false;
 
-        string url = string.Format("{0}/v1/markers-by-project?projectId={1}", baseURL, projectId);
+        string url = string.Format("{0}/v1/markers-by-project?projectId={1}", baseURL, projectID);
         WWW www = new WWW(url);
         yield return www;
 
@@ -144,7 +150,7 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetMarkersByDistance(string projectId, double longitude, double latitude)
+    public IEnumerator GetMarkersByDistance(double longitude, double latitude, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -153,7 +159,7 @@ public class SpatialClient2 : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("longitude", longitude.ToString());
         form.AddField("latitude", latitude.ToString());
-        form.AddField("projectId", projectId);
+        form.AddField("projectId", projectID);
 
         WWW www = new WWW(url, form);
         yield return www;
@@ -162,6 +168,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+            markers.Clear();
         }
         else
         {
@@ -180,7 +187,7 @@ public class SpatialClient2 : MonoBehaviour
 
     }
 
-    public IEnumerator GetMarkersByDistance(string projectId, double longitude, double latitude, double value, bool isMeter)
+    public IEnumerator GetMarkersByDistance(double longitude, double latitude, double value, bool isMeter, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -189,7 +196,7 @@ public class SpatialClient2 : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("longitude", longitude.ToString());
         form.AddField("latitude", latitude.ToString());
-        form.AddField("projectId", projectId);
+        form.AddField("projectId", projectID);
 
         if (isMeter)
         {
@@ -224,7 +231,7 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator DeleteMarkerById(string projectId, string markerId)
+    public IEnumerator DeleteMarkerById(string markerId, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -233,7 +240,7 @@ public class SpatialClient2 : MonoBehaviour
 
         WWWForm form = new WWWForm();
         form.AddField("markerId", markerId);
-        form.AddField("projectId", projectId);
+        form.AddField("projectId", projectID);
 
         WWW www = new WWW(url, form);
         yield return www;
@@ -249,6 +256,120 @@ public class SpatialClient2 : MonoBehaviour
             Debug.Log(www.text);
         }
     }
+
+	//Must login after creation
+	public IEnumerator CreateUser(string userName, string password, string projectID = PROJECT_ID){
+		string url = baseURL + "/v1/project-user/create-user";
+		WWWForm form = new WWWForm ();
+		form.AddField ("username", userName);
+		form.AddField ("password", password);
+		form.AddField ("projectId", projectID);
+		WWW www = new WWW(url, form);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
+
+	public IEnumerator LoginUser(string userName, string password, string projectID = PROJECT_ID){
+		string url = baseURL + "/v1/project-user/login-project-user";
+		WWWForm form = new WWWForm ();
+		form.AddField ("username", userName);
+		form.AddField ("password", password);
+		form.AddField ("projectId", projectID);
+		WWW www = new WWW(url, form);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+			LoginResponse response = new LoginResponse ();
+			response = JsonUtility.FromJson<LoginResponse> (www.text);
+			Debug.Log (response.user.username);
+		}
+	}
+
+	public IEnumerator AddFriend(string friendID, string token, string projectID = PROJECT_ID)
+    {
+		string url = baseURL + "/v1/project-friend/add-friend";
+		WWWForm form = new WWWForm ();
+		form.AddField ("projectId", projectID);
+		form.AddField ("friendId", friendID);
+		Dictionary<string,string> header = new Dictionary<string, string> ();
+		header ["auth-token"] = token;
+		WWW www = new WWW(url, form.data, header);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
+
+	public IEnumerator RemoveFriend(string friendID, string token, string projectID = PROJECT_ID)
+    {
+		string url = baseURL + "/v1/project-friend/remove-friend";
+		WWWForm form = new WWWForm ();
+		form.AddField ("projectId", projectID);
+		form.AddField ("friendId", friendID);
+		Dictionary<string,string> header = new Dictionary<string, string> ();
+		header ["auth-token"] = token;
+		WWW www = new WWW(url, form.data, header);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
+
+	public IEnumerator GetFriends(string userID, string projectID = PROJECT_ID)
+    {
+		string url = baseURL + "/v1/project-friend/get-friends-by-id";
+		WWWForm form = new WWWForm ();
+		form.AddField ("userId", userID);
+		form.AddField ("projectId", projectID);
+		WWW www = new WWW(url, form);
+		yield return www;
+
+		// Post Process
+		Debug.Log(url);
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
 }
 
 [System.Serializable]
@@ -256,6 +377,19 @@ public class ReturnMarkersMessage
 {
     public bool success;
     public List<Marker> markers = new List<Marker> { };
+}
+
+[System.Serializable]
+public class LoginResponse{
+	public UserData user;
+	public string token;
+}
+
+[System.Serializable]
+public class UserData {
+	public string username;
+	public string password;
+	public string projectId;
 }
 
 [System.Serializable]
