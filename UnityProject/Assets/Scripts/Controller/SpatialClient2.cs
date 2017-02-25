@@ -16,7 +16,7 @@ public class SpatialClient2 : MonoBehaviour
     public bool ready = false;
     public bool lastStatus = false;
     public static SpatialClient2 single;
-    public LoginResponse user;
+    public LoginResponse userSession = new LoginResponse();
 
     void Start()
     {
@@ -302,8 +302,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            LoginResponse response = new LoginResponse();
-            response = JsonUtility.FromJson<LoginResponse>(www.text);
+            userSession = JsonUtility.FromJson<LoginResponse>(www.text);
             ready = true;
             Debug.Log(www.text);
         }
