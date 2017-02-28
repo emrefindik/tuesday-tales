@@ -380,13 +380,12 @@ public class SpatialClient2 : MonoBehaviour
             Debug.Log(www.text);
         }
     }
-
-    // Not Woring for now. Waiting for Legendary to response.
+    
     public IEnumerator GetUsersByProject(string projectID = PROJECT_ID)
     {
         ready = false;
 
-        string url = baseURL + "/v1/project-user/get-users-by-project/:" + projectID;
+        string url = baseURL + "/v1/project-user/get-users-by-project/" + projectID;
         WWW www = new WWW(url);
         yield return www;
 
