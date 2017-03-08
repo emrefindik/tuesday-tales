@@ -15,17 +15,21 @@ public class MainMenuScript : MonoBehaviour {
     public Canvas _pleaseWaitCanvas;
     public Canvas _checkedInCanvas;
     public Canvas _errorCanvas;
+    public Canvas _eggsCanvas;
 
     private BoolWrapper seeWhatsAroundSuccess;
     private BoolWrapper checkInSuccess;
 
 	// Use this for initialization
 	void Start () {
+        EggController.instance.updateEggs();
+
         _mainMenuCanvas.enabled = true;
         _mapCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
         _checkedInCanvas.enabled = false;
         _errorCanvas.enabled = false;
+        _eggsCanvas.enabled = false;
 
         // initialize the bool wrappers
         seeWhatsAroundSuccess = new BoolWrapper();
@@ -41,6 +45,12 @@ public class MainMenuScript : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void onEggs()
+    {
+        _mainMenuCanvas.enabled = false;
+        _eggsCanvas.enabled = true;
+    }
 
     public void onCheckIn()
     {
@@ -65,6 +75,7 @@ public class MainMenuScript : MonoBehaviour {
     {
         StopAllCoroutines();
         _checkedInCanvas.enabled = false;
+        _eggsCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _errorCanvas.enabled = false;
@@ -86,9 +97,9 @@ public class MainMenuScript : MonoBehaviour {
             yield break; // could not get location
         }
         googleMaps.centerLocation.address = "";
-        googleMaps.centerLocation.latitude = Input.location.lastData.latitude;
-        googleMaps.centerLocation.longitude = Input.location.lastData.longitude;
-        Debug.Log(Input.location.lastData.latitude);
+        googleMaps.centerLocation.latitude = 40.432633f;//Input.location.lastData.latitude; TODO uncomment this
+        googleMaps.centerLocation.longitude = -79.964973f;// Input.location.lastData.longitude; TODO uncomment this
+
         // get markers from spatial and plug them into googleMaps
         yield return SpatialClient2.single.GetMarkersByDistance(
             Input.location.lastData.longitude, Input.location.lastData.latitude);
@@ -110,6 +121,7 @@ public class MainMenuScript : MonoBehaviour {
 
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = true;
+
     }
 
     // assigns true to result.value if location service is ready, otherwise assigns false
