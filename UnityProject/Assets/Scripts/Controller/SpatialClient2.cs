@@ -11,19 +11,20 @@ public class SpatialClient2 : MonoBehaviour
     public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // new test project ID
 
     public List<Marker> markers = new List<Marker> { };
+    public UserList allUser = new UserList();
     public Project project;
     public bool ready = false;
     public bool lastStatus = false;
-	public static SpatialClient2 single;
-	public LoginResponse user;
+    public static SpatialClient2 single;
+    public LoginResponse userSession = new LoginResponse();
 
     void Start()
     {
         ready = false;
-		single = this;
+        single = this;
     }
 
-// May not be used
+    // May not be used
     public IEnumerator CreateProject(string projName, string projCategory, string email)
     {
         ready = false;
@@ -45,7 +46,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            ReturnProjectMessage rm = JsonUtility.FromJson<ReturnProjectMessage>(www.text);
+            ResponseProjectMessage rm = JsonUtility.FromJson<ResponseProjectMessage>(www.text);
             if (rm.success)
             {
                 project = rm.project;
@@ -77,7 +78,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            ReturnProjectMessage rm = JsonUtility.FromJson<ReturnProjectMessage>(www.text);
+            ResponseProjectMessage rm = JsonUtility.FromJson<ResponseProjectMessage>(www.text);
             if (rm.success)
             {
                 project = rm.project;
@@ -91,7 +92,7 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-	//Longitude must be between -180 and 180. lattitude must be between -90 and 90.
+    //Longitude must be between -180 and 180. lattitude must be between -90 and 90.
     public IEnumerator CreateMarker(double longitude, double latitude, string name, string description, Dictionary<string, string> metadata, string projectID = PROJECT_ID)
     {
         ready = false;
@@ -136,7 +137,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            ReturnMarkersMessage rm = JsonUtility.FromJson<ReturnMarkersMessage>(www.text);
+            ResponseMarkersMessage rm = JsonUtility.FromJson<ResponseMarkersMessage>(www.text);
             if (rm.success)
             {
                 markers = rm.markers;
@@ -172,7 +173,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            ReturnMarkersMessage rm = JsonUtility.FromJson<ReturnMarkersMessage>(www.text);
+            ResponseMarkersMessage rm = JsonUtility.FromJson<ResponseMarkersMessage>(www.text);
             if (rm.success)
             {
                 markers = rm.markers;
@@ -217,7 +218,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-            ReturnMarkersMessage rm = JsonUtility.FromJson<ReturnMarkersMessage>(www.text);
+            ResponseMarkersMessage rm = JsonUtility.FromJson<ResponseMarkersMessage>(www.text);
             if (rm.success)
             {
                 markers = rm.markers;
@@ -257,127 +258,151 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-	//Must login after creation
-	public IEnumerator CreateUser(string userName, string password, string projectID = PROJECT_ID){
-		string url = baseURL + "/v1/project-user/create-user";
-		WWWForm form = new WWWForm ();
-		form.AddField ("username", userName);
-		form.AddField ("password", password);
-		form.AddField ("projectId", projectID);
-		WWW www = new WWW(url, form);
-		yield return www;
-
-		// Post Process
-		if (!string.IsNullOrEmpty(www.error))
-		{
-			print(www.error);
-		}
-		else
-		{
-			ready = true;
-			Debug.Log(www.text);
-		}
-	}
-
-	public IEnumerator LoginUser(string userName, string password, string projectID = PROJECT_ID){
-		string url = baseURL + "/v1/project-user/login-project-user";
-		WWWForm form = new WWWForm ();
-		form.AddField ("username", userName);
-		form.AddField ("password", password);
-		form.AddField ("projectId", projectID);
-		WWW www = new WWW(url, form);
-		yield return www;
-
-		// Post Process
-		if (!string.IsNullOrEmpty(www.error))
-		{
-			print(www.error);
-		}
-		else
-		{
-			ready = true;
-			Debug.Log(www.text);
-			LoginResponse response = new LoginResponse ();
-			response = JsonUtility.FromJson<LoginResponse> (www.text);
-			Debug.Log (response.user.username);
-		}
-	}
-
-	public IEnumerator AddFriend(string friendID, string token, string projectID = PROJECT_ID)
+    //Must login after creation
+    public IEnumerator CreateUser(string userName, string password, string projectID = PROJECT_ID)
     {
-		string url = baseURL + "/v1/project-friend/add-friend";
-		WWWForm form = new WWWForm ();
-		form.AddField ("projectId", projectID);
-		form.AddField ("friendId", friendID);
-		Dictionary<string,string> header = new Dictionary<string, string> ();
-		header ["auth-token"] = token;
-		WWW www = new WWW(url, form.data, header);
-		yield return www;
+        ready = false;
 
-		// Post Process
-		if (!string.IsNullOrEmpty(www.error))
-		{
-			print(www.error);
-		}
-		else
-		{
-			ready = true;
-			Debug.Log(www.text);
-		}
-	}
+        string url = baseURL + "/v1/project-user/create-user";
+        WWWForm form = new WWWForm();
+        form.AddField("username", userName);
+        form.AddField("password", password);
+        form.AddField("projectId", projectID);
+        WWW www = new WWW(url, form);
+        yield return www;
 
-	public IEnumerator RemoveFriend(string friendID, string token, string projectID = PROJECT_ID)
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+
+    public IEnumerator LoginUser(string userName, string password, string projectID = PROJECT_ID)
     {
-		string url = baseURL + "/v1/project-friend/remove-friend";
-		WWWForm form = new WWWForm ();
-		form.AddField ("projectId", projectID);
-		form.AddField ("friendId", friendID);
-		Dictionary<string,string> header = new Dictionary<string, string> ();
-		header ["auth-token"] = token;
-		WWW www = new WWW(url, form.data, header);
-		yield return www;
+        ready = false;
 
-		// Post Process
-		if (!string.IsNullOrEmpty(www.error))
-		{
-			print(www.error);
-		}
-		else
-		{
-			ready = true;
-			Debug.Log(www.text);
-		}
-	}
+        string url = baseURL + "/v1/project-user/login-project-user";
+        WWWForm form = new WWWForm();
+        form.AddField("username", userName);
+        form.AddField("password", password);
+        form.AddField("projectId", projectID);
+        WWW www = new WWW(url, form);
+        yield return www;
 
-	public IEnumerator GetFriends(string userID, string projectID = PROJECT_ID)
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            userSession = JsonUtility.FromJson<LoginResponse>(www.text);
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+
+    public IEnumerator AddFriend(string friendID, string token, string projectID = PROJECT_ID)
     {
-		string url = baseURL + "/v1/project-friend/get-friends-by-id";
-		WWWForm form = new WWWForm ();
-		form.AddField ("userId", userID);
-		form.AddField ("projectId", projectID);
-		WWW www = new WWW(url, form);
-		yield return www;
+        ready = false;
 
-		// Post Process
-		Debug.Log(url);
-		if (!string.IsNullOrEmpty(www.error))
-		{
-			print(www.error);
-		}
-		else
-		{
-			ready = true;
-			Debug.Log(www.text);
-		}
-	}
+        string url = baseURL + "/v1/project-friend/add-friend";
+        WWWForm form = new WWWForm();
+        form.AddField("projectId", projectID);
+        form.AddField("friendId", friendID);
+        Dictionary<string, string> header = new Dictionary<string, string>();
+        header["auth-token"] = token;
+        WWW www = new WWW(url, form.data, header);
+        yield return www;
+
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+
+    public IEnumerator RemoveFriend(string friendID, string token, string projectID = PROJECT_ID)
+    {
+        ready = false;
+
+        string url = baseURL + "/v1/project-friend/remove-friend";
+        WWWForm form = new WWWForm();
+        form.AddField("projectId", projectID);
+        form.AddField("friendId", friendID);
+        Dictionary<string, string> header = new Dictionary<string, string>();
+        header["auth-token"] = token;
+        WWW www = new WWW(url, form.data, header);
+        yield return www;
+
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+
+    public IEnumerator GetFriends(string userID, string projectID = PROJECT_ID)
+    {
+        ready = false;
+
+        string url = baseURL + "/v1/project-friend/get-friends-by-id";
+        WWWForm form = new WWWForm();
+        form.AddField("userId", userID);
+        form.AddField("projectId", projectID);
+        WWW www = new WWW(url, form);
+        yield return www;
+
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+    
+    public IEnumerator GetUsersByProject(string projectID = PROJECT_ID)
+    {
+        ready = false;
+
+        string url = baseURL + "/v1/project-user/get-users-by-project/" + projectID;
+        WWW www = new WWW(url);
+        yield return www;
+
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            allUser = JsonUtility.FromJson<UserList>(www.text);
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
 }
 
-[System.Serializable]
-public class ReturnMarkersMessage
-{
-    public bool success;
-    public List<Marker> markers = new List<Marker> { };
-}
 
 [System.Serializable]
 public class LoginResponse{
@@ -388,8 +413,16 @@ public class LoginResponse{
 [System.Serializable]
 public class UserData {
 	public string username;
-	public string password;
+    public string _id;
 	public string projectId;
+    public bool __v;    // what is __v? will it affect json?
+}
+
+[System.Serializable]
+public class ResponseMarkersMessage
+{
+    public bool success;
+    public List<Marker> markers = new List<Marker> { };
 }
 
 [System.Serializable]
@@ -414,7 +447,7 @@ public class Location
 
 
 [System.Serializable]
-public class ReturnProjectMessage
+public class ResponseProjectMessage
 {
     public bool success;
     public Project project; 
@@ -431,15 +464,21 @@ public class Project
 
 }
 
+[System.Serializable]
+public class UserList
+{
+    public List<UserData> users;
+}
 
 
-//[System.Serializable]
-//public class Markers
-//{
-//    public List<Marker> markers = new List<Marker> { };
-//}
 
-public static class JsonHelper
+    //[System.Serializable]
+    //public class Markers
+    //{
+    //    public List<Marker> markers = new List<Marker> { };
+    //}
+
+    public static class JsonHelper
 {
     public static T[] FromJson<T>(string json)
     {
