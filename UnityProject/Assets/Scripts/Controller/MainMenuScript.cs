@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainMenuScript : MonoBehaviour {
 
@@ -16,15 +18,57 @@ public class MainMenuScript : MonoBehaviour {
     public Canvas _checkedInCanvas;
     public Canvas _errorCanvas;
     public Canvas _eggsCanvas;
+    public Canvas _loginCanvas;
+    public Text _wrongPasswordText;
+    public Text _connectionErrorText;
 
-    private BoolWrapper seeWhatsAroundSuccess;
-    private BoolWrapper checkInSuccess;
+    private CoroutineResponse seeWhatsAroundSuccess;
+    private CoroutineResponse checkInSuccess;
 
-	// Use this for initialization
-	void Start () {
-        EggController.instance.updateEggs();
+    [SerializeField]
+    private InputField userNameField;
 
-        _mainMenuCanvas.enabled = true;
+    [SerializeField]
+    private InputField passwordField;
+
+    public IEnumerator onSubmit()
+    {
+        CoroutineResponse response = new CoroutineResponse();
+        yield return SpatialClient2.single.LoginUser(response, userNameField.text, passwordField.text);
+        switch (response.Success)
+        {
+            case true:
+                // initialize eggs canvas with
+                
+
+                // logged in, switch to main menu
+                _loginCanvas.enabled = false;
+                _mainMenuCanvas.enabled = true;
+
+                Debug.Log(Input.location.isEnabledByUser);
+
+                // start location tracking
+                Input.location.Start();
+                break;
+            case false:
+                // wrong credentials
+                _connectionErrorText.enabled = false;
+                _wrongPasswordText.enabled = true;
+                break;
+            case null:
+                // connection error (possible timeout)
+                _wrongPasswordText.enabled = false;
+                _connectionErrorText.enabled = true;
+                break;
+        }
+
+    }
+
+    // Use this for initialization
+    void Start () {
+
+        _loginCanvas.enabled = true;
+        _mainMenuCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
         _checkedInCanvas.enabled = false;
@@ -32,13 +76,8 @@ public class MainMenuScript : MonoBehaviour {
         _eggsCanvas.enabled = false;
 
         // initialize the bool wrappers
-        seeWhatsAroundSuccess = new BoolWrapper();
-        checkInSuccess = new BoolWrapper();
-
-        Debug.Log(Input.location.isEnabledByUser);
-
-        // start location tracking
-        Input.location.Start();
+        seeWhatsAroundSuccess = new CoroutineResponse();
+        checkInSuccess = new CoroutineResponse();
     }
 	
 	// Update is called once per frame
@@ -88,9 +127,8 @@ public class MainMenuScript : MonoBehaviour {
         GoogleMap googleMaps = GetComponent<GoogleMap>();
 
         // get location data and plug it into googleMaps
-        seeWhatsAroundSuccess.value = false;
         yield return checkLocationService(seeWhatsAroundSuccess);
-        if (!seeWhatsAroundSuccess.value)
+        if (seeWhatsAroundSuccess.Success != true)
         {
             _pleaseWaitCanvas.enabled = false;
             _errorCanvas.enabled = true;
@@ -125,8 +163,11 @@ public class MainMenuScript : MonoBehaviour {
     }
 
     // assigns true to result.value if location service is ready, otherwise assigns false
-    IEnumerator checkLocationService(BoolWrapper result)
+    IEnumerator checkLocationService(CoroutineResponse result)
     {
+        // make sure result's success value is null before beginning
+        result.reset();
+
         // base code from https://docs.unity3d.com/ScriptReference/LocationService.Start.html
         // Wait until service initializes
         int maxWait = LOCATION_INITIALIZED_QUERY_TIMEOUT * LOCATION_INITIALIZED_QUERIES_PER_SECOND;
@@ -137,8 +178,11 @@ public class MainMenuScript : MonoBehaviour {
             maxWait--;
         }
 
-        // false if location service disabled or initialization timed out, true otherwise
-        result.value = !(Input.location.status == LocationServiceStatus.Failed || maxWait < 1);
+        if (maxWait > 0)
+        {
+            // false if location service disabled, null if timed out, true otherwise
+            result.setSuccess(!(Input.location.status == LocationServiceStatus.Failed));
+        }
     }
 
     private void checkLocationServiceIsOn()
@@ -151,6 +195,11 @@ public class MainMenuScript : MonoBehaviour {
         {
             Input.location.Start();
         }
+    }
+
+    private List<OwnedEgg> getOwnedEggs()
+    {
+        return SpatialClient2.single.userSession.user.metadata.eggsOwned;
     }
 
 }

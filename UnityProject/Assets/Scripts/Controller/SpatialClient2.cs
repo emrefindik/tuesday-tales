@@ -22,6 +22,9 @@ public class SpatialClient2 : MonoBehaviour
     {
         ready = false;
         single = this;
+
+        // TODO delete this
+        StartCoroutine(LoginUser(new CoroutineResponse(), "hello", "hello"));
     }
 
     // May not be used
@@ -283,8 +286,9 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator LoginUser(string userName, string password, string projectID = PROJECT_ID)
+    public IEnumerator LoginUser(CoroutineResponse response, string userName, string password, string projectID = PROJECT_ID)
     {
+        response.reset();
         ready = false;
 
         string url = baseURL + "/v1/project-user/login-project-user";
@@ -299,12 +303,14 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+            if (www.error.StartsWith("400")) response.setSuccess(false);
         }
         else
         {
             userSession = JsonUtility.FromJson<LoginResponse>(www.text);
             ready = true;
             Debug.Log(www.text);
+            response.setSuccess(true);
         }
     }
 
@@ -416,6 +422,14 @@ public class UserData {
     public string _id;
 	public string projectId;
     public bool __v;    // what is __v? will it affect json?
+    public UserMetadata metadata; // TODO test whether get user returns metadata in Spatial
+}
+
+[System.Serializable]
+public class UserMetadata
+{
+    public List<OwnedEgg> eggsOwned;
+    public List<Egg> friendsEggs;
 }
 
 [System.Serializable]

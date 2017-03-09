@@ -20,7 +20,7 @@ public class GetFriendsHandler : MonoBehaviour {
 			StartCoroutine (SpatialClient2.single.CreateUser (username, password));
 		}
 		if (Input.GetKeyDown(KeyCode.L)) {
-			StartCoroutine (SpatialClient2.single.LoginUser (username, password));
+			StartCoroutine (SpatialClient2.single.LoginUser (new CoroutineResponse(), username, password));
 		}
 		if (Input.GetKeyDown(KeyCode.M)) {
 			StartCoroutine (SpatialClient2.single.CreateMarker (50f,50f,"test", "test marker",null));
