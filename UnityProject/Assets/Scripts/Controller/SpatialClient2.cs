@@ -407,6 +407,34 @@ public class SpatialClient2 : MonoBehaviour
             Debug.Log(www.text);
         }
     }
+
+	public IEnumerator UpdateMeta(string metadata, string token)
+	{
+		ready = false;
+
+		string url = baseURL + "/v1/project-user/update-metadata";
+		WWWForm form = new WWWForm();
+		UserData data = new UserData ();
+		meta met = new meta ();
+		met.valid = "name:\"pass\"";
+		Debug.Log (JsonUtility.ToJson (met));
+		form.AddField("metadata", JsonUtility.ToJson(met));
+		Dictionary<string, string> header = new Dictionary<string, string>();
+		header["auth-token"] = token;
+		WWW www = new WWW(url, form.data, header);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
 }
 
 
@@ -414,6 +442,11 @@ public class SpatialClient2 : MonoBehaviour
 public class LoginResponse{
 	public UserData user;
 	public string token;
+}
+
+[System.Serializable]
+public class meta{
+	public string valid;
 }
 
 [System.Serializable]
