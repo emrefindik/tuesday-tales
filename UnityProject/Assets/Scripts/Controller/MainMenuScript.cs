@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MainMenuScript : MonoBehaviour {
 
@@ -11,6 +12,9 @@ public class MainMenuScript : MonoBehaviour {
 
     // time before giving up on enabling location service, in seconds
     const int LOCATION_INITIALIZED_QUERY_TIMEOUT = 20;
+
+    // the scene index of the destruction scene in the build settings
+    const int DESTRUCTION_SCENE_INDEX = 1;
 
     public Canvas _mainMenuCanvas;
     public Canvas _mapCanvas;
@@ -146,8 +150,8 @@ public class MainMenuScript : MonoBehaviour {
             yield break; // could not get location
         }
         googleMaps.centerLocation.address = "";
-        googleMaps.centerLocation.latitude = 40.432633f;//Input.location.lastData.latitude; TODO uncomment this
-        googleMaps.centerLocation.longitude = -79.964973f;// Input.location.lastData.longitude; TODO uncomment this
+        googleMaps.centerLocation.latitude = Input.location.lastData.latitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION 40.432633f;
+        googleMaps.centerLocation.longitude = Input.location.lastData.longitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION -79.964973f;
 
         // get markers from spatial and plug them into googleMaps
         yield return SpatialClient2.single.GetMarkersByDistance(
@@ -211,6 +215,11 @@ public class MainMenuScript : MonoBehaviour {
     private List<OwnedEgg> getOwnedEggs()
     {
         return SpatialClient2.single.userSession.user.metadata.eggsOwned;
+    }
+
+    public void onTestDestruction()
+    {
+        SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
     }
 
 }
