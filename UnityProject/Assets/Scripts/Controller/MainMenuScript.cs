@@ -31,15 +31,23 @@ public class MainMenuScript : MonoBehaviour {
     [SerializeField]
     private InputField passwordField;
 
-    public IEnumerator onSubmit()
+    public void onSubmit()
+    {
+        StartCoroutine(submit());
+    }
+
+    public IEnumerator submit()
     {
         CoroutineResponse response = new CoroutineResponse();
         yield return SpatialClient2.single.LoginUser(response, userNameField.text, passwordField.text);
         switch (response.Success)
         {
             case true:
-                // initialize eggs canvas with
-                
+                Debug.Log(SpatialClient2.single.userSession.user.projectId);
+                Debug.Log(SpatialClient2.single.userSession.user.metadata.eggsOwned);
+
+                // initialize egg menu
+                _eggsCanvas.GetComponent<EggMenuController>().addButtons(SpatialClient2.single.userSession.user.metadata.eggsOwned);
 
                 // logged in, switch to main menu
                 _loginCanvas.enabled = false;
@@ -68,6 +76,9 @@ public class MainMenuScript : MonoBehaviour {
     void Start () {
 
         _loginCanvas.enabled = true;
+        _wrongPasswordText.enabled = false;
+        _connectionErrorText.enabled = false;
+
         _mainMenuCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
