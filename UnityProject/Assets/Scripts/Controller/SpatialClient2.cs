@@ -18,10 +18,19 @@ public class SpatialClient2 : MonoBehaviour
     public static SpatialClient2 single;
     public LoginResponse userSession = new LoginResponse();
 
+    /** The content data sent to the server directly with user updateMetadata */
+    //private RawMetadata _rawMetadata;
+
     void Start()
     {
         ready = false;
         single = this;
+
+        //_rawMetadata = new RawMetadata();
+        //_rawMetadata.projectId = PROJECT_ID;
+
+        // TODO delete this
+        StartCoroutine(LoginUser(new CoroutineResponse(), "hello", "hello"));
     }
 
     // May not be used
@@ -283,8 +292,9 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator LoginUser(string userName, string password, string projectID = PROJECT_ID)
+    public IEnumerator LoginUser(CoroutineResponse response, string userName, string password, string projectID = PROJECT_ID)
     {
+        response.reset();
         ready = false;
 
         string url = baseURL + "/v1/project-user/login-project-user";
@@ -299,12 +309,14 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+            if (www.error.StartsWith("400")) response.setSuccess(false);
         }
         else
         {
             userSession = JsonUtility.FromJson<LoginResponse>(www.text);
             ready = true;
             Debug.Log(www.text);
+            response.setSuccess(true);
         }
     }
 
@@ -401,6 +413,33 @@ public class SpatialClient2 : MonoBehaviour
             Debug.Log(www.text);
         }
     }
+
+	public IEnumerator UpdateMeta()
+	{
+		ready = false;
+
+		string url = baseURL + "/v1/project-user/update-metadata";
+		WWWForm form = new WWWForm();
+		UserData data = new UserData ();
+
+		form.AddField("metadata", JsonUtility.ToJson(userSession.user.metadata));
+        form.AddField("projectId", PROJECT_ID);
+		Dictionary<string, string> header = new Dictionary<string, string>();
+		header["auth-token"] = userSession.token;
+		WWW www = new WWW(url, form.data, header);
+		yield return www;
+
+		// Post Process
+		if (!string.IsNullOrEmpty(www.error))
+		{
+			print(www.error);
+		}
+		else
+		{
+			ready = true;
+			Debug.Log(www.text);
+		}
+	}
 }
 
 
@@ -415,7 +454,23 @@ public class UserData {
 	public string username;
     public string _id;
 	public string projectId;
-    public bool __v;    // what is __v? will it affect json?
+    //public bool __v;    // what is __v? will it affect json?  NOTE FROM EMRE: RICK REMOVED THIS
+    public UserMetadata metadata; // TODO test whether get user returns metadata in Spatial
+}
+
+/*
+[System.Serializable]
+public class RawMetadata
+{
+    public UserMetadata metadata;
+    public string projectId;
+} */
+
+[System.Serializable]
+public class UserMetadata
+{
+    public List<OwnedEgg> eggsOwned;
+    public List<OwnedEgg> friendsEggs;
 }
 
 [System.Serializable]
