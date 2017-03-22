@@ -219,7 +219,8 @@ public class MainMenuScript : MonoBehaviour {
 
     public void onTestDestruction()
     {
-        SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
+        //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
+        MainController.single.goToDestroyCity();
     }
 
 }
