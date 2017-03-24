@@ -223,4 +223,10 @@ public class MainMenuScript : MonoBehaviour {
         MainController.single.goToDestroyCity();
     }
 
+	public void onTestCamera()
+	{
+		//SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
+		MainController.single.goToPhoneCamera();
+	}
+
 }
