@@ -5,22 +5,25 @@ using System.Linq;
 
 public class LevelControl : MonoBehaviour {
 
-    private Vector2 fingerStart;
-    private Vector2 fingerEnd;
     public GameObject buildings;
     public GameObject[] realBuilding = new GameObject[4];
     public GameObject[] realBuildingbuildingCover = new GameObject[4];
     public GameObject[] structures = new GameObject[4];
+	public GameObject winCanvas;
+	public GameObject shareSucceedCanvas;
     public bool switchNow=false;
-    private PixelDestruction pD;
+	public Texture2D barFull;
+	public Texture2D barEmpty;
+	public int score;
+
+	PixelDestruction pD;
     float[] levelPositions;
+	Vector2 fingerStart;
+	Vector2 fingerEnd;
 
     // GUI
     Vector2 barPos = new Vector2(20, 40);
     Vector2 barSize = new Vector2(Screen.width-40, Screen.height/10);
-    public Texture2D barFull;
-    public Texture2D barEmpty;
-    public int score;
     const int scoreBase = 100;
 
     //float[] progress;
@@ -29,8 +32,8 @@ public class LevelControl : MonoBehaviour {
     public int num_of_people;
     float progressStep;
     
-    private float tolerance = 300;
-    private int level = 0;
+    float tolerance = 300;
+    int level = 0;
 
     float currentTime = 0;
     bool currentTimeOff = true;
@@ -38,6 +41,10 @@ public class LevelControl : MonoBehaviour {
     int buildingDestroyedCount;
     int number_of_buildings;
     bool win;   // check this status : whether has win
+
+	// Wait for other process to finish
+
+	static public FacebookManager.ShareStatus shareStatus;
 
     public enum Movement
     {
@@ -50,10 +57,11 @@ public class LevelControl : MonoBehaviour {
     public List<Movement> movements = new List<Movement>();
 
     void Start() {
-        initLevel();
+        initSystem();
+		initLevel();
     }
 
-    void initLevel()
+    void initSystem()
     {
         pD = FindObjectOfType(typeof(PixelDestruction)) as PixelDestruction;
 
@@ -69,25 +77,57 @@ public class LevelControl : MonoBehaviour {
             progressCount[i] = num_of_pieces + num_of_people;
             structures[i].GetComponent<PolygonCollider2D>().enabled = false;
         }
-
         progressStep = 1.0f / (num_of_pieces + num_of_people);
-        score = 0;
-        buildingDestroyedCount = 0;
-
-        win = false;
+       
     }
+
+	void initLevel ()
+	{
+		winCanvas.SetActive(false);
+		shareSucceedCanvas.SetActive(false);
+
+		score = 0;
+		buildingDestroyedCount = 0;
+
+		win = false;
+		shareStatus = FacebookManager.ShareStatus.None;
+	}
 
     private void OnGUI()
     {
-        GUI.BeginGroup(new Rect(barPos.x, barPos.y, barSize.x, barSize.y));
-        GUI.Box(new Rect(0, 0, barSize.x, barSize.y), barEmpty);
-        GUI.BeginGroup(new Rect(0, 0, barSize.x * (((float)progressCount[level]) / (num_of_people + num_of_pieces)), barSize.y));
-        GUI.Box(new Rect(0, 0, barSize.x, barSize.y), barFull);
-        GUI.EndGroup();
-        GUI.EndGroup();
+		switch (shareStatus) {
+		case FacebookManager.ShareStatus.Init:
+			{
+				SendScreenshotToFacebook ();
+				return;
+			}
+		case FacebookManager.ShareStatus.Sending:
+			return;
+		case FacebookManager.ShareStatus.Recieved:
+			{
+				shareStatus = FacebookManager.ShareStatus.None;
+				// Should show a dialog to show status
+				shareSucceedCanvas.SetActive(true);
+				return;
+			}
+		default:
+			break;
+		}
+		
+		if (!win) {
+			GUI.BeginGroup (new Rect (barPos.x, barPos.y, barSize.x, barSize.y));
+			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barEmpty);
+			GUI.BeginGroup (new Rect (0, 0, barSize.x * (((float)progressCount [level]) / (num_of_people + num_of_pieces)), barSize.y));
+			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barFull);
+			GUI.EndGroup ();
+			GUI.EndGroup ();
 
-        GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
-        GUI.Label(new Rect(20, (int)(Screen.height * 0.85), Screen.width/3, (int)(Screen.height * 0.1)), score.ToString());
+			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
+			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
+		} else {
+			if(winCanvas)
+				winCanvas.SetActive (true);
+		}
     }
 
     public void increaseProgress(int amount)
@@ -115,7 +155,9 @@ public class LevelControl : MonoBehaviour {
     void Update()
     {
         // Check win
-        if(buildingDestroyedCount == number_of_buildings)
+		// Test Win Status
+        //if(buildingDestroyedCount == number_of_buildings)
+		if(buildingDestroyedCount > number_of_buildings/30)
         {
             win = true;
             buildingDestroyedCount = -1;
@@ -228,116 +270,6 @@ public class LevelControl : MonoBehaviour {
         }
     }
 
-    //void goTolevel0()
-    //{
-    //    float i = 0;
-    //    i = buildings.transform.position.x;
-    //    if (Mathf.Abs(i-levelPositions[0])>=.02f)
-    //    {
-    //        GetcurrentTime();
-    //        float newPos = 0;
-    //        newPos = Mathf.Lerp(i, levelPositions[0], (Time.time-currentTime) * .1f);
-    //        buildings.transform.position = new Vector3(newPos, buildings.transform.position.y, buildings.transform.position.z);
-    //    }
-    //    else
-    //    {
-    //        realBuilding[0].SetActive(true);
-    //        realBuildingbuildingCover[0].SetActive(false);
-
-    //        realBuilding[1].SetActive(false);
-    //        realBuildingbuildingCover[1].SetActive(true);
-    //        realBuilding[2].SetActive(false);
-    //        realBuildingbuildingCover[2].SetActive(true);
-    //        realBuilding[3].SetActive(false);
-    //        realBuildingbuildingCover[3].SetActive(true);
-    //        switchNow = false;
-    //        currentTimeOff = true;
-    //    }
-    //}
-
-    //void goTolevel1()
-    //{
-    //    float i = 0;
-    //    i = buildings.transform.position.x;
-    //    if (Mathf.Abs(i - levelPositions[1]) >= .02f)
-    //    {
-    //        GetcurrentTime();
-    //        float newPos = 0;
-    //        newPos = Mathf.Lerp(i, levelPositions[1], (Time.time-currentTime) * .1f);
-    //        buildings.transform.position = new Vector3(newPos, buildings.transform.position.y, buildings.transform.position.z);
-
-    //    }
-    //    else
-    //    {
-    //        realBuilding[1].SetActive(true);
-    //        realBuildingbuildingCover[1].SetActive(false);
-
-    //        realBuilding[0].SetActive(false);
-    //        realBuildingbuildingCover[0].SetActive(true);
-    //        realBuilding[2].SetActive(false);
-    //        realBuildingbuildingCover[2].SetActive(true);
-    //        realBuilding[3].SetActive(false);
-    //        realBuildingbuildingCover[3].SetActive(true);
-    //        switchNow = false;
-    //        currentTimeOff = true;
-    //    }
-    //}
-
-    //void goTolevel2()
-    //{
-    //    GetcurrentTime();
-    //    float i = 0;
-    //    i = buildings.transform.position.x;
-    //    if (Mathf.Abs(i - levelPositions[2]) >= .02f)
-    //    {
-    //        float newPos = 0;
-    //        newPos = Mathf.Lerp(i, levelPositions[2], (Time.time-currentTime) * .1f);
-    //        buildings.transform.position = new Vector3(newPos, buildings.transform.position.y, buildings.transform.position.z);
-    //    }
-    //    else
-    //    {
-    //        realBuilding[2].SetActive(true);
-    //        realBuildingbuildingCover[2].SetActive(false);
-
-    //        realBuilding[0].SetActive(false);
-    //        realBuildingbuildingCover[0].SetActive(true);
-    //        realBuilding[1].SetActive(false);
-    //        realBuildingbuildingCover[1].SetActive(true);
-    //        realBuilding[3].SetActive(false);
-    //        realBuildingbuildingCover[3].SetActive(true);
-    //        switchNow = false;
-    //        currentTimeOff = true;
-    //    }
-    //}
-
-    //void goTolevel3()
-    //{
-    //    GetcurrentTime();
-    //    float i = 0;
-    //    i = buildings.transform.position.x;
-    //    if (Mathf.Abs(i - levelPositions[3]) >= .02f)
-    //    {
-    //        float newPos = 0;
-    //        newPos = Mathf.Lerp(i, levelPositions[3], (Time.time-currentTime) * .1f);
-    //        buildings.transform.position = new Vector3(newPos, buildings.transform.position.y, buildings.transform.position.z);
-    //    }
-    //    else
-    //    {
-    //        realBuilding[3].SetActive(true);
-    //        realBuildingbuildingCover[3].SetActive(false);
-
-    //        realBuilding[0].SetActive(false);
-    //        realBuildingbuildingCover[0].SetActive(true);
-    //        realBuilding[1].SetActive(false);
-    //        realBuildingbuildingCover[1].SetActive(true);
-    //        realBuilding[2].SetActive(false);
-    //        realBuildingbuildingCover[2].SetActive(true);
-    //        switchNow = false;
-    //        currentTimeOff = true;
-    //    }
-    //}
-
-
     private bool CheckForPatternMove(int startIndex, int lengthOfPattern, List<Movement> movementToCheck)
     {
         if (switchNow == true)
@@ -365,9 +297,7 @@ public class LevelControl : MonoBehaviour {
         return tMovements.SequenceEqual(movementToCheck);
 
     }
-
-
-
+		
     void GetcurrentTime()
     {
         if (currentTimeOff==true)
@@ -376,6 +306,22 @@ public class LevelControl : MonoBehaviour {
             currentTime = Time.time;
         }
     }
+		
+	public void BackToMainMenu()
+	{
+		MainController.single.goToMainMenu ();
+	}
 
+	public void initShareToFacebook()
+	{
+		shareStatus = FacebookManager.ShareStatus.Init;
+		winCanvas.SetActive (false);
+	}
+
+	void SendScreenshotToFacebook()
+	{
+		shareStatus = FacebookManager.ShareStatus.Sending;
+		FacebookManager.single.ShareScreenshotToFacebook();
+	}
 
 }
