@@ -8,9 +8,13 @@ using System.Text;
 [Serializable]
 public class OwnedEgg
 {
-    /** The friend holding on to the egg. 
+    /** The name of the friend holding on to the egg. 
      * Must be null if the egg is at its owner. */
-    public string _friend;
+    public string _friendName;
+
+    /** The user ID of the friend holding on to the egg.
+     * Must be null if the egg is at its owner. */
+    public string _friendID;
 
     public Egg _egg;
 }
