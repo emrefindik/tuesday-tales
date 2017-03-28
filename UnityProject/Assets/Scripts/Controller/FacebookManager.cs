@@ -7,6 +7,12 @@ public class FacebookManager : MonoBehaviour {
 
 	static public FacebookManager single;
 
+	// image server info
+	Texture2D uploadImage;
+	string URL = "http://matthewestone.com/PhotoTest/";
+	string send = "SendPhoto.php";
+	string recv;
+
 	public enum ShareStatus
 	{
 		None,
@@ -75,21 +81,38 @@ public class FacebookManager : MonoBehaviour {
 	IEnumerator CaptureScreen() {
 		yield return new WaitForEndOfFrame();
 
-		Texture2D screenShot = ScreenCapture.Capture();
-		LoadTextureFromImagePicker.SaveAsJpgToPhotoLibrary(screenShot, gameObject.name, "OnFinishedSaveImage");
+		uploadImage = ScreenCapture.Capture();
+		LoadTextureFromImagePicker.SaveAsJpgToPhotoLibrary(uploadImage, gameObject.name, "OnFinishedSaveImage");
 	}
 	#endif
 
 	void OnFinishedSaveImage (string message) {
-		FB.ShareLink(
-			new System.Uri("https://developers.facebook.com/"),
-			callback: ShareCallback
-		);
+		string imageName = Time.time + ".png";
+		StartCoroutine (UploadImage(imageName));
+	}
+
+	IEnumerator UploadImage(string imageName){
+		byte[] data = uploadImage.EncodeToPNG ();
+		WWWForm form = new WWWForm ();
+		form.AddBinaryData ("Image", data, imageName, "image/png");
+		WWW web = new WWW (URL+send, form);
+		Debug.Log ("Image URL: "+web.url);
+		yield return web;
+		if (!string.IsNullOrEmpty (web.error)) {
+			print (web.error);
+		} else {
+			print (web.text);
+			recv = web.text;
+
+			// Share facebook link here
+			FB.ShareLink(
+				new System.Uri(URL+recv),
+				callback: ShareCallback
+			);
+		}
 	}
 
 	private void ShareCallback (IShareResult result) {
-
-
 
 		if (result.Cancelled || !string.IsNullOrEmpty(result.Error)) {
 			Debug.Log("ShareLink Error: "+result.Error);
