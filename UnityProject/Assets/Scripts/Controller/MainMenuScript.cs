@@ -21,10 +21,23 @@ public class MainMenuScript : MonoBehaviour {
     public Canvas _pleaseWaitCanvas;
     public Canvas _checkedInCanvas;
     public Canvas _errorCanvas;
+
+    // Displays all of the player's own eggs
     public Canvas _eggsCanvas;
+    // Displays all the eggs from all the friends
+    public Canvas _friendsEggsCanvas;
+    // Displays your list of friends for sending an egg
+    public Canvas _friendsCanvas;
+
     public Canvas _loginCanvas;
     public Text _wrongPasswordText;
     public Text _connectionErrorText;
+
+    public GameObject _eggMenuItemPrefab;
+    public Transform _eggMenuContentPanel;
+
+    public GameObject _friendMenuItemPrefab;
+    public Transform _friendMenuContentPanel;
 
     private CoroutineResponse seeWhatsAroundSuccess;
     private CoroutineResponse checkInSuccess;
@@ -50,8 +63,29 @@ public class MainMenuScript : MonoBehaviour {
                 Debug.Log(SpatialClient2.single.userSession.user.projectId);
                 Debug.Log(SpatialClient2.single.userSession.user.metadata.eggsOwned);
 
+                // indicates whether this is the user's first login
+                bool firstLogin = false;
+
+                if (SpatialClient2.single.userSession.user.metadata.eggsOwned == null)
+                {
+                    SpatialClient2.single.userSession.user.metadata.eggsOwned = new List<OwnedEgg>();
+                    firstLogin = true;
+                }
+                if (SpatialClient2.single.userSession.user.metadata.friendsEggs == null)
+                {
+                    SpatialClient2.single.userSession.user.metadata.friendsEggs = new List<OwnedEgg>();
+                    firstLogin = true;
+                }
+                if (firstLogin)
+                {
+                    // update metadata on Spatial to contain empty lists
+                    yield return SpatialClient2.single.UpdateMeta();
+                }
+
                 // initialize egg menu
-                _eggsCanvas.GetComponent<EggMenuController>().addButtons(SpatialClient2.single.userSession.user.metadata.eggsOwned);
+                EggMenuController.instance.addButtons();
+
+                // TODO create the buttons in _friendsCanvas
 
                 // logged in, switch to main menu
                 _loginCanvas.enabled = false;
@@ -61,6 +95,7 @@ public class MainMenuScript : MonoBehaviour {
 
                 // start location tracking
                 Input.location.Start();
+
                 break;
             case false:
                 // wrong credentials
@@ -78,17 +113,20 @@ public class MainMenuScript : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        // Initialize the egg menu controller
+        EggMenuController.createInstance(_eggsCanvas, _friendsCanvas, _friendsEggsCanvas, _eggMenuItemPrefab, _eggMenuContentPanel, _friendMenuItemPrefab, _friendMenuContentPanel);
 
         _loginCanvas.enabled = true;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
-
         _mainMenuCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
         _checkedInCanvas.enabled = false;
         _errorCanvas.enabled = false;
         _eggsCanvas.enabled = false;
+        _friendsEggsCanvas.enabled = false;
+        _friendsCanvas.enabled = false;
 
         // initialize the bool wrappers
         seeWhatsAroundSuccess = new CoroutineResponse();
@@ -104,6 +142,12 @@ public class MainMenuScript : MonoBehaviour {
     {
         _mainMenuCanvas.enabled = false;
         _eggsCanvas.enabled = true;
+    }
+
+    public void onFriendsEggs()
+    {
+        _mainMenuCanvas.enabled = false;
+        _friendsEggsCanvas.enabled = true;
     }
 
     public void onCheckIn()
@@ -133,6 +177,8 @@ public class MainMenuScript : MonoBehaviour {
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _errorCanvas.enabled = false;
+        _friendsEggsCanvas.enabled = false;
+        _friendsCanvas.enabled = false;
         _mainMenuCanvas.enabled = true;
     }
 
@@ -228,5 +274,11 @@ public class MainMenuScript : MonoBehaviour {
 		//SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
 		MainController.single.goToPhoneCamera();
 	}
+
+    public void onBackToYourEggs()
+    {
+        _friendsCanvas.enabled = false;
+        _eggsCanvas.enabled = true;
+    }
 
 }

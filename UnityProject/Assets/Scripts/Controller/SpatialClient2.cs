@@ -17,6 +17,8 @@ public class SpatialClient2 : MonoBehaviour
     public bool lastStatus = false;
     public static SpatialClient2 single;
     public LoginResponse userSession = new LoginResponse();
+    public FriendList friendList;
+    
 
     /** The content data sent to the server directly with user updateMetadata */
     //private RawMetadata _rawMetadata;
@@ -30,7 +32,7 @@ public class SpatialClient2 : MonoBehaviour
         //_rawMetadata.projectId = PROJECT_ID;
 
         // TODO delete this
-        StartCoroutine(LoginUser(new CoroutineResponse(), "hello", "hello"));
+        //StartCoroutine(LoginUser(new CoroutineResponse(), "hello", "hello"));
     }
 
     // May not be used
@@ -287,6 +289,8 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
+
+            yield return UpdateMeta();
             ready = true;
             Debug.Log(www.text);
         }
@@ -314,13 +318,14 @@ public class SpatialClient2 : MonoBehaviour
         else
         {
             userSession = JsonUtility.FromJson<LoginResponse>(www.text);
+            yield return GetFriends();
             ready = true;
             Debug.Log(www.text);
             response.setSuccess(true);
         }
     }
 
-    public IEnumerator AddFriend(string friendID, string token, string projectID = PROJECT_ID)
+    public IEnumerator AddFriend(string friendID, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -329,7 +334,7 @@ public class SpatialClient2 : MonoBehaviour
         form.AddField("projectId", projectID);
         form.AddField("friendId", friendID);
         Dictionary<string, string> header = new Dictionary<string, string>();
-        header["auth-token"] = token;
+        header["auth-token"] = userSession.token;
         WWW www = new WWW(url, form.data, header);
         yield return www;
 
@@ -370,13 +375,13 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetFriends(string userID, string projectID = PROJECT_ID)
+    public IEnumerator GetFriends(string projectID = PROJECT_ID)
     {
         ready = false;
 
         string url = baseURL + "/v1/project-friend/get-friends-by-id";
         WWWForm form = new WWWForm();
-        form.AddField("userId", userID);
+        form.AddField("userId", userSession.user._id);
         form.AddField("projectId", projectID);
         WWW www = new WWW(url, form);
         yield return www;
@@ -388,6 +393,7 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
+            friendList = JsonUtility.FromJson<FriendList>(www.text);
             ready = true;
             Debug.Log(www.text);
         }
@@ -523,6 +529,19 @@ public class Project
 public class UserList
 {
     public List<UserData> users;
+}
+
+[System.Serializable]
+public class FriendData
+{
+    public string _id;
+    public UserData friend;
+}
+
+[System.Serializable]
+public class FriendList
+{
+    public List<FriendData> friends;
 }
 
 
