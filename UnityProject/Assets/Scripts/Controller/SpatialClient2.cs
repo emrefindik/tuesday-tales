@@ -7,7 +7,7 @@ public class SpatialClient2 : MonoBehaviour
 {
 
     // Test Project ID: 588fb546604ae700118697c5
-    const string baseURL = "https://spatial-api-poc.herokuapp.com";
+    public const string baseURL = "https://spatial-api-poc.herokuapp.com";
     public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // new test project ID
 
     public List<Marker> markers = new List<Marker> { };
@@ -27,12 +27,7 @@ public class SpatialClient2 : MonoBehaviour
     {
         ready = false;
         single = this;
-
-        //_rawMetadata = new RawMetadata();
-        //_rawMetadata.projectId = PROJECT_ID;
-
-        // TODO delete this
-        //StartCoroutine(LoginUser(new CoroutineResponse(), "hello", "hello"));
+        StartCoroutine(CreateMarker(40.432645, -79.964834, "ETC", "Entertainment Technology Center\nCarnegie Mellon University"));
     }
 
     // May not be used
@@ -103,8 +98,8 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    //Longitude must be between -180 and 180. lattitude must be between -90 and 90.
-    public IEnumerator CreateMarker(double longitude, double latitude, string name, string description, Dictionary<string, string> metadata, string projectID = PROJECT_ID)
+    // Longitude must be between -180 and 180. latitude must be between -90 and 90.
+    public IEnumerator CreateMarker(double latitude, double longitude, string name, string description, MarkerMetadata metadata = null, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -116,7 +111,10 @@ public class SpatialClient2 : MonoBehaviour
         form.AddField("name", name);
         form.AddField("description", description);
         form.AddField("projectId", projectID);
-        form.AddField("metadata", JsonUtility.ToJson(metadata));
+        if (metadata != null)
+            form.AddField("metadata", JsonUtility.ToJson(metadata));
+        else
+            form.AddField("metadata", JsonUtility.ToJson(new MarkerMetadata()));
 
         WWW www = new WWW(url, form);
         yield return www;
@@ -289,8 +287,6 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
-
-            yield return UpdateMeta();
             ready = true;
             Debug.Log(www.text);
         }
@@ -428,7 +424,7 @@ public class SpatialClient2 : MonoBehaviour
 		WWWForm form = new WWWForm();
 		UserData data = new UserData ();
 
-		form.AddField("metadata", JsonUtility.ToJson(userSession.user.metadata));
+        form.AddField("metadata", JsonUtility.ToJson(userSession.user.metadata));
         form.AddField("projectId", PROJECT_ID);
 		Dictionary<string, string> header = new Dictionary<string, string>();
 		header["auth-token"] = userSession.token;
@@ -542,6 +538,18 @@ public class FriendData
 public class FriendList
 {
     public List<FriendData> friends;
+}
+
+[System.Serializable]
+public class MarkerMetadata
+{
+    public string type;
+    // TODO figure the fields out
+
+    public MarkerMetadata()
+    {
+        type = "empty";
+    }
 }
 
 
