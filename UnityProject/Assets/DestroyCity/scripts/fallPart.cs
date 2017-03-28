@@ -38,7 +38,7 @@ public class fallPart : MonoBehaviour {
             Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
             GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);
-			blood.transform.parent = gameObject.transform;
+			blood.transform.parent = Camera.main.transform;
             healthControl.increaseProgress(1);
         }
     }

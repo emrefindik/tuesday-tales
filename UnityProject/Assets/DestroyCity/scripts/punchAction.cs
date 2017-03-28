@@ -65,7 +65,13 @@ public class punchAction : MonoBehaviour {
     const float STOP_PUNCHING_GAP = 0.02f;
     const float TRANSITION_Y_TIME = 9.0f;
 
-
+	// one touch control for now
+	float punchStrength;
+	const float PUNCH_STRENGTH_MAX = 1.5f;
+	const float PUNCH_STRENGTH_STEP = 0.04f;
+	public ParticleSystem pressEffect;
+	//ParticleSystem pressEffectInstance;
+	ParticleSystem.Particle[] m_Particles;
 
     void Start () {
         startTimeL = 0.0f;
@@ -76,23 +82,48 @@ public class punchAction : MonoBehaviour {
         leftFist.GetComponent<Collider>().enabled = false;
         leftFist.GetComponent<Collider>().enabled = false;
     }
-	
+
 	void Update () {
 
         // mouse input need change to phone touch input
         if (Input.GetMouseButtonDown(0))
         {
             tapCheckX = Input.mousePosition.x;
+			punchStrength = 0.0f;
+			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -0.2f);
+			pressEffect.Play ();
         }
+
+		if (Input.GetMouseButton (0)) {
+			// add punch strength
+			if (punchStrength < PUNCH_STRENGTH_MAX) {
+				punchStrength += PUNCH_STRENGTH_STEP;
+				pressEffect.transform.localScale = new Vector3 (1 + punchStrength, 1 + punchStrength, 1 + punchStrength);
+			}
+
+			/*
+			int numParticlesAlive = pressEffect.GetParticles(m_Particles);
+			// Change only the particles that are alive
+			for (int i = 0; i < numParticlesAlive; i++)
+			{
+				m_Particles [i].startSize = 1.5f + punchStrength;
+			}
+
+			pressEffect.SetParticles (m_Particles, numParticlesAlive);
+			*/
+
+		}
 
         if(Input.GetMouseButtonUp(0))
         {
+			pressEffect.Stop ();
 
             if (Mathf.Abs(Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
                 return;
 
-            _inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
-            //Debug.Log(_inputPosition.x);
+            //_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+            
 
 
 
@@ -227,7 +258,8 @@ public class punchAction : MonoBehaviour {
             startTimeL = Time.time;
             hitting_left = true;
             newPosL = new Vector2(currentFist_l.x, currentFist_l.y);
-            destPosL.x = Random.Range(-1.5f, 0.0f);
+            //destPosL.x = Random.Range(-1.5f, 0.0f);
+			destPosL.x = -1.5f + punchStrength;
             destPosL.y = _inputPosition.y;
             pD.smashCity(new Vector3(destPosL.x, destPosL.y, 10.0f));
             leftFist.GetComponent<Collider>().enabled = true;
@@ -237,7 +269,8 @@ public class punchAction : MonoBehaviour {
             startTimeR = Time.time;
             hitting_right = true;
             newPosR = new Vector2(currentFist_r.x, currentFist_r.y);
-            destPosR.x = Random.Range(0.0f, 1.5f);
+            //destPosR.x = Random.Range(0.0f, 1.5f);
+			destPosR.x = 1.5f - punchStrength;
             destPosR.y = _inputPosition.y;
             pD.smashCity(new Vector3(destPosR.x, destPosR.y, 10.0f));
             rightFist.GetComponent<Collider>().enabled = true;
