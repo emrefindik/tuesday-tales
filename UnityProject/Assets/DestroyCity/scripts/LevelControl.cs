@@ -208,6 +208,7 @@ public class LevelControl : MonoBehaviour {
                 //After the checks are performed, set the fingerStart & fingerEnd to be the same
                 fingerStart = fingerEnd;
 
+				/*
                 //Now let's check if the Movement pattern is what we want
                 //In this example, I'm checking whether the pattern is Left, then Right, then Left again
                 // Debug.Log(CheckForPatternMove(0, 3, new List<Movement>() { Movement.Left, Movement.Right, Movement.Left }));
@@ -227,6 +228,7 @@ public class LevelControl : MonoBehaviour {
                     if (level>0  )
                     level= level-1;
                 }
+				*/
             }
         }
 
@@ -309,7 +311,7 @@ public class LevelControl : MonoBehaviour {
 		
 	public void BackToMainMenu()
 	{
-		MainController.single.goToMainMenu ();
+		MainController.single.goBack();
 	}
 
 	public void initShareToFacebook()

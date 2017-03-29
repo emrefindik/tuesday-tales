@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<body style="margin: 0" onresize="resizeMap()">
+<div id="map"></div>
+<script>
+// furthest distance to fetch markers from, in meters
+markerRadius = 6000;
+
+function resizeMap() {
+	document.getElementById("map").style.height = window.innerHeight.toString().concat("px");
+	document.getElementById("map").style.width = window.innerWidth.toString().concat("px");
+}
+
+function onMarkerClick(markerId, markerType) {	
+	window.location.href = "uniwebview://marker?id=" + markerId + "&type=" + markerType;
+}
+
+function BackControl(controlDiv) {
+
+	// Set CSS for the control border.
+	var controlUI = document.createElement('div');
+	controlUI.style.backgroundColor = '#fff';
+	controlUI.style.border = '2px solid #fff';
+	controlUI.style.borderRadius = '3px';
+	controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+	controlUI.style.cursor = 'pointer';
+	controlUI.style.marginBottom = '22px';
+	controlUI.style.textAlign = 'center';
+	controlUI.title = 'Click to go back to the menu';
+	controlDiv.appendChild(controlUI);
+
+	// Set CSS for the control interior.
+	var controlText = document.createElement('div');
+	controlText.style.color = 'rgb(25,25,25)';
+	controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+	controlText.style.fontSize = '14px';
+	controlText.style.lineHeight = '38px';
+	controlText.style.paddingLeft = '5px';
+	controlText.style.paddingRight = '5px';
+	controlText.innerHTML = 'Back to Menu';
+	controlUI.appendChild(controlText);
+
+	// Setup the click event listeners: simply set the map to Chicago.
+	controlUI.addEventListener('click', function() {
+		window.location.href = "uniwebview://back";
+	});
+}
+
+function initializeMap() {
+	map = new google.maps.Map(document.getElementById('map'), {
+		center: {lat: latitude, lng: longitude},
+		zoom: 16
+	});
+	mapCenter = map.getCenter();
+	google.maps.event.addDomListener(map, 'idle', function() {
+		mapCenter = map.getCenter();
+	});
+	google.maps.event.addDomListener(window, 'resize', function() {
+		map.setCenter(mapCenter);
+	});
+	markers.forEach(function(spatialMarker) {		
+		var googleMarker = new google.maps.Marker({
+			position: {lat: spatialMarker.loc.coordinates[1], lng: spatialMarker.loc.coordinates[0]},
+			map: map,
+			label: {
+				color: "yellow",
+				fontSize: "35px",
+				fontWeight: "bold",
+				text: spatialMarker.name
+			},
+			icon: {
+				anchor: {
+					x: 81,
+					y: 108
+				},
+				scaledSize: {
+					width: 162,
+					height: 216
+				},
+				url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
+			},
+			title: spatialMarker.name
+		});		
+		// TODO uncomment this after fixing the problem of metadata being saved as strings
+		//googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, spatialMarker.metadata.type); });
+		googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, "no type"); });
+	});
+	//var backButtonDiv = document.createElement('div');
+    //var backControl = new BackControl(backButtonDiv);
+
+    //backButtonDiv.index = 1;
+    //map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(backButtonDiv);
+}
+
+// lat = latitude the player is currently at
+// lon = longitude the player is currently at
+// baseURL = the Spatial server base URL
+// projectID = the Spatial project ID
+function loadMap(lat, lon, baseURL, projectID) {
+	
+	// initialize location variables globally
+	latitude = lat;
+	longitude = lon;
+	
+	// get markers and store them into a global variable
+	var getReq = new XMLHttpRequest();
+	getReq.onreadystatechange = function() {
+		if (getReq.readyState == 4) {
+			if (getReq.status == 200) {
+				markers = JSON.parse(getReq.responseText).markers;
+			} else {
+				console.log(getReq.status.toString() + " error, no markers received from Spatial");
+				markers = [];
+			}
+			// run the googlemaps script. it will run initializeMap in turn
+			var googleMapsScript = document.createElement('script');
+			googleMapsScript.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCejidwxDYN4APVvtlE7ZPsBtVdhB7JG70&callback=initializeMap";
+			document.getElementsByTagName("body")[0].appendChild(googleMapsScript);
+		}
+	};
+	getReq.open('GET', baseURL + "/v1/markers-by-distance?longitude=" +
+		longitude.toString() + "&latitude=" + latitude.toString() + "&projectId=" +
+		projectID + "&meters=" + markerRadius.toString(), true);
+	getReq.send();
+}
+
+resizeMap();
+loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee");
+</script>
+</body>
+</html>

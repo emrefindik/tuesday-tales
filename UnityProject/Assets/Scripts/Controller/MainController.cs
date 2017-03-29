@@ -8,9 +8,11 @@ public class MainController : MonoBehaviour
 	public enum GameState{
 		MainMenu,
 		DestroyCity,
-		PhoneCamera
+		PhoneCamera,
+		MapView
 	}
 	public GameState gameState;
+	public GameState lastGameState;
     public Camera mainMenuCamera;
     public GameObject menuScene;
     public GameObject destroyCityPrefab;
@@ -31,8 +33,32 @@ public class MainController : MonoBehaviour
 
     }
 
+	public void goBack()
+	{
+		Debug.Log ("go back to the place you were");
+		switch (lastGameState) {
+		case GameState.DestroyCity:
+			goToDestroyCity ();
+			break;
+		case GameState.MainMenu:
+			goToMainMenu ();
+			break;
+		case GameState.MapView:
+			goToMapView ();
+			break;
+		case GameState.PhoneCamera:
+			goToPhoneCamera ();
+			break;
+		default:
+			Debug.Log ("No such game state.");
+			goToMainMenu ();
+			break;
+		}
+	}
+		
     public void goToMainMenu()
 	{
+		lastGameState = gameState;
 		Debug.Log ("go to main menu");
 
         mainMenuCamera.enabled = true;
@@ -45,8 +71,29 @@ public class MainController : MonoBehaviour
 		gameState = GameState.MainMenu;
     }
 
+	public void goToMapView()
+	{
+		lastGameState = gameState;
+		Debug.Log ("go to map");
+
+		mainMenuCamera.enabled = true;
+		menuScene.SetActive(true);
+		phoneCamera.enabled = false;
+		phoneCameraScene.SetActive (false);
+		if (destroyCityScene)
+			Destroy (destroyCityScene);
+		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<PlaytestController> ()._webView);
+		mapWebView.Show ();
+
+		gameState = GameState.MapView;
+	}
+
+
     public void goToDestroyCity()
     {
+		lastGameState = gameState;
+		Debug.Log ("go to destory city gameplay");
+
         mainMenuCamera.enabled = false;
         menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
@@ -58,6 +105,8 @@ public class MainController : MonoBehaviour
 
 	public void goToPhoneCamera()
 	{
+		Debug.Log ("go to phone camera");
+
 		mainMenuCamera.enabled = false;
 		menuScene.SetActive(false);
 		phoneCamera.enabled = true;

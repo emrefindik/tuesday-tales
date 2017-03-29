@@ -16,14 +16,13 @@ public class PlaytestController : MonoBehaviour {
 	// the scene index of the destruction scene in the build settings
 	const int DESTRUCTION_SCENE_INDEX = 1;
 
-	const string MAP_ADDRESS = "map.html";
+	const string MAP_ADDRESS = "playtest.html";
 
 	const string JS_INIT_MAP_METHOD_NAME = "loadMap";
 
 	// Used to display the map
 	public UniWebView _webView;
 
-	public Canvas _mapCanvas;
 	public Canvas _pleaseWaitCanvas;
 	public Canvas _checkedInCanvas;
 	public Canvas _errorCanvas;
@@ -35,8 +34,6 @@ public class PlaytestController : MonoBehaviour {
 
 	public void Start()
 	{
-
-		_mapCanvas.enabled = false;
 		_pleaseWaitCanvas.enabled = true;
 		_checkedInCanvas.enabled = false;
 		_errorCanvas.enabled = false;
@@ -55,6 +52,7 @@ public class PlaytestController : MonoBehaviour {
 	{
 		if (!init)
 		{
+			MainController.single.gameState = MainController.GameState.MapView;
 			StartCoroutine(submit());
 			init = true;
 		}
@@ -92,7 +90,6 @@ public class PlaytestController : MonoBehaviour {
 			// start location tracking
 			Input.location.Start();
 
-			_mapCanvas.enabled = true;
 			_pleaseWaitCanvas.enabled = false;
 
 			break;
@@ -126,48 +123,7 @@ public class PlaytestController : MonoBehaviour {
 		StopAllCoroutines();
 		_checkedInCanvas.enabled = false;
 		_pleaseWaitCanvas.enabled = false;
-		_mapCanvas.enabled = true;
 		_errorCanvas.enabled = false;
-	}
-
-	IEnumerator seeWhatsAround()
-	{
-
-		GoogleMap googleMaps = GetComponent<GoogleMap>();
-
-		// get location data and plug it into googleMaps
-		yield return checkLocationService(seeWhatsAroundSuccess);
-		if (seeWhatsAroundSuccess.Success != true)
-		{
-			_pleaseWaitCanvas.enabled = false;
-			_errorCanvas.enabled = true;
-			yield break; // could not get location
-		}
-		googleMaps.centerLocation.address = "";
-		googleMaps.centerLocation.latitude = Input.location.lastData.latitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION 40.432633f;
-		googleMaps.centerLocation.longitude = Input.location.lastData.longitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION -79.964973f;
-
-		// get markers from spatial and plug them into googleMaps
-		yield return SpatialClient2.single.GetMarkersByDistance(
-			Input.location.lastData.longitude, Input.location.lastData.latitude);
-		// TODO handle error from spatial
-
-		Debug.Log(SpatialClient2.single.markers.Count);
-		googleMaps.swapMarkersAndRefresh(SpatialClient2.single.markers);
-		/* googleMaps.markers = new GoogleMapMarker[1]; // this will change when we have different types of markers
-        googleMaps.markers[0] = new GoogleMapMarker();
-        googleMaps.markers[0].locations = new GoogleMapLocation[SpatialClient2.single.markers.Count];
-        googleMaps.markers[0].size = GoogleMapMarker.GoogleMapMarkerSize.Small;
-        for (int index = 0; index < googleMaps.markers[0].locations.Length; index++)
-        {
-            googleMaps.markers[0].locations[index] = new GoogleMapLocation("",
-                (float)(SpatialClient2.single.markers[index].loc.coordinates[0]),
-                (float)(SpatialClient2.single.markers[index].loc.coordinates[1]));
-        }
-        googleMaps.Refresh(); */
-
-		_pleaseWaitCanvas.enabled = false;
-		_mapCanvas.enabled = true;
 	}
 
 	/** Called when uniwebview successfully loads the HTML page */
