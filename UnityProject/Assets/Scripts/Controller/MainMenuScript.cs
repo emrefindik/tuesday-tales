@@ -16,6 +16,13 @@ public class MainMenuScript : MonoBehaviour {
     // the scene index of the destruction scene in the build settings
     const int DESTRUCTION_SCENE_INDEX = 1;
 
+    const string MAP_ADDRESS = "map.html";
+
+    const string JS_INIT_MAP_METHOD_NAME = "loadMap";
+
+    // Used to display the map
+    public UniWebView _webView;
+
     public Canvas _mainMenuCanvas;
     public Canvas _mapCanvas;
     public Canvas _pleaseWaitCanvas;
@@ -131,6 +138,10 @@ public class MainMenuScript : MonoBehaviour {
         // initialize the bool wrappers
         seeWhatsAroundSuccess = new CoroutineResponse();
         checkInSuccess = new CoroutineResponse();
+
+        _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
+        _webView.OnLoadComplete += onLoadComplete;
+		_webView.OnReceivedMessage += onReceivedMessage;
     }
 	
 	// Update is called once per frame
@@ -166,7 +177,9 @@ public class MainMenuScript : MonoBehaviour {
         _mainMenuCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = true;
         checkLocationServiceIsOn();
-        StartCoroutine(seeWhatsAround());
+        //StartCoroutine(seeWhatsAround());
+        Debug.Log(_webView.url);
+        _webView.Load();
     }
 
     public void onBack()
@@ -220,7 +233,47 @@ public class MainMenuScript : MonoBehaviour {
 
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = true;
+    }
 
+    /** Called when uniwebview successfully loads the HTML page */
+    void onLoadComplete(UniWebView webView, bool success, string errorMessage)
+    {
+        if (success)
+        {
+            _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
+                Input.location.lastData.latitude.ToString() + ',' +
+                Input.location.lastData.longitude.ToString() + ',' +
+                SpatialClient2.baseURL + ',' +
+                SpatialClient2.PROJECT_ID + ')');
+			_pleaseWaitCanvas.enabled = false;
+            _webView.Show();
+            Debug.Log("fuck yeah");
+        }
+        else
+        {
+            Debug.Log(errorMessage);
+        }
+    }
+
+    void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
+    {
+		Debug.Log ("hi");
+		Debug.Log (message.path);
+        switch (message.path)
+        {
+			case "back":
+				_mainMenuCanvas.enabled = true;
+                _webView.Hide();
+                break;
+			case "marker":
+				_mainMenuCanvas.enabled = true;
+				_webView.Hide();
+                // TODO get message.args and redirect to correct marker's destruction
+                MainController.single.goToDestroyCity();
+                break;
+            default:
+                break;
+        }
     }
 
     // assigns true to result.value if location service is ready, otherwise assigns false
