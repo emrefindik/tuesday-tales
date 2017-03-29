@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CheckInHandler : MonoBehaviour {
+public class PlaytestController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
@@ -13,5 +13,4 @@ public class CheckInHandler : MonoBehaviour {
 	void Update () {
 		
 	}
-		
 }
