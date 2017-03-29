@@ -141,6 +141,7 @@ public class MainMenuScript : MonoBehaviour {
 
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
+		_webView.OnReceivedMessage += onReceivedMessage;
     }
 	
 	// Update is called once per frame
@@ -244,6 +245,7 @@ public class MainMenuScript : MonoBehaviour {
                 Input.location.lastData.longitude.ToString() + ',' +
                 SpatialClient2.baseURL + ',' +
                 SpatialClient2.PROJECT_ID + ')');
+			_pleaseWaitCanvas.enabled = false;
             _webView.Show();
             Debug.Log("fuck yeah");
         }
@@ -253,14 +255,19 @@ public class MainMenuScript : MonoBehaviour {
         }
     }
 
-    void OnReceivedMessage(UniWebView webView, UniWebViewMessage message)
+    void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
+		Debug.Log ("hi");
+		Debug.Log (message.path);
         switch (message.path)
         {
-            case "back":
+			case "back":
+				_mainMenuCanvas.enabled = true;
                 _webView.Hide();
                 break;
-            case "marker":
+			case "marker":
+				_mainMenuCanvas.enabled = true;
+				_webView.Hide();
                 // TODO get message.args and redirect to correct marker's destruction
                 MainController.single.goToDestroyCity();
                 break;
