@@ -148,7 +148,9 @@ public class PlaytestController : MonoBehaviour {
 				Input.location.lastData.latitude.ToString() + ',' +
 				Input.location.lastData.longitude.ToString() + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
-				SpatialClient2.PROJECT_ID + "\")");
+				SpatialClient2.PROJECT_ID + "\"," +
+				SpatialClient2.single.getScore().ToString() + ',' +
+				SpatialClient2.single.getTimer().ToString() + ')');
 			_pleaseWaitCanvas.enabled = false;
 			_webView.Show();
 			Debug.Log("uniwebview is showing");
@@ -206,6 +208,9 @@ public class PlaytestController : MonoBehaviour {
 			//else{
 				// Load Error Canvas
 			//}
+			break;
+		case "resetscore":
+			SpatialClient2.single.resetStreak();
 			break;
 		default:
 			break;
