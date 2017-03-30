@@ -347,11 +347,15 @@ public class MainMenuScript : MonoBehaviour {
     {
         if (success)
         {
+            // START OF EMRE'S CODE
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
                 Input.location.lastData.longitude.ToString() + ",\"" +
                 SpatialClient2.baseURL + "\",\"" +
-                SpatialClient2.PROJECT_ID + "\")");
+                SpatialClient2.PROJECT_ID + "\"," +
+                SpatialClient2.single.getScore().ToString() + ',' +
+                SpatialClient2.single.getTimer().ToString() + ')');
+            // END OF EMRE'S CODE
 			_pleaseWaitCanvas.enabled = false;
             _webView.Show();
             Debug.Log("uniwebview is showing");
@@ -378,6 +382,11 @@ public class MainMenuScript : MonoBehaviour {
                 // TODO get message.args and redirect to correct marker's destruction
                 MainController.single.goToDestroyCity();
                 break;
+            // START OF EMRE'S CODE
+            case "resetscore":
+                SpatialClient2.single.resetStreak();
+                break;
+            // END OF EMRE'S CODE
             default:
                 break;
         }

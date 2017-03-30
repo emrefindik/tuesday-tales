@@ -77,6 +77,33 @@ public class SpatialClient2 : MonoBehaviour
         return userSession != null;
     }
 
+    public int getScore()
+    {
+        return userSession.User.Metadata.Score;
+    }
+
+    public int getTimer()
+    {
+        return (int)((userSession.User.Metadata.LastRampage +
+            userSession.User.Metadata.StreakTimerStart) -
+            UserMetadata.currentTimestamp());
+    }
+
+    // START OF EMRE'S CODE
+    public IEnumerator resetStreak()
+    {
+        userSession.User.Metadata.resetStreak();
+        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+    }
+
+
+    public IEnumerator updateLastRampage(int scoreIncrement)
+    {
+        userSession.User.Metadata.updateLastRampage(scoreIncrement);
+        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+    }
+    // END OF EMRE'S CODE
+
     public string newEggIdForSelf()
     {
         string eggId = userSession.User.Id + userSession.User.Id + userSession.User.Metadata.EggsCreated.ToString("x");
@@ -679,6 +706,19 @@ public class UserData
 [System.Serializable]
 public class UserMetadata
 {
+    // START OF EMRE'S CODE
+
+    // start time stamp to offset Spatial times by
+    // set to UTC March 30th, 8:00 PM
+    // DO NOT CHANGE!!
+    public static DateTime startTime = new DateTime(2017, 3, 30, 20, 0, 0);
+
+    // interval between first two destructions to trigger a streak
+    public const int INITIAL_RAMPAGE_INTERVAL = 300;
+    // value to set streakTimerStart to when there is no streak
+    public const int NO_STREAK = 0;
+    // END OF EMRE'S CODE
+
     [SerializeField]
     private EggList eggsOwned;
     public EggList EggsOwned
@@ -702,6 +742,55 @@ public class UserMetadata
         get { return eggsCreated; }
         private set { eggsCreated = value; }
     }
+
+    // START OF EMRE'S CODE
+    [SerializeField]
+    private int score;
+    public int Score
+    {
+        get { return score; }
+        private set { score = value; }
+    }
+
+    [SerializeField]
+    private long lastRampage;
+    public long LastRampage
+    {
+        get { return lastRampage; }
+        private set { lastRampage = value; }
+    }
+
+    [SerializeField]
+    // the value of the streak timer at the start in seconds
+    // should be updated with each rampage reset
+    private int streakTimerStart;
+    public int StreakTimerStart
+    {
+        get { return streakTimerStart; }
+        private set { streakTimerStart = value; }
+    }
+
+    public static long currentTimestamp()
+    {
+        return Convert.ToInt64(DateTime.UtcNow.Subtract(startTime).TotalSeconds);
+    }
+
+    public void updateLastRampage(int scoreIncrement)
+    {
+        lastRampage = currentTimestamp();
+        score += scoreIncrement;
+        if (streakTimerStart == 0)
+            streakTimerStart = INITIAL_RAMPAGE_INTERVAL;
+        else
+            streakTimerStart *= 2;
+    }
+
+    public void resetStreak()
+    {
+        streakTimerStart = NO_STREAK;
+        score = 0;
+    }
+    // END OF EMRE'S CODE
 
     public void initializeEggsOwned()
     {
