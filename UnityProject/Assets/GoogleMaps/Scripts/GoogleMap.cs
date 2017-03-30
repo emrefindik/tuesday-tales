@@ -45,7 +45,7 @@ public class GoogleMap : MonoBehaviour
         {
             GoogleMapLocation[] gml_list = new GoogleMapLocation[]
             {
-                new GoogleMapLocation("", (float)marker.loc.coordinates[0],(float)marker.loc.coordinates[1])
+                new GoogleMapLocation("", (float)marker.Loc.Coordinates[0],(float)marker.Loc.Coordinates[1])
             };
             markers[count] = new GoogleMapMarker(GoogleMapMarker.GoogleMapMarkerSize.Mid, GoogleMapColor.gray, 'a', gml_list);
             count++;
