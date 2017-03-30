@@ -55,6 +55,10 @@ public class MainController : MonoBehaviour
 
 		PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
 		pcl.addCheckedLocation ();
+
+        // START OF EMRE'S CODE
+        SpatialClient2.single.updateLastRampage(amount * multiplier);
+        // END OF EMRE'S CODE
 	}
 
 
