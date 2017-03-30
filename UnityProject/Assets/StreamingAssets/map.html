@@ -1,18 +1,38 @@
 <!DOCTYPE html>
 <html>
 <body style="margin: 0" onresize="resizeMap()">
+<style>
+	#wrapper { position: relative; }
+	#map { z-index: 1 }
+	#statsscreen { position: absolute; top: 5px; right: 5px; width: 25%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
+	#scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 40%; }
+	#timertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 40%; }
+	#scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 40%; }
+	#timervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 40%; }
+</style>
+<div id="wrapper">
 <div id="map"></div>
+<div id="statsscreen">
+	<div id="scoretextdiv"><h1 id="scoretext">Score:</h1></div>
+	<div id="timertextdiv"><h1 id="timetext">Time:</h1></div>
+	<div id="scorevalue"><h1 id="score"></h1></div>
+	<div id="timervalue"><h1 id="time"></h1></div>
+</div>
+</div>
 <script>
 // furthest distance to fetch markers from, in meters
 markerRadius = 6000;
+// START OF EMRE'S CODE
+score = 0;
+// END OF EMRE'S CODE
 
 function resizeMap() {
 	document.getElementById("map").style.height = window.innerHeight.toString().concat("px");
 	document.getElementById("map").style.width = window.innerWidth.toString().concat("px");
 }
 
-function onMarkerClick(markerId, markerType) {	
-	window.location.href = "uniwebview://marker?id=" + markerId + "&type=" + markerType;
+function onMarkerClick(markerId, lat, lon, markerType) {
+	window.location.href = "uniwebview://marker?id=" + markerId + "&lat="+lat+"&lon="+lon+"&type=" + markerType;
 }
 
 function BackControl(controlDiv) {
@@ -96,7 +116,7 @@ function initializeMap() {
 // lon = longitude the player is currently at
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
-function loadMap(lat, lon, baseURL, projectID) {
+function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds) {
 	
 	// initialize location variables globally
 	latitude = lat;
@@ -122,10 +142,75 @@ function loadMap(lat, lon, baseURL, projectID) {
 		longitude.toString() + "&latitude=" + latitude.toString() + "&projectId=" +
 		projectID + "&meters=" + markerRadius.toString(), true);
 	getReq.send();
+	
+	// START OF EMRE'S CODE
+	updateScore(startScore);
+	if (score == 0)
+	{
+		// no need to display the "Time:" text
+		document.getElementById("timetext").innerHTML = "";
+	}
+	else
+	{
+		startTimer(timerSeconds);
+	}
+	// END OF EMRE'S CODE
 }
 
 resizeMap();
-loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee");
+
+// START OF EMRE'S CODE
+function updateScore(newScore)
+{
+	score = newScore;
+	document.getElementById("score").innerHTML = newScore.toString();
+}
+
+secondsRemaining = 0;
+
+function startTimer(seconds)
+{
+	// if timer is 3 minutes, start displaying from 2:59
+	secondsRemaining = seconds - 1;
+	
+	timer = setInterval(updateTimer, 1000);
+	updateDisplayedTime();
+}
+
+function updateDisplayedTime()
+{
+	var secondText = (secondsRemaining % 60).toString();
+	if (secondsRemaining % 60 < 10)
+	{
+		secondText = "0" + secondText;
+	}
+	document.getElementById("time").innerHTML = Math.floor(secondsRemaining / 60).toString() + ": " + secondText;
+}
+
+function timeout()
+{
+	clearInterval(timer);
+	updateScore(0);
+	// no need to display the timer
+	document.getElementById("timetext").innerHTML = "";
+	document.getElementById("timervalue").innerHTML = "";
+	window.location.href = "uniwebview://resetscore";
+}
+
+function updateTimer()
+{
+	if (secondsRemaining == 0)
+	{
+		timeout();
+		return;
+	}
+	secondsRemaining = secondsRemaining - 1;
+	updateDisplayedTime();
+}
+
+// TODO delete this
+loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 10, 13);
+// END OF EMRE'S CODE
 </script>
 </body>
 </html>
