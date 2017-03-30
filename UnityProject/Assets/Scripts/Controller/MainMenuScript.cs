@@ -20,40 +20,195 @@ public class MainMenuScript : MonoBehaviour {
 
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
 
-    // Used to display the map
-    public UniWebView _webView;
-
-    public Canvas _mainMenuCanvas;
-    public Canvas _mapCanvas;
-    public Canvas _pleaseWaitCanvas;
-    public Canvas _checkedInCanvas;
-    public Canvas _errorCanvas;
+    private static Canvas errorCanvas;
+    public static Canvas ErrorCanvas
+    {
+        get
+        {
+            return errorCanvas;
+        }
+        private set
+        {
+            errorCanvas = value;
+        }
+    }
 
     // Displays all of the player's own eggs
-    public Canvas _eggsCanvas;
+    private static Canvas eggsCanvas;
+    public static Canvas EggsCanvas
+    {
+        get
+        {
+            return eggsCanvas;
+        }
+        private set
+        {
+            eggsCanvas = value;
+        }
+    }
+
+    // Temporary. May get rid of it if we decided to get rid of sending eggs completely
+    private static Canvas friendsCanvas;
+    public static Canvas FriendsCanvas
+    {
+        get
+        {
+            return friendsCanvas;
+        }
+        private set
+        {
+            friendsCanvas = value;
+        }
+    }
+
     // Displays all the eggs from all the friends
-    public Canvas _friendsEggsCanvas;
+    private static Canvas friendsEggsCanvas;
+    public static Canvas FriendsEggsCanvas
+    {
+        get
+        {
+            return friendsEggsCanvas;
+        }
+        private set
+        {
+            friendsEggsCanvas = value;
+        }
+    }
+
+    private static Canvas checkedInCanvas;
+    public static Canvas CheckedInCanvas
+    {
+        get
+        {
+            return checkedInCanvas;
+        }
+        private set
+        {
+            checkedInCanvas = value;
+        }
+    }
+
+    private static Canvas checkInErrorCanvas;
+    public static Canvas CheckInErrorCanvas
+    {
+        get
+        {
+            return checkInErrorCanvas;
+        }
+        private set
+        {
+            checkInErrorCanvas = value;
+        }
+    }
+
+    private static Text checkInErrorMessage;
+    public static Text CheckInErrorMessage
+    {
+        get
+        {
+            return checkInErrorMessage;
+        }
+        private set
+        {
+            checkInErrorMessage = value;
+        }
+    }
+
+    // the canvas that directed to the wait screen
+    private static Canvas previousCanvas;
+
+    private static Canvas pleaseWaitCanvas;
+
+    // Used to display the map
+    [SerializeField]
+    private UniWebView _webView;
+
+    [SerializeField]
+    private Canvas _mainMenuCanvas;
+    [SerializeField]
+    private Canvas _mapCanvas;
+    [SerializeField]
+    private Canvas _pleaseWaitCanvas;
+    [SerializeField]
+    private Canvas _checkedInCanvas;
+    [SerializeField]
+    private Canvas _checkInErrorCanvas;
+    [SerializeField]
+    private Canvas _locationStartErrorCanvas;
+
+    // Displays all of the player's own eggs
+    [SerializeField]
+    private Canvas _eggsCanvas;
+
+    // Displays all the eggs from all the friends
+    [SerializeField]
+    private Canvas _friendsEggsCanvas;
+
     // Displays your list of friends for sending an egg
-    public Canvas _friendsCanvas;
+    [SerializeField]
+    private Canvas _friendsCanvas;
 
-    public Canvas _loginCanvas;
-    public Text _wrongPasswordText;
-    public Text _connectionErrorText;
-
-    public GameObject _eggMenuItemPrefab;
-    public Transform _eggMenuContentPanel;
-
-    public GameObject _friendMenuItemPrefab;
-    public Transform _friendMenuContentPanel;
-
-    private CoroutineResponse seeWhatsAroundSuccess;
-    private CoroutineResponse checkInSuccess;
-
+    [SerializeField]
+    private Canvas _loginCanvas;
+    [SerializeField]
+    private Text _wrongPasswordText;
+    [SerializeField]
+    private Text _connectionErrorText;
+    [SerializeField]
+    private GameObject _eggMenuItemPrefab;
+    [SerializeField]
+    private Transform _eggMenuContentPanel;
+    [SerializeField]
+    private GameObject _friendMenuItemPrefab;
+    [SerializeField]
+    private Transform _friendMenuContentPanel;
+    [SerializeField]
+    private GameObject _friendEggMenuItemPrefab;
+    [SerializeField]
+    private Transform _friendEggMenuContentPanel;
+    [SerializeField]
+    private Text _checkInErrorMessage;
     [SerializeField]
     private InputField userNameField;
-
     [SerializeField]
     private InputField passwordField;
+
+
+    // Use this for initialization
+    void Start()
+    {
+        errorCanvas = _locationStartErrorCanvas;
+        eggsCanvas = _eggsCanvas;
+        checkedInCanvas = _checkedInCanvas;
+        friendsCanvas = _friendsCanvas;
+        friendsEggsCanvas = _friendsEggsCanvas;
+        checkInErrorCanvas = _checkInErrorCanvas;
+        checkInErrorMessage = _checkInErrorMessage;
+        pleaseWaitCanvas = _pleaseWaitCanvas;
+
+        _loginCanvas.enabled = true;
+        _wrongPasswordText.enabled = false;
+        _connectionErrorText.enabled = false;
+        _mainMenuCanvas.enabled = false;
+        _mapCanvas.enabled = false;
+        _pleaseWaitCanvas.enabled = false;
+        _checkedInCanvas.enabled = false;
+        _locationStartErrorCanvas.enabled = false;
+        _eggsCanvas.enabled = false;
+        _friendsEggsCanvas.enabled = false;
+        _friendsCanvas.enabled = false;
+        _checkInErrorCanvas.enabled = false;
+
+        _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
+        _webView.OnLoadComplete += onLoadComplete;
+        _webView.OnReceivedMessage += onReceivedMessage;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     public void onSubmit()
     {
@@ -62,46 +217,41 @@ public class MainMenuScript : MonoBehaviour {
 
     public IEnumerator submit()
     {
+        // start location tracking
+        Debug.Log(Input.location.isEnabledByUser);
+        Input.location.Start();
         CoroutineResponse response = new CoroutineResponse();
+        yield return checkLocationService(response);
+        if (response.Success != true)
+        {
+            _pleaseWaitCanvas.enabled = false;
+            _locationStartErrorCanvas.enabled = true;
+            yield break; // could not turn location service on
+        }
+
+        response.reset();
         yield return SpatialClient2.single.LoginUser(response, userNameField.text, passwordField.text);
         switch (response.Success)
         {
             case true:
-                Debug.Log(SpatialClient2.single.userSession.user.projectId);
-                Debug.Log(SpatialClient2.single.userSession.user.metadata.eggsOwned);
+                yield return SpatialClient2.single.checkFirstLogin();
 
-                // indicates whether this is the user's first login
-                bool firstLogin = false;
-
-                if (SpatialClient2.single.userSession.user.metadata.eggsOwned == null)
-                {
-                    SpatialClient2.single.userSession.user.metadata.eggsOwned = new List<OwnedEgg>();
-                    firstLogin = true;
-                }
-                if (SpatialClient2.single.userSession.user.metadata.friendsEggs == null)
-                {
-                    SpatialClient2.single.userSession.user.metadata.friendsEggs = new List<OwnedEgg>();
-                    firstLogin = true;
-                }
-                if (firstLogin)
-                {
-                    // update metadata on Spatial to contain empty lists
-                    yield return SpatialClient2.single.UpdateMeta();
-                }
+                // TODO delete this
+                List<Location> locations = new List<Location>();
+                Location loc = new Location(41.5, -76.5);
+                locations.Add(loc);
 
                 // initialize egg menu
-                EggMenuController.instance.addButtons();
+                addButtons();
+
+                yield return OwnedEgg.createEggForSelf(_eggMenuItemPrefab, _eggMenuContentPanel, "Matt", locations);
+                yield return OwnedEgg.createEggForSelf(_eggMenuItemPrefab, _eggMenuContentPanel, "Emre", locations);
 
                 // TODO create the buttons in _friendsCanvas
 
                 // logged in, switch to main menu
                 _loginCanvas.enabled = false;
                 _mainMenuCanvas.enabled = true;
-
-                Debug.Log(Input.location.isEnabledByUser);
-
-                // start location tracking
-                Input.location.Start();
 
                 break;
             case false:
@@ -118,37 +268,6 @@ public class MainMenuScript : MonoBehaviour {
 
     }
 
-    // Use this for initialization
-    void Start () {
-        // Initialize the egg menu controller
-        EggMenuController.createInstance(_eggsCanvas, _friendsCanvas, _friendsEggsCanvas, _eggMenuItemPrefab, _eggMenuContentPanel, _friendMenuItemPrefab, _friendMenuContentPanel);
-
-        _loginCanvas.enabled = true;
-        _wrongPasswordText.enabled = false;
-        _connectionErrorText.enabled = false;
-        _mainMenuCanvas.enabled = false;
-        _mapCanvas.enabled = false;
-        _pleaseWaitCanvas.enabled = false;
-        _checkedInCanvas.enabled = false;
-        _errorCanvas.enabled = false;
-        _eggsCanvas.enabled = false;
-        _friendsEggsCanvas.enabled = false;
-        _friendsCanvas.enabled = false;
-
-        // initialize the bool wrappers
-        seeWhatsAroundSuccess = new CoroutineResponse();
-        checkInSuccess = new CoroutineResponse();
-
-        _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
-        _webView.OnLoadComplete += onLoadComplete;
-		_webView.OnReceivedMessage += onReceivedMessage;
-    }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public void onEggs()
     {
         _mainMenuCanvas.enabled = false;
@@ -159,17 +278,6 @@ public class MainMenuScript : MonoBehaviour {
     {
         _mainMenuCanvas.enabled = false;
         _friendsEggsCanvas.enabled = true;
-    }
-
-    public void onCheckIn()
-    {
-        _mainMenuCanvas.enabled = false;
-        _pleaseWaitCanvas.enabled = true;
-
-        // get nearby marker from spatial, if there is none, create one
-
-        _pleaseWaitCanvas.enabled = false;
-        _checkedInCanvas.enabled = true;
     }
 
     public void onSeeWhatsAround()
@@ -184,18 +292,17 @@ public class MainMenuScript : MonoBehaviour {
 
     public void onBack()
     {
-        StopAllCoroutines();
         _checkedInCanvas.enabled = false;
+        _checkInErrorCanvas.enabled = false;
         _eggsCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = false;
-        _errorCanvas.enabled = false;
         _friendsEggsCanvas.enabled = false;
         _friendsCanvas.enabled = false;
         _mainMenuCanvas.enabled = true;
     }
 
-    IEnumerator seeWhatsAround()
+    /* IEnumerator seeWhatsAround()
     {
 
         GoogleMap googleMaps = GetComponent<GoogleMap>();
@@ -219,21 +326,21 @@ public class MainMenuScript : MonoBehaviour {
 
         Debug.Log(SpatialClient2.single.markers.Count);
         googleMaps.swapMarkersAndRefresh(SpatialClient2.single.markers);
-        /* googleMaps.markers = new GoogleMapMarker[1]; // this will change when we have different types of markers
-        googleMaps.markers[0] = new GoogleMapMarker();
-        googleMaps.markers[0].locations = new GoogleMapLocation[SpatialClient2.single.markers.Count];
-        googleMaps.markers[0].size = GoogleMapMarker.GoogleMapMarkerSize.Small;
-        for (int index = 0; index < googleMaps.markers[0].locations.Length; index++)
-        {
-            googleMaps.markers[0].locations[index] = new GoogleMapLocation("",
-                (float)(SpatialClient2.single.markers[index].loc.coordinates[0]),
-                (float)(SpatialClient2.single.markers[index].loc.coordinates[1]));
-        }
-        googleMaps.Refresh(); */
+//        googleMaps.markers = new GoogleMapMarker[1]; // this will change when we have different types of markers
+//        googleMaps.markers[0] = new GoogleMapMarker();
+//        googleMaps.markers[0].locations = new GoogleMapLocation[SpatialClient2.single.markers.Count];
+//        googleMaps.markers[0].size = GoogleMapMarker.GoogleMapMarkerSize.Small;
+//        for (int index = 0; index < googleMaps.markers[0].locations.Length; index++)
+//        {
+//            googleMaps.markers[0].locations[index] = new GoogleMapLocation("",
+//                (float)(SpatialClient2.single.markers[index].loc.coordinates[0]),
+//                (float)(SpatialClient2.single.markers[index].loc.coordinates[1]));
+//        }
+//        googleMaps.Refresh();
 
         _pleaseWaitCanvas.enabled = false;
         _mapCanvas.enabled = true;
-    }
+    } */
 
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
@@ -242,12 +349,12 @@ public class MainMenuScript : MonoBehaviour {
         {
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
-                Input.location.lastData.longitude.ToString() + ',' +
-                SpatialClient2.baseURL + ',' +
-                SpatialClient2.PROJECT_ID + ')');
+                Input.location.lastData.longitude.ToString() + ",\"" +
+                SpatialClient2.baseURL + "\",\"" +
+                SpatialClient2.PROJECT_ID + "\")");
 			_pleaseWaitCanvas.enabled = false;
             _webView.Show();
-            Debug.Log("fuck yeah");
+            Debug.Log("uniwebview is showing");
         }
         else
         {
@@ -311,11 +418,6 @@ public class MainMenuScript : MonoBehaviour {
         }
     }
 
-    private List<OwnedEgg> getOwnedEggs()
-    {
-        return SpatialClient2.single.userSession.user.metadata.eggsOwned;
-    }
-
     public void onTestDestruction()
     {
         //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
@@ -332,6 +434,84 @@ public class MainMenuScript : MonoBehaviour {
     {
         _friendsCanvas.enabled = false;
         _eggsCanvas.enabled = true;
+    }
+
+    public void onBackFromLocationStartError()
+    {
+        _locationStartErrorCanvas.enabled = false;
+        if (!SpatialClient2.single.isLoggedIn())
+            // the user has not yet logged in
+            _loginCanvas.enabled = true;
+        else
+            _mainMenuCanvas.enabled = true;
+    }
+
+    public void onBackFromFriendSelection()
+    {
+        _friendsCanvas.enabled = false;
+        _eggsCanvas.enabled = true;
+    }
+
+    public void addButtons()
+    {
+        foreach (OwnedEgg e in SpatialClient2.single.EggsOwned)
+        {
+            GameObject eggMenuItem = GameObject.Instantiate(_eggMenuItemPrefab);
+            eggMenuItem.transform.SetParent(_eggMenuContentPanel, false);
+            eggMenuItem.GetComponent<EggMenuItem>().Egg = e; // also updates the egg menu item's view
+        }
+        foreach (FriendData fd in SpatialClient2.single.Friends)
+        {
+            GameObject friendMenuItem = GameObject.Instantiate(_friendMenuItemPrefab);
+            friendMenuItem.transform.SetParent(_friendMenuContentPanel, false);
+            friendMenuItem.GetComponent<FriendMenuItem>().Friend = fd;
+            foreach (OwnedEgg e in fd.Friend.Metadata.EggsOwned)
+            {
+                GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
+                friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
+                friendEggMenuItem.GetComponent<EggMenuItem>().Egg = e; // also updates the egg menu item's view
+            }
+        }
+    }
+
+    public static void displayWaitScreen()
+    {
+        foreach (Canvas c in FindObjectsOfType<Canvas>())
+        {
+            if (c.enabled && c != pleaseWaitCanvas)
+            {
+                previousCanvas = c;
+                c.enabled = false;
+                pleaseWaitCanvas.enabled = true;
+                return;
+            }
+        }
+    }
+
+    public static void displayError(string errorText)
+    {
+        checkInErrorMessage.text = errorText;
+        foreach (Canvas c in FindObjectsOfType<Canvas>())
+        {
+            if (c.enabled)
+            {
+                c.enabled = false;
+                checkInErrorCanvas.enabled = true;
+                return;
+            }
+        }
+    }
+
+    public static void displayErrorFromWaitScreen(string errorText)
+    {
+        pleaseWaitCanvas.enabled = false;
+        displayError(errorText);
+    }
+
+    public static void closeWaitScreen()
+    {
+        pleaseWaitCanvas.enabled = false;
+        previousCanvas.enabled = true;
     }
 
 }

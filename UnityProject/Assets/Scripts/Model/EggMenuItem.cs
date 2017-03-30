@@ -5,18 +5,24 @@ using UnityEngine.UI;
 
 public class EggMenuItem : FriendEggMenuItem
 {
+    public static OwnedEgg eggToSend;
+
     public Button _sendToFriendButton;
+    
+    public void ownEggCheckInButtonHandler()
+    {
+        StartCoroutine(checkInButtonHandler(MainMenuScript.EggsCanvas));
+    }
 
     // TODO implement this
     public void sendToFriendButtonHandler()
     {
-        if (_egg._friendID == null)
+        if (_egg._friendUserID == null)
         {
             Debug.Log("no friend");
-            EggMenuController.instance._refererItem = this;
-            EggMenuController.instance.EggsCanvas.enabled = false;
-            EggMenuController.instance.FriendsEggsCanvas.enabled = false;
-            EggMenuController.instance.FriendsCanvas.enabled = true;
+            eggToSend = _egg;
+            MainMenuScript.EggsCanvas.enabled = false;
+            MainMenuScript.FriendsCanvas.enabled = true;
         }
     }
 }

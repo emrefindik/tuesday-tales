@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FriendEggMenuItem : MonoBehaviour
 {
     public const double EGG_SIZE_INCREMENT = 1.0;
+
+    // maximum distance between check in point and user's current point, in meters
+    public const double MAX_CHECK_IN_DISTANCE = 400.0;
 
     public Image _eggImage;
     public Text _eggNameText;
@@ -24,8 +27,8 @@ public class FriendEggMenuItem : MonoBehaviour
         {
             _egg = value;
             // TODO uncomment this after figuring out how to store the images _eggImage.sprite = e.egg.image;
-            _eggNameText.text = value._egg._name;
-            if (value._friendName != null) _friendNameText.text = value._friendName;
+            _eggNameText.text = value._name;
+            if (value._friendUserID != null) _friendNameText.text = SpatialClient2.single.getNameOfFriend(value._friendUserID);
         }
     }
 
@@ -41,9 +44,44 @@ public class FriendEggMenuItem : MonoBehaviour
 
     }
 
-    public void checkInButtonHandler()
+    public void friendEggCheckInButtonHandler()
     {
-        _egg._egg._size += EGG_SIZE_INCREMENT;
-        // TODO check position and see if it maps with the egg's intended place of hatching
+        if (_egg._friendUserID != null)
+        {
+            StartCoroutine(checkInButtonHandler(MainMenuScript.FriendsEggsCanvas));
+        }
+        else
+        {
+            MainMenuScript.FriendsEggsCanvas.enabled = false;
+            MainMenuScript.CheckInErrorMessage.text = "Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
+                " is currently holding onto this egg, they have to send it back to you first.";
+            MainMenuScript.CheckInErrorCanvas.enabled = true;
+        }
     }
+
+    protected IEnumerator checkInButtonHandler(Canvas openCanvas)
+    {
+        foreach (Location loc in _egg._hatchLocations)
+        {
+            if (GeographyMaster.calculateDistance(loc, Input.location.lastData.latitude, Input.location.lastData.longitude) <= MAX_CHECK_IN_DISTANCE)
+            {
+                yield return checkInEgg();                
+                openCanvas.enabled = false;
+                MainMenuScript.CheckedInCanvas.GetComponent<Text>().text = 
+                    "Checked in " + _egg._name + " at " + Input.location.lastData.latitude.ToString()
+                    + ", " + Input.location.lastData.longitude.ToString();
+                MainMenuScript.CheckedInCanvas.enabled = true;
+                yield break;
+            }
+        }
+        // could not check in since too far from desired location
+        MainMenuScript.displayError("You are too far from a desirable location to check in " + _egg._name + '!');
+    }
+
+    public IEnumerator checkInEgg()
+    {
+        _egg._size += EGG_SIZE_INCREMENT;
+        yield return SpatialClient2.single.UpdateMetadata("Could not check in egg " + _egg._name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+    }
+
 }
