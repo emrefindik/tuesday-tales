@@ -19,6 +19,8 @@ public class PlaytestController : MonoBehaviour {
 	const string MAP_ADDRESS = "playtest.html";
 
 	const string JS_INIT_MAP_METHOD_NAME = "loadMap";
+	const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
+	const string JS_CHECKIN_LOCATION = "addPointToPath";
 
 	// Used to display the map
 	public UniWebView _webView;
@@ -31,9 +33,14 @@ public class PlaytestController : MonoBehaviour {
 	private CoroutineResponse checkInSuccess;
 
 	private bool init;
+	private bool mapLoaded;
+
+	private Path destroyPath;
+	private LocationCoord currentMarker;
 
 	public void Start()
 	{
+		mapLoaded = false;
 		_pleaseWaitCanvas.enabled = true;
 		_checkedInCanvas.enabled = false;
 		_errorCanvas.enabled = false;
@@ -56,44 +63,49 @@ public class PlaytestController : MonoBehaviour {
 			StartCoroutine(submit());
 			init = true;
 		}
+		if(Input.location.status == LocationServiceStatus.Running){
+			updateCurrentLocation();
+		}
+
 	}
 
 	public IEnumerator submit()
 	{
+		// start location tracking
+		Debug.Log("GPS ON: " + Input.location.isEnabledByUser);
+		Input.location.Start();
 		CoroutineResponse response = new CoroutineResponse();
+		yield return checkLocationService(response);
+		if (response.Success != true)
+		{
+			_pleaseWaitCanvas.enabled = false;
+			yield break; // could not turn location service on
+		}
+
+		response.reset();
 		yield return SpatialClient2.single.LoginUser(response, "hello", "hello");
+		Debug.Log ("Login User Return");
 		switch (response.Success)
 		{
 		case true:
+			yield return SpatialClient2.single.checkFirstLogin();
 
-			// indicates whether this is the user's first login
-			bool firstLogin = false;
+			// TODO delete this
+			//List<Location> locations = new List<Location>();
+			//Location loc = new Location(41.5, -76.5);
+			//locations.Add(loc);
 
-			if (SpatialClient2.single.userSession.user.metadata.eggsOwned == null)
-			{
-				SpatialClient2.single.userSession.user.metadata.eggsOwned = new List<OwnedEgg>();
-				firstLogin = true;
-			}
-			if (SpatialClient2.single.userSession.user.metadata.friendsEggs == null)
-			{
-				SpatialClient2.single.userSession.user.metadata.friendsEggs = new List<OwnedEgg>();
-				firstLogin = true;
-			}
-			if (firstLogin)
-			{
-				// update metadata on Spatial to contain empty lists
-				yield return SpatialClient2.single.UpdateMeta();
-			}
-
-			Debug.Log(Input.location.isEnabledByUser);
-
-			// start location tracking
-			Input.location.Start();
-
-			_pleaseWaitCanvas.enabled = false;
-
+			// TODO create the buttons in _friendsCanvas
+			Debug.Log("Spatial Login Succeed");
+			onSeeWhatsAround();
 			break;
-		default:
+		case false:
+			// wrong credentials
+			Debug.Log("Wrong User or Password");
+			break;
+		case null:
+			// connection error (possible timeout)
+			Debug.Log("Connection Error");
 			break;
 		}
 
@@ -114,7 +126,8 @@ public class PlaytestController : MonoBehaviour {
 		_pleaseWaitCanvas.enabled = true;
 		checkLocationServiceIsOn();
 		//StartCoroutine(seeWhatsAround());
-		Debug.Log(_webView.url);
+
+		Debug.Log("OnSeeWhatsAround:" + _webView.url);
 		_webView.Load();
 	}
 
@@ -129,16 +142,17 @@ public class PlaytestController : MonoBehaviour {
 	/** Called when uniwebview successfully loads the HTML page */
 	void onLoadComplete(UniWebView webView, bool success, string errorMessage)
 	{
-		if (success)
+		if (success && !mapLoaded)
 		{
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
 				Input.location.lastData.latitude.ToString() + ',' +
-				Input.location.lastData.longitude.ToString() + ',' +
-				SpatialClient2.baseURL + ',' +
-				SpatialClient2.PROJECT_ID + ')');
+				Input.location.lastData.longitude.ToString() + ",\"" +
+				SpatialClient2.baseURL + "\",\"" +
+				SpatialClient2.PROJECT_ID + "\")");
 			_pleaseWaitCanvas.enabled = false;
 			_webView.Show();
-			Debug.Log("Load Uniweb Complete.");
+			Debug.Log("uniwebview is showing");
+			mapLoaded = true;
 		}
 		else
 		{
@@ -146,26 +160,57 @@ public class PlaytestController : MonoBehaviour {
 		}
 	}
 
+	void updateCurrentLocation()
+	{
+		_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+			Input.location.lastData.latitude.ToString() + ',' +
+			Input.location.lastData.longitude.ToString() + ")");
+	}
+
+	public void addCheckedLocation()
+	{
+		Debug.Log ("Adding Checked Location");
+		_webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
+			currentMarker.lat + ',' +
+			currentMarker.lon + ")");
+	}
+
 	void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
 	{
-		Debug.Log ("Receiving Message from Uniweb");
+		Debug.Log ("hi");
 		Debug.Log (message.path);
 		switch (message.path)
 		{
 		case "back":
-			// TODO:
 			_webView.Hide();
 			break;
 		case "marker":
-			_webView.Hide();
-			// TODO get message.args and redirect to correct marker's destruction
-			MainController.single.goToDestroyCity();
+			// check for distance
+			Debug.Log ("Receive marker message: " + message.rawMessage);
+			double markerLat;
+			Double.TryParse (message.args ["lat"], out markerLat);
+			//Debug.Log ("markerLat: " + markerLat);
+			double markerLon;
+			Double.TryParse (message.args ["lon"], out markerLon);
+			//Debug.Log ("markerLon:" + markerLon);
+			currentMarker = new LocationCoord ();
+			currentMarker.lat = markerLat;
+			currentMarker.lon = markerLon;
+			//Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
+			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
+			//if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
+				_webView.Hide();
+				// TODO get message.args and redirect to correct marker's destruction
+				MainController.single.goToDestroyCity();
+			//}
+			//else{
+				// Load Error Canvas
+			//}
 			break;
 		default:
 			break;
 		}
 	}
-
 	// assigns true to result.value if location service is ready, otherwise assigns false
 	IEnumerator checkLocationService(CoroutineResponse result)
 	{
