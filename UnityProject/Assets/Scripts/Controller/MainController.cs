@@ -20,9 +20,9 @@ public class MainController : MonoBehaviour
 	public Camera phoneCamera;
 	public GameObject phoneCameraScene;
 
-	public int screams;
-	public int multiplier;
-	public float timer;
+	//public int screams;
+	//public int multiplier;
+	//public float timer;
 	const float COUNT_DOWN_BASE = 60.0f * 5;
 
     // Use this for initialization
@@ -30,39 +30,46 @@ public class MainController : MonoBehaviour
     {
         single = this;
 		gameState = GameState.MainMenu;
+		/*
 		screams = 0;
 		multiplier = 1;
 		timer = COUNT_DOWN_BASE / multiplier;
+		*/
     }
 
     // Update is called once per frame
     void Update()
     {
+		/*
 		if (timer == 0.0) {
 			// TODO:Trigger some notification
 			timer = COUNT_DOWN_BASE;
 			multiplier = 1;
 		}
+		*/
     }
 
 	public void addDestoryCityReward(int amount)
 	{
+		/*
 		screams += amount * multiplier;
 		if (multiplier < 32) {
 			multiplier *= 2;
 			setTimer ();
 		}
+		*/
 
 		PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
 		pcl.addCheckedLocation ();
 	}
 
 
-
+	/*
 	public void setTimer()
 	{
 		timer = COUNT_DOWN_BASE / multiplier;
 	}
+	*/
 
 	public void goBack()
 	{
@@ -118,8 +125,7 @@ public class MainController : MonoBehaviour
 
 		gameState = GameState.MapView;
 	}
-
-
+		
     public void goToDestroyCity()
     {
 		lastGameState = gameState;

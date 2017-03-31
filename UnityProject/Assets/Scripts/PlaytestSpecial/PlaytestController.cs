@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 
 public class PlaytestController : MonoBehaviour {
 
+	// time interval between location marker updates on map, in seconds
+	const float LOCATION_MARKER_UPDATE_INTERVAL = 4.0f;
+
 	// frequency of queries on whether location service is enabled, in number per second
 	const int LOCATION_INITIALIZED_QUERIES_PER_SECOND = 4;
 
@@ -32,6 +35,8 @@ public class PlaytestController : MonoBehaviour {
 	private CoroutineResponse seeWhatsAroundSuccess;
 	private CoroutineResponse checkInSuccess;
 
+	//private Coroutine _locationUpdateCoroutine;
+
 	private bool init;
 	private bool mapLoaded;
 
@@ -43,6 +48,8 @@ public class PlaytestController : MonoBehaviour {
 
 	public void Start()
 	{
+		//_locationUpdateCoroutine = null;
+
 		mapLoaded = false;
 		_pleaseWaitCanvas.enabled = true;
 		_checkedInCanvas.enabled = false;
@@ -168,7 +175,7 @@ public class PlaytestController : MonoBehaviour {
 		}
 	}
 
-	void updateCurrentLocation()
+	IEnumerator updateCurrentLocation()
 	{
 		_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
 			Input.location.lastData.latitude.ToString() + ',' +
