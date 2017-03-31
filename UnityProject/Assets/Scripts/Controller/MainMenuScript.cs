@@ -5,7 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class MainMenuScript : MonoBehaviour {
+public class MainMenuScript : MonoBehaviour
+{
+    // time interval between location marker updates on map, in seconds
+    const float LOCATION_MARKER_UPDATE_INTERVAL = 4.0f;
 
     // frequency of queries on whether location service is enabled, in number per second
     const int LOCATION_INITIALIZED_QUERIES_PER_SECOND = 4;
@@ -19,6 +22,8 @@ public class MainMenuScript : MonoBehaviour {
     const string MAP_ADDRESS = "map.html";
 
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
+    const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
+    const string JS_CHECKIN_LOCATION = "addPointToPath";
 
     private static Canvas errorCanvas;
     public static Canvas ErrorCanvas
@@ -119,6 +124,11 @@ public class MainMenuScript : MonoBehaviour {
 
     private static Canvas pleaseWaitCanvas;
 
+    private bool mapLoaded;
+
+    private Path destroyPath;
+    private LocationCoord currentMarker;
+
     // Used to display the map
     [SerializeField]
     private UniWebView _webView;
@@ -147,7 +157,6 @@ public class MainMenuScript : MonoBehaviour {
     // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
-
     [SerializeField]
     private Canvas _loginCanvas;
     [SerializeField]
@@ -173,10 +182,14 @@ public class MainMenuScript : MonoBehaviour {
     [SerializeField]
     private InputField passwordField;
 
+    private Coroutine _locationUpdateCoroutine;
+
 
     // Use this for initialization
     void Start()
     {
+        _locationUpdateCoroutine = null;
+
         errorCanvas = _locationStartErrorCanvas;
         eggsCanvas = _eggsCanvas;
         checkedInCanvas = _checkedInCanvas;
@@ -192,6 +205,7 @@ public class MainMenuScript : MonoBehaviour {
         _mainMenuCanvas.enabled = false;
         _mapCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = false;
+        mapLoaded = false;
         _checkedInCanvas.enabled = false;
         _locationStartErrorCanvas.enabled = false;
         _eggsCanvas.enabled = false;
@@ -202,23 +216,18 @@ public class MainMenuScript : MonoBehaviour {
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
         _webView.OnReceivedMessage += onReceivedMessage;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
 
     }
 
-    public void onSubmit()
+    public void Update()
     {
-        StartCoroutine(submit());
+
     }
 
     public IEnumerator submit()
     {
         // start location tracking
-        Debug.Log(Input.location.isEnabledByUser);
+        Debug.Log("GPS ON: " + Input.location.isEnabledByUser);
         Input.location.Start();
         CoroutineResponse response = new CoroutineResponse();
         yield return checkLocationService(response);
@@ -234,28 +243,26 @@ public class MainMenuScript : MonoBehaviour {
         switch (response.Success)
         {
             case true:
-
                 // initialize egg menu
                 addButtons();
-
-                // TODO create the buttons in _friendsCanvas
 
                 // logged in, switch to main menu
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = false;
                 _loginCanvas.enabled = false;
                 _mainMenuCanvas.enabled = true;
-
                 break;
             case false:
                 // wrong credentials
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
+                Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
+                Debug.Log("Connection Error");
                 break;
         }
 
@@ -273,13 +280,22 @@ public class MainMenuScript : MonoBehaviour {
         _friendsEggsCanvas.enabled = true;
     }
 
+    public void onCheckIn()
+    {
+        _pleaseWaitCanvas.enabled = true;
+
+        // get nearby marker from spatial, if there is none, create one
+
+        _pleaseWaitCanvas.enabled = false;
+        _checkedInCanvas.enabled = true;
+    }
+
     public void onSeeWhatsAround()
     {
         _mainMenuCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = true;
         checkLocationServiceIsOn();
-        //StartCoroutine(seeWhatsAround());
-        Debug.Log(_webView.url);
+        Debug.Log("OnSeeWhatsAround:" + _webView.url);
         _webView.Load();
     }
 
@@ -295,52 +311,11 @@ public class MainMenuScript : MonoBehaviour {
         _mainMenuCanvas.enabled = true;
     }
 
-    /* IEnumerator seeWhatsAround()
-    {
-
-        GoogleMap googleMaps = GetComponent<GoogleMap>();
-
-        // get location data and plug it into googleMaps
-        yield return checkLocationService(seeWhatsAroundSuccess);
-        if (seeWhatsAroundSuccess.Success != true)
-        {
-            _pleaseWaitCanvas.enabled = false;
-            _errorCanvas.enabled = true;
-            yield break; // could not get location
-        }
-        googleMaps.centerLocation.address = "";
-        googleMaps.centerLocation.latitude = Input.location.lastData.latitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION 40.432633f;
-        googleMaps.centerLocation.longitude = Input.location.lastData.longitude; // UNCOMMENT THIS IF TESTING ON COMPUTER AND WANT TO USE ETC LOCATION -79.964973f;
-
-        // get markers from spatial and plug them into googleMaps
-        yield return SpatialClient2.single.GetMarkersByDistance(
-            Input.location.lastData.longitude, Input.location.lastData.latitude);
-        // TODO handle error from spatial
-
-        Debug.Log(SpatialClient2.single.markers.Count);
-        googleMaps.swapMarkersAndRefresh(SpatialClient2.single.markers);
-//        googleMaps.markers = new GoogleMapMarker[1]; // this will change when we have different types of markers
-//        googleMaps.markers[0] = new GoogleMapMarker();
-//        googleMaps.markers[0].locations = new GoogleMapLocation[SpatialClient2.single.markers.Count];
-//        googleMaps.markers[0].size = GoogleMapMarker.GoogleMapMarkerSize.Small;
-//        for (int index = 0; index < googleMaps.markers[0].locations.Length; index++)
-//        {
-//            googleMaps.markers[0].locations[index] = new GoogleMapLocation("",
-//                (float)(SpatialClient2.single.markers[index].loc.coordinates[0]),
-//                (float)(SpatialClient2.single.markers[index].loc.coordinates[1]));
-//        }
-//        googleMaps.Refresh();
-
-        _pleaseWaitCanvas.enabled = false;
-        _mapCanvas.enabled = true;
-    } */
-
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
     {
-        if (success)
+        if (success && !mapLoaded)
         {
-            // START OF EMRE'S CODE
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
                 Input.location.lastData.longitude.ToString() + ",\"" +
@@ -348,10 +323,13 @@ public class MainMenuScript : MonoBehaviour {
                 SpatialClient2.PROJECT_ID + "\"," +
                 SpatialClient2.single.getScore().ToString() + ',' +
                 SpatialClient2.single.getTimer().ToString() + ')');
-            // END OF EMRE'S CODE
-			_pleaseWaitCanvas.enabled = false;
+            _pleaseWaitCanvas.enabled = false;
             _webView.Show();
             Debug.Log("uniwebview is showing");
+            mapLoaded = true;
+
+            // EMRE'S ADDITION
+            _locationUpdateCoroutine = StartCoroutine(updateCurrentLocation());
         }
         else
         {
@@ -359,32 +337,81 @@ public class MainMenuScript : MonoBehaviour {
         }
     }
 
+    IEnumerator updateCurrentLocation()
+    {
+        if (Input.location.status == LocationServiceStatus.Running)
+        {
+            _webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+            Input.location.lastData.latitude.ToString() + ',' +
+            Input.location.lastData.longitude.ToString() + ")");
+            yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
+        }
+    }
+
+    public void addCheckedLocation()
+    {
+        Debug.Log("Adding Checked Location");
+        _webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
+            currentMarker.lat + ',' +
+            currentMarker.lon + ")");
+    }
+
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
-		Debug.Log ("hi");
-		Debug.Log (message.path);
+        Debug.Log("hi");
+        Debug.Log(message.path);
         switch (message.path)
         {
-			case "back":
-				_mainMenuCanvas.enabled = true;
+            case "back":
+                StopCoroutine(_locationUpdateCoroutine);
+                _mainMenuCanvas.enabled = true;
                 _webView.Hide();
                 break;
-			case "marker":
-				_mainMenuCanvas.enabled = true;
-				_webView.Hide();
+            case "marker":
+                StopCoroutine(_locationUpdateCoroutine);
+                // check for distance
+                Debug.Log("Receive marker message: " + message.rawMessage);
+                double markerLat;
+                Double.TryParse(message.args["lat"], out markerLat);
+                //Debug.Log ("markerLat: " + markerLat);
+                double markerLon;
+                Double.TryParse(message.args["lon"], out markerLon);
+                //Debug.Log ("markerLon:" + markerLon);
+                currentMarker = new LocationCoord();
+                currentMarker.lat = markerLat;
+                currentMarker.lon = markerLon;
+                //Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
+                //Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
+
+                // TODO REPLACE THIS AFTER THE PLAYTEST
+
+                if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE)){
+                    _friendsEggsCanvas.enabled = false;
+                    _eggsCanvas.enabled = false;
+                    _checkedInCanvas.GetComponent<Text>().text =
+                        "Checked in " + "egg" + " at " + Input.location.lastData.latitude.ToString()
+                        + ", " + Input.location.lastData.longitude.ToString();
+                    _checkedInCanvas.enabled = true;
+                    _webView.Hide();
                 // TODO get message.args and redirect to correct marker's destruction
-                MainController.single.goToDestroyCity();
+
+                    // TODO check whether player is checking in or destroying city
+                    MainController.single.goToDestroyCity();
+                }
+                else{
+                // Load Error Canvas
+                }
+
+                // END OF PART TO BE REPLACED AFTER THE PLAYTEST
+
                 break;
-            // START OF EMRE'S CODE
             case "resetscore":
                 StartCoroutine(SpatialClient2.single.resetStreak());
                 break;
-            // END OF EMRE'S CODE
             default:
                 break;
         }
     }
-
     // assigns true to result.value if location service is ready, otherwise assigns false
     IEnumerator checkLocationService(CoroutineResponse result)
     {
@@ -428,11 +455,11 @@ public class MainMenuScript : MonoBehaviour {
         MainController.single.goToDestroyCity();
     }
 
-	public void onTestCamera()
-	{
-		//SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
-		MainController.single.goToPhoneCamera();
-	}
+    public void onTestCamera()
+    {
+        //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
+        MainController.single.goToPhoneCamera();
+    }
 
     public void onBackToYourEggs()
     {
@@ -517,5 +544,4 @@ public class MainMenuScript : MonoBehaviour {
         pleaseWaitCanvas.enabled = false;
         previousCanvas.enabled = true;
     }
-
 }
