@@ -38,6 +38,9 @@ public class PlaytestController : MonoBehaviour {
 	private Path destroyPath;
 	private LocationCoord currentMarker;
 
+	// Playtest Special
+	ArrayList checkedMarkers;
+
 	public void Start()
 	{
 		mapLoaded = false;
@@ -52,6 +55,9 @@ public class PlaytestController : MonoBehaviour {
 		_webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
 		_webView.OnLoadComplete += onLoadComplete;
 		_webView.OnReceivedMessage += onReceivedMessage;
+
+		// Playtest Special
+		checkedMarkers = new ArrayList();
 
 	}
 
@@ -195,19 +201,21 @@ public class PlaytestController : MonoBehaviour {
 			double markerLon;
 			Double.TryParse (message.args ["lon"], out markerLon);
 			//Debug.Log ("markerLon:" + markerLon);
-			currentMarker = new LocationCoord ();
-			currentMarker.lat = markerLat;
-			currentMarker.lon = markerLon;
+			currentMarker = new LocationCoord (markerLat, markerLon);
 			//Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
 			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-			//if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
-				_webView.Hide();
-				// TODO get message.args and redirect to correct marker's destruction
-				MainController.single.goToDestroyCity();
-			//}
-			//else{
+			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
+				LocationCoord currentMarker = new LocationCoord (markerLat, markerLon);
+				if(!checkedMarkersContains(currentMarker)){
+					_webView.Hide();
+					checkedMarkers.Add (currentMarker);
+					// TODO get message.args and redirect to correct marker's destruction
+					MainController.single.goToDestroyCity();
+				}
+			}
+			else{
 				// Load Error Canvas
-			//}
+			}
 			break;
 		case "resetscore":
 			SpatialClient2.single.resetStreak();
@@ -216,6 +224,18 @@ public class PlaytestController : MonoBehaviour {
 			break;
 		}
 	}
+
+	// Playtest Special
+	bool checkedMarkersContains(LocationCoord loc)
+	{
+		foreach(LocationCoord checkedMarker in checkedMarkers)
+		{
+			if (loc.lat == checkedMarker.lat && loc.lon == checkedMarker.lon)
+				return true;
+		}
+		return false;
+	}
+
 	// assigns true to result.value if location service is ready, otherwise assigns false
 	IEnumerator checkLocationService(CoroutineResponse result)
 	{

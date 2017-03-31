@@ -66,6 +66,12 @@ public class MonsterCreator : MonoBehaviour {
 		renderer = rightHand.GetComponent<SpriteRenderer> ();
 		renderer.sprite = handSprites [handType];
 		renderer.color = monsterColor;
+
+		head.SetActive (true);
+		leftEye.SetActive (true);
+		body.SetActive (true);
+		leftHand.SetActive (true);
+		rightHand.SetActive (true);
 	}
 
 }
