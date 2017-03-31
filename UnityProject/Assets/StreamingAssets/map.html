@@ -22,13 +22,73 @@
 <script>
 // furthest distance to fetch markers from, in meters
 markerRadius = 6000;
-// START OF EMRE'S CODE
 score = 0;
-// END OF EMRE'S CODE
+
+function updateCurrentLocation(lat, lon){
+    latitude = lat;
+    longitude = lon;
+    var newLatLng = new google.maps.LatLng(latitude, longitude);
+    meLocation.setPosition(newLatLng);
+}
+
+function addPointToPath(la, lo){
+    pathCoordinates.push({lat:la, lng:lo});
+    var destroyPath = new google.maps.Polyline({
+                                              path: pathCoordinates,
+                                              geodesic: true,
+                                              strokeColor: '#EE1100',
+                                              strokeOpacity: 1.0,
+                                              strokeWeight: 2
+                                              });
+                                              
+    destroyPath.setMap(map);
+}
 
 function resizeMap() {
 	document.getElementById("map").style.height = window.innerHeight.toString().concat("px");
 	document.getElementById("map").style.width = window.innerWidth.toString().concat("px");
+}
+
+function updateScore(newScore)
+{
+    score = newScore;
+    document.getElementById("score").innerHTML = newScore.toString();
+}
+
+secondsRemaining = 0;
+function startTimer(seconds)
+{
+    secondsRemaining = seconds - 1;
+    imer = setInterval(updateTimer, 1000);
+    updateDisplayedTime();
+}
+
+function updateDisplayedTime()
+{
+    var secondText = (secondsRemaining % 60).toString();
+    if (secondsRemaining % 60 < 10)
+    {
+        secondText = "0" + secondText;
+    }
+    document.getElementById("time").innerHTML = Math.floor(secondsRemaining / 60).toString() + ": " + secondText;
+}
+
+function timeout()
+{
+    clearInterval(timer);
+    updateScore(0);
+    window.location.href = "uniwebview://updatescore?score=" + score.toString();
+}
+
+function updateTimer()
+{
+    if (secondsRemaining == 0)
+    {
+        timeout();
+        return;
+    }
+    secondsRemaining = secondsRemaining - 1;
+    updateDisplayedTime();
 }
 
 function onMarkerClick(markerId, lat, lon, markerType) {
@@ -97,19 +157,37 @@ function initializeMap() {
 					width: 162,
 					height: 216
 				},
-				url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
+				//url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
 			},
 			title: spatialMarker.name
 		});		
 		// TODO uncomment this after fixing the problem of metadata being saved as strings
 		//googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, spatialMarker.metadata.type); });
-		googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, "no type"); });
+		googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, spatialMarker.loc.coordinates[1], spatialMarker.loc.coordinates[0], "no type"); });
 	});
 	var backButtonDiv = document.createElement('div');
     var backControl = new BackControl(backButtonDiv);
 
     backButtonDiv.index = 1;
     map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(backButtonDiv);
+    meLocation = new google.maps.Marker({
+                                              position: {lat: latitude, lng: longitude},
+                                              map: map,
+                                              icon: {
+                                              anchor: {
+                                              x: 81,
+                                              y: 108
+                                              },
+                                              scaledSize: {
+                                              width: 162,
+                                              height: 216
+                                              },
+                                              url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
+                                              }
+    });
+    
+    pathCoordinates = [];
+    
 }
 
 // lat = latitude the player is currently at
@@ -143,7 +221,6 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds) {
 		projectID + "&meters=" + markerRadius.toString(), true);
 	getReq.send();
 	
-	// START OF EMRE'S CODE
 	updateScore(startScore);
 	if (score == 0)
 	{
@@ -154,63 +231,12 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds) {
 	{
 		startTimer(timerSeconds);
 	}
-	// END OF EMRE'S CODE
 }
 
 resizeMap();
+loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee");
 
-// START OF EMRE'S CODE
-function updateScore(newScore)
-{
-	score = newScore;
-	document.getElementById("score").innerHTML = newScore.toString();
-}
 
-secondsRemaining = 0;
-
-function startTimer(seconds)
-{
-	// if timer is 3 minutes, start displaying from 2:59
-	secondsRemaining = seconds - 1;
-	
-	timer = setInterval(updateTimer, 1000);
-	updateDisplayedTime();
-}
-
-function updateDisplayedTime()
-{
-	var secondText = (secondsRemaining % 60).toString();
-	if (secondsRemaining % 60 < 10)
-	{
-		secondText = "0" + secondText;
-	}
-	document.getElementById("time").innerHTML = Math.floor(secondsRemaining / 60).toString() + ": " + secondText;
-}
-
-function timeout()
-{
-	clearInterval(timer);
-	updateScore(0);
-	// no need to display the timer
-	document.getElementById("timetext").innerHTML = "";
-	document.getElementById("timervalue").innerHTML = "";
-	window.location.href = "uniwebview://resetscore";
-}
-
-function updateTimer()
-{
-	if (secondsRemaining == 0)
-	{
-		timeout();
-		return;
-	}
-	secondsRemaining = secondsRemaining - 1;
-	updateDisplayedTime();
-}
-
-// TODO delete this
-loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 10, 13);
-// END OF EMRE'S CODE
 </script>
 </body>
 </html>
