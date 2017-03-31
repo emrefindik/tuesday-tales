@@ -234,22 +234,15 @@ public class MainMenuScript : MonoBehaviour {
         switch (response.Success)
         {
             case true:
-                yield return SpatialClient2.single.checkFirstLogin();
-
-                // TODO delete this
-                List<Location> locations = new List<Location>();
-                Location loc = new Location(41.5, -76.5);
-                locations.Add(loc);
 
                 // initialize egg menu
                 addButtons();
 
-                yield return OwnedEgg.createEggForSelf(_eggMenuItemPrefab, _eggMenuContentPanel, "Matt", locations);
-                yield return OwnedEgg.createEggForSelf(_eggMenuItemPrefab, _eggMenuContentPanel, "Emre", locations);
-
                 // TODO create the buttons in _friendsCanvas
 
                 // logged in, switch to main menu
+                _connectionErrorText.enabled = false;
+                _wrongPasswordText.enabled = false;
                 _loginCanvas.enabled = false;
                 _mainMenuCanvas.enabled = true;
 
@@ -384,7 +377,7 @@ public class MainMenuScript : MonoBehaviour {
                 break;
             // START OF EMRE'S CODE
             case "resetscore":
-                SpatialClient2.single.resetStreak();
+                StartCoroutine(SpatialClient2.single.resetStreak());
                 break;
             // END OF EMRE'S CODE
             default:
@@ -429,6 +422,8 @@ public class MainMenuScript : MonoBehaviour {
 
     public void onTestDestruction()
     {
+        Debug.Log("multiplier: " + SpatialClient2.single.getMultiplier().ToString());
+        Debug.Log("score: " + SpatialClient2.single.getScore().ToString());
         //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
         MainController.single.goToDestroyCity();
     }

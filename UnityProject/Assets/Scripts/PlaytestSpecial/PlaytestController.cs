@@ -88,12 +88,12 @@ public class PlaytestController : MonoBehaviour {
 		switch (response.Success)
 		{
 		case true:
-			yield return SpatialClient2.single.checkFirstLogin();
+			/*yield return SpatialClient2.single.checkFirstLogin();
 
 			// TODO delete this
 			//List<Location> locations = new List<Location>();
 			//Location loc = new Location(41.5, -76.5);
-			//locations.Add(loc);
+			//locations.Add(loc); */
 
 			// TODO create the buttons in _friendsCanvas
 			Debug.Log("Spatial Login Succeed");
@@ -200,8 +200,8 @@ public class PlaytestController : MonoBehaviour {
 			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
 			//if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
 				_webView.Hide();
-				// TODO get message.args and redirect to correct marker's destruction
-				MainController.single.goToDestroyCity();
+                // TODO get message.args and redirect to correct marker's destruction
+                MainController.single.goToDestroyCity();
 			//}
 			//else{
 				// Load Error Canvas

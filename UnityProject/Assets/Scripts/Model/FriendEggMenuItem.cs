@@ -52,10 +52,8 @@ public class FriendEggMenuItem : MonoBehaviour
         }
         else
         {
-            MainMenuScript.FriendsEggsCanvas.enabled = false;
-            MainMenuScript.CheckInErrorMessage.text = "Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
-                " is currently holding onto this egg, they have to send it back to you first.";
-            MainMenuScript.CheckInErrorCanvas.enabled = true;
+            MainMenuScript.displayError("Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
+                " is currently holding onto this egg, they have to send it back to you first.");
         }
     }
 

@@ -37,17 +37,6 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     private LoginResponse userSession = null;
-    /* public LoginResponse UserSession
-    {
-        get
-        {
-            return userSession;
-        }
-        private set
-        {
-            userSession = value;
-        }
-    } */
 
     private Dictionary<string, FriendData> friends = new Dictionary<string, FriendData>();
     public IEnumerable<FriendData> Friends
@@ -63,13 +52,24 @@ public class SpatialClient2 : MonoBehaviour
     public Project project;
 
     public bool metadataUpdatedSuccessfully = false;
+    private bool isCheckingStreak = false;
+    private bool streakInitialized = false;
 
     void Start()
     {
         ready = false;
+        isCheckingStreak = false;
+        streakInitialized = false;
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
+    }
+
+    private void Update()
+    {
+        if (streakInitialized && !isCheckingStreak
+            && userSession.User.Metadata.StreakTimerStart != UserMetadata.NO_STREAK)
+            StartCoroutine(checkIfStreakIsOutdated());
     }
 
     public bool isLoggedIn()
@@ -82,11 +82,16 @@ public class SpatialClient2 : MonoBehaviour
         return userSession.User.Metadata.Score;
     }
 
-    public int getTimer()
+    public int getMultiplier()
     {
-        return (int)((userSession.User.Metadata.LastRampage +
+        return userSession.User.Metadata.ScoreMultiplier;
+    }
+
+    public long getTimer()
+    {
+        return (userSession.User.Metadata.LastRampage +
             userSession.User.Metadata.StreakTimerStart) -
-            UserMetadata.currentTimestamp());
+            UserMetadata.currentTimestamp();
     }
 
     // START OF EMRE'S CODE
@@ -94,12 +99,19 @@ public class SpatialClient2 : MonoBehaviour
     {
         userSession.User.Metadata.resetStreak();
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        Debug.Log("reset streak");
     }
 
 
     public IEnumerator updateLastRampage(int scoreIncrement)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement);
+        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+    }
+
+    public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement)
+    {
+        userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier);
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
     // END OF EMRE'S CODE
@@ -140,27 +152,14 @@ public class SpatialClient2 : MonoBehaviour
             return "";
     }
 
-    public IEnumerator checkFirstLogin()
+    private IEnumerator checkFirstLogin()
     {
-        // indicates whether this is the user's first login
-        bool firstLogin = false;
-        Debug.Log(userSession.User.Metadata.EggsOwned.length());
-        if (userSession.User.Metadata.EggsOwned == null)
+        if (userSession.User.Metadata.EggsOwned == null ||
+            userSession.User.Metadata.FriendsEggs == null ||
+            userSession.User.Metadata.ScoreMultiplier == 0)
         {
-            Debug.Log("init eggs owned");
-            userSession.User.Metadata.initializeEggsOwned();
-            firstLogin = true;
-        }
-        if (userSession.User.Metadata.FriendsEggs == null)
-        {
-            Debug.Log("init friends eggs");
-            userSession.User.Metadata.initializeFriendsEggs();
-            firstLogin = true;
-        }
-        if (firstLogin)
-        {
-            userSession.User.Metadata.initializeEggsCreated();
-            // update metadata on Spatial to contain empty lists
+            Debug.Log("first login");
+            userSession.User.Metadata.initialize();
             yield return UpdateMetadata("Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
         }
     }
@@ -451,6 +450,9 @@ public class SpatialClient2 : MonoBehaviour
         else
         {
             userSession = JsonUtility.FromJson<LoginResponse>(www.text);
+            yield return checkFirstLogin();
+            yield return checkIfStreakIsOutdated();
+            streakInitialized = true;
             eggsOwned = userSession.User.Metadata.EggsOwned.makeDictionary();
             yield return GetFriends();
             ready = true;
@@ -459,6 +461,25 @@ public class SpatialClient2 : MonoBehaviour
         }
         // do not call displayError, since that error screen would direct to the main menu instead of the login screen
         MainMenuScript.closeWaitScreen();
+    }
+
+    public IEnumerator checkIfStreakIsOutdated()
+    {
+        isCheckingStreak = true;
+        if (getTimer() <= 0)
+        {
+            yield return resetStreak();
+            isCheckingStreak = false;
+            yield break;
+        }
+        // waits for the remaining amount on timer + 10 seconds, then calls this coroutine again
+        StartCoroutine(waitBeforeCheckStreak());
+    }
+
+    public IEnumerator waitBeforeCheckStreak()
+    {
+        yield return new WaitForSeconds(getTimer() + 10);
+        StartCoroutine(checkIfStreakIsOutdated());
     }
 
     public IEnumerator AddFriend(string friendID, string projectID = PROJECT_ID)
@@ -716,7 +737,10 @@ public class UserMetadata
     // interval between first two destructions to trigger a streak
     public const int INITIAL_RAMPAGE_INTERVAL = 300;
     // value to set streakTimerStart to when there is no streak
-    public const int NO_STREAK = 0;
+    public const int NO_STREAK = -1;
+    // value to set lastRampage when the user has not destroyed anything yet
+    public const int NO_RAMPAGE = -1;
+
     // END OF EMRE'S CODE
 
     [SerializeField]
@@ -770,6 +794,15 @@ public class UserMetadata
         private set { streakTimerStart = value; }
     }
 
+    [SerializeField]
+    // the streak combo multiplier
+    private int scoreMultiplier;
+    public int ScoreMultiplier
+    {
+        get { return scoreMultiplier; }
+        private set { scoreMultiplier = value; }
+    }
+
     public static long currentTimestamp()
     {
         return Convert.ToInt64(DateTime.UtcNow.Subtract(startTime).TotalSeconds);
@@ -779,37 +812,45 @@ public class UserMetadata
     {
         lastRampage = currentTimestamp();
         score += scoreIncrement;
-        if (streakTimerStart == 0)
+        if (streakTimerStart <= 0 || streakTimerStart == NO_STREAK)
             streakTimerStart = INITIAL_RAMPAGE_INTERVAL;
         else
             streakTimerStart *= 2;
+        scoreMultiplier++;
     }
 
     public void resetStreak()
     {
         streakTimerStart = NO_STREAK;
         score = 0;
+        scoreMultiplier = 1;
     }
     // END OF EMRE'S CODE
-
-    public void initializeEggsOwned()
-    {
-        eggsOwned = new EggList();
-    }
 
     public void initializeEggsOwned(IEnumerable<OwnedEgg> eggs)
     {
         eggsOwned = new EggList(eggs);
     }
 
+    public void initialize()
+    {
+        eggsOwned = new EggList();
+        friendsEggs = new List<OwnedEgg>();
+        eggsCreated = 0;
+        lastRampage = NO_RAMPAGE;
+        score = 0;
+        scoreMultiplier = 1;
+        streakTimerStart = NO_STREAK;
+    }
+
+    public void initializeEggsOwned()
+    {
+        eggsOwned = new EggList();
+    }
+
     public void initializeFriendsEggs()
     {
         friendsEggs = new List<OwnedEgg>();
-    }
-
-    public void initializeEggsCreated()
-    {
-        eggsCreated = 0;
     }
 
     public void incrementEggsCreated()
