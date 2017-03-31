@@ -23,7 +23,7 @@ public class LevelControl : MonoBehaviour {
 
     // GUI
     Vector2 barPos = new Vector2(20, 40);
-    Vector2 barSize = new Vector2(Screen.width-40, Screen.height/10);
+    Vector2 barSize = new Vector2(Screen.width-60, Screen.height/25);
     const int scoreBase = 100;
 
     //float[] progress;
