@@ -58,6 +58,7 @@ public class MainController : MonoBehaviour
 			setTimer ();
 		}
 		*/
+		StartCoroutine(SpatialClient2.single.updateLastRampageWithMultiplier(amount));
 
 		PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
 		pcl.addCheckedLocation ();

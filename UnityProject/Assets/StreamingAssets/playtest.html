@@ -4,20 +4,27 @@
 <style>
     #wrapper { position: relative; }
     #map { z-index: 1 }
-    #statsscreen { position: absolute; top: 5px; right: 5px; width: 25%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
-    #scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 40%; }
-    #timertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 40%; }    #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 40%; }
-    #timervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 40%; }
-    </style>
+    #statsscreen { position: absolute; top: 5px; right: 5px; width: 50%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
+    #scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 30%; }
+    #timertextdiv { position: absolute; bottom: 35%; left: 5%; width: 50%; height: 30%; }
+    #multipliertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 30%; }
+    #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 30%; }
+    #timervalue { position: absolute; bottom: 35%; right: 5%; width: 40%; height: 30%; }
+    #multipliervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 30%; }
+    h1 { font-size: 20px; }
+    
+</style>
 <div id="wrapper">
 <div id="map"></div>
 <div id="statsscreen">
     <div id="scoretextdiv"><h1 id="scoretext">Score:</h1></div>
     <div id="timertextdiv"><h1 id="timetext">Time:</h1></div>
+    <div id="multipliertextdiv"><h1 id="multipliertext">Combo:</h1></div>
     <div id="scorevalue"><h1 id="score"></h1></div>
     <div id="timervalue"><h1 id="time"></h1></div>
+    <div id="multipliervalue"><h1 id="multiplier"></h1></div>
     </div>
-+</div>
+</div>
 <script>
 // furthest distance to fetch markers from, in meters
 markerRadius = 6000;
@@ -32,6 +39,11 @@ function updateScore(newScore)
 {
     score = newScore;
     document.getElementById("score").innerHTML = newScore.toString();
+}
+
+function updateMultiplier(newMultiplier)
+{
+    document.getElementById("multiplier").innerHTML = newMultiplier.toString();
 }
 
 secondsRemaining = 0;
@@ -176,7 +188,7 @@ function initializeMap() {
 // lon = longitude the player is currently at
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
-function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds) {
+function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier) {
 	
 	// initialize location variables globally
 	latitude = lat;
@@ -204,6 +216,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds) {
 	getReq.send();
     
     updateScore(startScore);
+    updateMultiplier(multiplier);
     if (score == 0)
     {
         // no need to display the "Time:" text
@@ -223,7 +236,10 @@ function updateCurrentLocation(lat, lon){
     meLocation.setPosition(newLatLng);
 }
 
-function addPointToPath(la, lo){
+function addPointToPath(la, lo, sc, time, mult){
+    updateScore(sc);
+    updateMultiplier(mult);
+    startTimer(time);
     pathCoordinates.push({lat:la, lng:lo});
     var destroyPath = new google.maps.Polyline({
                                               path: pathCoordinates,

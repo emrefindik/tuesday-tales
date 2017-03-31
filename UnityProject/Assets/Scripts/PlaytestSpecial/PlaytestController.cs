@@ -35,7 +35,7 @@ public class PlaytestController : MonoBehaviour {
 	private CoroutineResponse seeWhatsAroundSuccess;
 	private CoroutineResponse checkInSuccess;
 
-	//private Coroutine _locationUpdateCoroutine;
+	private Coroutine _locationUpdateCoroutine;
 
 	private bool init;
 	private bool mapLoaded;
@@ -48,7 +48,7 @@ public class PlaytestController : MonoBehaviour {
 
 	public void Start()
 	{
-		//_locationUpdateCoroutine = null;
+		_locationUpdateCoroutine = null;
 
 		mapLoaded = false;
 		_pleaseWaitCanvas.enabled = true;
@@ -101,7 +101,7 @@ public class PlaytestController : MonoBehaviour {
 		switch (response.Success)
 		{
 		case true:
-			yield return SpatialClient2.single.checkFirstLogin();
+			//yield return SpatialClient2.single.checkFirstLogin();
 
 			// TODO delete this
 			//List<Location> locations = new List<Location>();
@@ -163,11 +163,14 @@ public class PlaytestController : MonoBehaviour {
 				SpatialClient2.baseURL + "\",\"" +
 				SpatialClient2.PROJECT_ID + "\"," +
 				SpatialClient2.single.getScore().ToString() + ',' +
-				SpatialClient2.single.getTimer().ToString() + ')');
+				SpatialClient2.single.getTimer().ToString() + ',' + 
+				SpatialClient2.single.getMultiplier().ToString() + ')');
 			_pleaseWaitCanvas.enabled = false;
 			_webView.Show();
 			Debug.Log("uniwebview is showing");
 			mapLoaded = true;
+
+			_locationUpdateCoroutine = StartCoroutine(updateCurrentLocation());
 		}
 		else
 		{
@@ -177,9 +180,13 @@ public class PlaytestController : MonoBehaviour {
 
 	IEnumerator updateCurrentLocation()
 	{
-		_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+		if (Input.location.status == LocationServiceStatus.Running)
+		{
+			_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
 			Input.location.lastData.latitude.ToString() + ',' +
 			Input.location.lastData.longitude.ToString() + ")");
+			yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
+		}
 	}
 
 	public void addCheckedLocation()
@@ -187,7 +194,10 @@ public class PlaytestController : MonoBehaviour {
 		Debug.Log ("Adding Checked Location");
 		_webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
 			currentMarker.lat + ',' +
-			currentMarker.lon + ")");
+			currentMarker.lon + ',' + 
+			SpatialClient2.single.getScore().ToString() + ',' +
+			SpatialClient2.single.getTimer().ToString() + ',' + 
+			SpatialClient2.single.getMultiplier().ToString() + ")");
 	}
 
 	void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
@@ -197,9 +207,12 @@ public class PlaytestController : MonoBehaviour {
 		switch (message.path)
 		{
 		case "back":
+			StopCoroutine(_locationUpdateCoroutine);
 			_webView.Hide();
 			break;
 		case "marker":
+			StopCoroutine(_locationUpdateCoroutine);
+
 			// check for distance
 			Debug.Log ("Receive marker message: " + message.rawMessage);
 			double markerLat;
@@ -225,6 +238,7 @@ public class PlaytestController : MonoBehaviour {
 			}
 			break;
 		case "resetscore":
+			StartCoroutine(SpatialClient2.single.resetStreak());
 			SpatialClient2.single.resetStreak();
 			break;
 		default:
