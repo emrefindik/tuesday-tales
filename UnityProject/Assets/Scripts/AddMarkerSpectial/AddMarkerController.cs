@@ -8,15 +8,16 @@ public class AddMarkerController : MonoBehaviour {
 	string URL = "http://matthewestone.com/PhotoTest/";
 	string send = "SendPhoto.php";
 	string recv;
+	bool ok;
 
 	// Use this for initialization
 	void Start () {
-		StartCoroutine (UploadImage("MyLocationImage"));
+		//StartCoroutine (UploadImage("MyLocationImage"));
+		//StartCoroutine(SpatialClient2.single.CreateMarker(40.433445, -79.963945,"Second Avenue","Second Avenue"));
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
 	}
 
 	IEnumerator UploadImage(string imageName){

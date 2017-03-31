@@ -224,7 +224,7 @@ public class PlaytestController : MonoBehaviour {
 			currentMarker = new LocationCoord (markerLat, markerLon);
 			//Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
 			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
+			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 20)){
 				LocationCoord currentMarker = new LocationCoord (markerLat, markerLon);
 				if(!checkedMarkersContains(currentMarker)){
 					_webView.Hide();
