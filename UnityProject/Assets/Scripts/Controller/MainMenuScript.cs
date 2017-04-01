@@ -339,11 +339,14 @@ public class MainMenuScript : MonoBehaviour
 
     IEnumerator updateCurrentLocation()
     {
-        if (Input.location.status == LocationServiceStatus.Running)
+        while (true)
         {
-            _webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
-            Input.location.lastData.latitude.ToString() + ',' +
-            Input.location.lastData.longitude.ToString() + ")");
+            if (Input.location.status == LocationServiceStatus.Running)
+            {
+                _webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+                Input.location.lastData.latitude.ToString() + ',' +
+                Input.location.lastData.longitude.ToString() + ")");
+            }
             yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
         }
     }
