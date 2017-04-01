@@ -7,11 +7,11 @@ public class LocationCoord
 {
 	public double lat;
 	public double lon;
-	public LocationCoord(double _lat, double _lon)
-	{
-		lat = _lat;
-		lon = _lon;
-	}
+    public LocationCoord(double _lat, double _lon)
+    {
+        lat = _lat;
+        lon = _lon;
+    }
 }
 
 [System.Serializable]
