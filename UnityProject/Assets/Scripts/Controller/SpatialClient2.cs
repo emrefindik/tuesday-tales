@@ -75,6 +75,11 @@ public class SpatialClient2 : MonoBehaviour
     public bool isLoggedIn()
     {
         return userSession != null;
+    }    
+
+    public string getStreakPathAsJsonString()
+    {
+        return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers);
     }
 
     public int getScore()
@@ -103,15 +108,15 @@ public class SpatialClient2 : MonoBehaviour
     }
 
 
-    public IEnumerator updateLastRampage(int scoreIncrement)
+    public IEnumerator updateLastRampage(int scoreIncrement, string markerId)
     {
-        userSession.User.Metadata.updateLastRampage(scoreIncrement);
+        userSession.User.Metadata.updateLastRampage(scoreIncrement, markerId);
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
-    public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement)
+    public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement, string markerId)
     {
-        userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier);
+        userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier, markerId);
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
     // END OF EMRE'S CODE
@@ -156,6 +161,7 @@ public class SpatialClient2 : MonoBehaviour
     {
         if (userSession.User.Metadata.EggsOwned == null ||
             userSession.User.Metadata.FriendsEggs == null ||
+            userSession.User.Metadata.StreakMarkers == null ||
             userSession.User.Metadata.ScoreMultiplier == 0)
         {
             Debug.Log("first login");
@@ -803,12 +809,21 @@ public class UserMetadata
         private set { scoreMultiplier = value; }
     }
 
+    [SerializeField]
+    // the streak path, containing marker ids
+    private StreakPath streakMarkers;
+    public StreakPath StreakMarkers
+    {
+        get { return streakMarkers; }
+        private set { streakMarkers = value; }
+    }
+
     public static long currentTimestamp()
     {
         return Convert.ToInt64(DateTime.UtcNow.Subtract(startTime).TotalSeconds);
     }
 
-    public void updateLastRampage(int scoreIncrement)
+    public void updateLastRampage(int scoreIncrement, string newMarkerId)
     {
         lastRampage = currentTimestamp();
         score += scoreIncrement;
@@ -817,11 +832,13 @@ public class UserMetadata
         else
             streakTimerStart *= 2;
         scoreMultiplier++;
+        streakMarkers.addMarkerId(newMarkerId);
     }
 
     public void resetStreak()
     {
         streakTimerStart = NO_STREAK;
+        streakMarkers.resetPath();
         score = 0;
         scoreMultiplier = 1;
     }
@@ -840,6 +857,7 @@ public class UserMetadata
         lastRampage = NO_RAMPAGE;
         score = 0;
         scoreMultiplier = 1;
+        streakMarkers = new StreakPath();
         streakTimerStart = NO_STREAK;
     }
 
@@ -915,8 +933,8 @@ public class Marker
     }
 
     [SerializeField]
-    private string metadata;
-    public string Metadata
+    private MarkerMetadata metadata;
+    public MarkerMetadata Metadata
     {
         get { return metadata; }
         private set { metadata = value; }
@@ -936,6 +954,9 @@ public class Marker
 [System.Serializable]
 public class Location
 {
+    public const int LATITUDE_INDEX = 1;
+    public const int LONGITUDE_INDEX = 0;
+
     [SerializeField]
     private string type;
     public string Type
@@ -946,10 +967,15 @@ public class Location
 
     [SerializeField]
     private List<double> coordinates;
-    public List<double> Coordinates
+    public double Latitude
     {
-        get { return coordinates; }
-        private set { coordinates = value; }
+        get { return coordinates[LATITUDE_INDEX]; }
+        private set { coordinates[LATITUDE_INDEX] = value; }
+    }
+    public double Longitude
+    {
+        get { return coordinates[LONGITUDE_INDEX]; }
+        private set { coordinates[LONGITUDE_INDEX] = value; }
     }
 
     public Location(double lat, double lng, string t = "")
@@ -1123,17 +1149,113 @@ public class EggList : IEnumerable<OwnedEgg>
     {
         return list.Count;
     }
+
+    public OwnedEgg this[int index]
+    {
+        get { return list[index]; }
+        // there should be no set!
+    }
+}
+
+/*[System.Serializable]
+public class PathMarker
+{
+    [SerializeField]
+    private string markerId;
+    public string Id
+    {
+        get { return markerId; }
+        set { markerId = value; }
+    }
+        
+    private LocationCoord markerLocation;
+
+    [SerializeField]
+    public double Latitude
+    {
+        get { return markerLocation.lat; }
+        set { markerLocation.lat = value; }
+    }
+
+    [SerializeField]
+    public double Longitude
+    {
+        get { return markerLocation.lon; }
+        set { markerLocation.lon = value; }
+    }
+
+    public PathMarker(string id, double lat, double lon)
+    {
+        markerId = id;
+        markerLocation = new LocationCoord();
+        markerLocation.lat = lat;
+        markerLocation.lon = lon;
+    }
+
+    public PathMarker(Marker m)
+    {
+
+    }
+} */
+
+// the streak path, containing marker ids
+[System.Serializable]
+public class StreakPath : IEnumerable<string>
+{
+    [SerializeField]
+    private List<string> _markerIds;
+
+    public StreakPath()
+    {
+        _markerIds = new List<string>();
+    }
+
+    public StreakPath(IEnumerable<string> markerIds)
+    {
+        _markerIds = new List<string>(markerIds);
+    }
+
+    public IEnumerator<string> GetEnumerator()
+    {
+        return _markerIds.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _markerIds.GetEnumerator();
+    }
+
+    public void resetPath()
+    {
+        _markerIds.Clear();
+    }
+
+    public void addMarkerId(string markerId)
+    {
+        _markerIds.Add(markerId);
+    }
+
+    public int length()
+    {
+        return _markerIds.Count;
+    }
+
+    public string this[int index]
+    {
+        get { return _markerIds[index]; }
+        // there should be no set!
+    }
 }
 
 
 
-    //[System.Serializable]
-    //public class Markers
-    //{
-    //    public List<Marker> markers = new List<Marker> { };
-    //}
+//[System.Serializable]
+//public class Markers
+//{
+//    public List<Marker> markers = new List<Marker> { };
+//}
 
-    public static class JsonHelper
+public static class JsonHelper
 {
     public static T[] FromJson<T>(string json)
     {

@@ -201,7 +201,7 @@ public class PlaytestController : MonoBehaviour {
 			//if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
 				_webView.Hide();
                 // TODO get message.args and redirect to correct marker's destruction
-                MainController.single.goToDestroyCity();
+                MainController.single.goToDestroyCity(message.args["id"]);
 			//}
 			//else{
 				// Load Error Canvas

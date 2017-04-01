@@ -41,7 +41,7 @@ public class GeographyMaster {
 		return deg * (Mathf.PI / 180);
 	} */
 
-    public static double degreeToRadian(double deg)
+    /*public static double degreeToRadian(double deg)
     {
         return (Math.PI * deg) / 180.0;
     }
@@ -58,8 +58,8 @@ public class GeographyMaster {
 
     public static double calculateDistance(double latitude1, double longitude1, double latitude2, double longitude2)
     {
-        /* script from
-         * http://www.movable-type.co.uk/scripts/latlong.html */
+        // script from
+        // http://www.movable-type.co.uk/scripts/latlong.html
 
         var deltaphi = degreeToRadian(latitude2 - latitude1);
         var deltalambda = degreeToRadian(longitude2 - longitude1);
@@ -71,6 +71,6 @@ public class GeographyMaster {
 
         // multiply with earth's radius
         return EARTH_RADIUS * c;
-    }
+    }*/
 
 }

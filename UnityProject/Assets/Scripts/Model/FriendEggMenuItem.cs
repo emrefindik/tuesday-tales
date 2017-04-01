@@ -61,7 +61,7 @@ public class FriendEggMenuItem : MonoBehaviour
     {
         foreach (Location loc in _egg._hatchLocations)
         {
-            if (GeographyMaster.calculateDistance(loc, Input.location.lastData.latitude, Input.location.lastData.longitude) <= MAX_CHECK_IN_DISTANCE)
+            if (Geography.withinDistance(loc.Latitude, loc.Longitude, Input.location.lastData.latitude, Input.location.lastData.longitude, MAX_CHECK_IN_DISTANCE))
             {
                 yield return checkInEgg();                
                 openCanvas.enabled = false;

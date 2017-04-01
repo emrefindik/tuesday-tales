@@ -19,7 +19,7 @@ public class MainMenuScript : MonoBehaviour
     // the scene index of the destruction scene in the build settings
     const int DESTRUCTION_SCENE_INDEX = 1;
 
-    const string MAP_ADDRESS = "map.html";
+    public const string MAP_ADDRESS = "map.html";
 
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
     const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
@@ -127,7 +127,6 @@ public class MainMenuScript : MonoBehaviour
     private bool mapLoaded;
 
     private Path destroyPath;
-    private LocationCoord currentMarker;
 
     // Used to display the map
     [SerializeField]
@@ -322,7 +321,8 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.baseURL + "\",\"" +
                 SpatialClient2.PROJECT_ID + "\"," +
                 SpatialClient2.single.getScore().ToString() + ',' +
-                SpatialClient2.single.getTimer().ToString() + ')');
+                SpatialClient2.single.getTimer().ToString() + ',' +
+                SpatialClient2.single.getStreakPathAsJsonString() + ')');
             _pleaseWaitCanvas.enabled = false;
             _webView.Show();
             Debug.Log("uniwebview is showing");
@@ -350,10 +350,12 @@ public class MainMenuScript : MonoBehaviour
 
     public void addCheckedLocation()
     {
-        Debug.Log("Adding Checked Location");
+        /*Debug.Log("Adding Checked Location");
         _webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
             currentMarker.lat + ',' +
-            currentMarker.lon + ")");
+            currentMarker.lon + ")"); */
+        _webView.EvaluatingJavaScript(
+            JS_CHECKIN_LOCATION + '(' + SpatialClient2.single.getStreakPathAsJsonString() + ')');
     }
 
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
@@ -377,9 +379,8 @@ public class MainMenuScript : MonoBehaviour
                 double markerLon;
                 Double.TryParse(message.args["lon"], out markerLon);
                 //Debug.Log ("markerLon:" + markerLon);
-                currentMarker = new LocationCoord();
-                currentMarker.lat = markerLat;
-                currentMarker.lon = markerLon;
+                /*currentMarker.lat = markerLat;
+                currentMarker.lon = markerLon; */
                 //Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
                 //Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
 
@@ -396,7 +397,7 @@ public class MainMenuScript : MonoBehaviour
                 // TODO get message.args and redirect to correct marker's destruction
 
                     // TODO check whether player is checking in or destroying city
-                    MainController.single.goToDestroyCity();
+                    MainController.single.goToDestroyCity(message.args["id"]);
                 }
                 else{
                 // Load Error Canvas
@@ -447,13 +448,13 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
-    public void onTestDestruction()
+    /*public void onTestDestruction()
     {
         Debug.Log("multiplier: " + SpatialClient2.single.getMultiplier().ToString());
         Debug.Log("score: " + SpatialClient2.single.getScore().ToString());
         //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
         MainController.single.goToDestroyCity();
-    }
+    } */
 
     public void onTestCamera()
     {

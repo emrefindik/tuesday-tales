@@ -19,6 +19,7 @@ public class MainController : MonoBehaviour
 	public GameObject destroyCityScene;
 	public Camera phoneCamera;
 	public GameObject phoneCameraScene;
+    public string currentMarkerId;
 
     /*public int screams;
 	public float timer; */
@@ -45,7 +46,7 @@ public class MainController : MonoBehaviour
 		} */
     }
 
-	public void addDestoryCityReward(int amount)
+	public IEnumerator addDestoryCityReward(int amount)
 	{
         /*screams += amount * multiplier;
 		if (multiplier < 32) {
@@ -54,7 +55,8 @@ public class MainController : MonoBehaviour
 		}*/
 
         // START OF EMRE'S CODE
-        StartCoroutine(SpatialClient2.single.updateLastRampageWithMultiplier(amount));
+        yield return SpatialClient2.single.updateLastRampageWithMultiplier(amount, currentMarkerId);
+        mainMenuCamera.GetComponent<MainMenuScript>().addCheckedLocation();
         // END OF EMRE'S CODE
 
         /*
@@ -74,7 +76,7 @@ public class MainController : MonoBehaviour
         !!!!!
 
         !!!!! */
-	}
+    }
 
 
 
@@ -88,7 +90,7 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go back to the place you were");
 		switch (lastGameState) {
 		case GameState.DestroyCity:
-			goToDestroyCity ();
+			goToDestroyCity (currentMarkerId);
 			break;
 		case GameState.MainMenu:
 			goToMainMenu ();
@@ -133,13 +135,16 @@ public class MainController : MonoBehaviour
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
 		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<PlaytestController> ()._webView);
-		mapWebView.Show ();
+        mapWebView.Stop();
+        mapWebView.url = UniWebViewHelper.streamingAssetURLForPath(MainMenuScript.MAP_ADDRESS);
+        mapWebView.Load();
 
 		gameState = GameState.MapView;
 	}
 
-    public void goToDestroyCity()
+    public void goToDestroyCity(string markerId)
     {
+        currentMarkerId = markerId;
 		lastGameState = gameState;
 		Debug.Log ("go to destory city gameplay");
 

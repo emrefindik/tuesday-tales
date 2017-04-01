@@ -161,7 +161,7 @@ public class LevelControl : MonoBehaviour {
         {
             win = true;
             buildingDestroyedCount = -1;
-			MainController.single.addDestoryCityReward (score);
+			StartCoroutine(MainController.single.addDestoryCityReward (score));
         }
 
         if (Input.GetMouseButtonDown(0))
