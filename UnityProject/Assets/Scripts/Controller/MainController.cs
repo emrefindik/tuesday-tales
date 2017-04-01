@@ -19,78 +19,65 @@ public class MainController : MonoBehaviour
 	public GameObject destroyCityScene;
 	public Camera phoneCamera;
 	public GameObject phoneCameraScene;
-    public string currentMarkerId;
 
-    /*public int screams;
-	public float timer; */
-    //private int multiplier;
-    const float COUNT_DOWN_BASE = 60.0f * 5;
+	//public int screams;
+	//public int multiplier;
+	//public float timer;
+	const float COUNT_DOWN_BASE = 60.0f * 5;
 
     // Use this for initialization
     void Start()
     {
         single = this;
 		gameState = GameState.MainMenu;
-		//screams = 0;
-		//multiplier = 1;
-		//timer = COUNT_DOWN_BASE / multiplier;
+		/*
+		screams = 0;
+		multiplier = 1;
+		timer = COUNT_DOWN_BASE / multiplier;
+		*/
     }
 
     // Update is called once per frame
     void Update()
     {
-		/* if (timer == 0.0) {
+		/*
+		if (timer == 0.0) {
 			// TODO:Trigger some notification
 			timer = COUNT_DOWN_BASE;
 			multiplier = 1;
-		} */
+		}
+		*/
     }
 
-	public IEnumerator addDestoryCityReward(int amount)
+	public void addDestoryCityReward(int amount)
 	{
-        /*screams += amount * multiplier;
+		/*
+		screams += amount * multiplier;
 		if (multiplier < 32) {
 			multiplier *= 2;
 			setTimer ();
-		}*/
+		}
+		*/
+		StartCoroutine(SpatialClient2.single.updateLastRampageWithMultiplier(amount));
 
-        // START OF EMRE'S CODE
-        yield return SpatialClient2.single.updateLastRampageWithMultiplier(amount, currentMarkerId);
-        mainMenuCamera.GetComponent<MainMenuScript>().addCheckedLocation();
-        // END OF EMRE'S CODE
-
-        /*
-        
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
-		pcl.addCheckedLocation (); 
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        !!!!! */
-    }
+		PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
+		pcl.addCheckedLocation ();
+	}
 
 
-
-	/*public void setTimer()
+	/*
+	public void setTimer()
 	{
 		timer = COUNT_DOWN_BASE / multiplier;
-	} */
+	}
+	*/
 
 	public void goBack()
 	{
 		Debug.Log ("go back to the place you were");
 		switch (lastGameState) {
 		case GameState.DestroyCity:
-			goToDestroyCity (currentMarkerId);
+			goToDestroyCity ();
 			break;
 		case GameState.MainMenu:
 			goToMainMenu ();
@@ -135,16 +122,13 @@ public class MainController : MonoBehaviour
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
 		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<PlaytestController> ()._webView);
-        mapWebView.Stop();
-        mapWebView.url = UniWebViewHelper.streamingAssetURLForPath(MainMenuScript.MAP_ADDRESS);
-        mapWebView.Load();
+		mapWebView.Show ();
 
 		gameState = GameState.MapView;
 	}
-
-    public void goToDestroyCity(string markerId)
+		
+    public void goToDestroyCity()
     {
-        currentMarkerId = markerId;
 		lastGameState = gameState;
 		Debug.Log ("go to destory city gameplay");
 
