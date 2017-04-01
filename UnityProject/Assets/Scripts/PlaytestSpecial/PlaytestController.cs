@@ -35,7 +35,7 @@ public class PlaytestController : MonoBehaviour {
 	private CoroutineResponse seeWhatsAroundSuccess;
 	private CoroutineResponse checkInSuccess;
 
-	private Coroutine _locationUpdateCoroutine;
+	//private Coroutine _locationUpdateCoroutine;
 
 	private bool init;
 	private bool mapLoaded;
@@ -48,7 +48,7 @@ public class PlaytestController : MonoBehaviour {
 
 	public void Start()
 	{
-		_locationUpdateCoroutine = null;
+		//_locationUpdateCoroutine = null;
 
 		mapLoaded = false;
 		_pleaseWaitCanvas.enabled = true;
@@ -96,7 +96,7 @@ public class PlaytestController : MonoBehaviour {
 		}
 
 		response.reset();
-		yield return SpatialClient2.single.LoginUser(response, "hello", "hello");
+		yield return SpatialClient2.single.LoginUser(response, "5", "5");
 		Debug.Log ("Login User Return");
 		switch (response.Success)
 		{
@@ -170,7 +170,7 @@ public class PlaytestController : MonoBehaviour {
 			Debug.Log("uniwebview is showing");
 			mapLoaded = true;
 
-			_locationUpdateCoroutine = StartCoroutine(updateCurrentLocation());
+			//_locationUpdateCoroutine = StartCoroutine(updateCurrentLocation());
 		}
 		else
 		{
@@ -178,15 +178,17 @@ public class PlaytestController : MonoBehaviour {
 		}
 	}
 
-	IEnumerator updateCurrentLocation()
+	void updateCurrentLocation()
 	{
-		if (Input.location.status == LocationServiceStatus.Running)
-		{
-			_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
-			Input.location.lastData.latitude.ToString() + ',' +
-			Input.location.lastData.longitude.ToString() + ")");
-			yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
-		}
+		//while(true){
+		if(Input.location.status == LocationServiceStatus.Running)
+			{
+				_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ")");
+			}
+			//yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
+		//}
 	}
 
 	public void addCheckedLocation()
@@ -207,11 +209,11 @@ public class PlaytestController : MonoBehaviour {
 		switch (message.path)
 		{
 		case "back":
-			StopCoroutine(_locationUpdateCoroutine);
+			//StopCoroutine(_locationUpdateCoroutine);
 			_webView.Hide();
 			break;
 		case "marker":
-			StopCoroutine(_locationUpdateCoroutine);
+			//StopCoroutine(_locationUpdateCoroutine);
 
 			// check for distance
 			Debug.Log ("Receive marker message: " + message.rawMessage);
@@ -224,8 +226,7 @@ public class PlaytestController : MonoBehaviour {
 			currentMarker = new LocationCoord (markerLat, markerLon);
 			//Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
 			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 30)){
-				LocationCoord currentMarker = new LocationCoord (markerLat, markerLon);
+			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 50)){
 				if(!checkedMarkersContains(currentMarker)){
 					_webView.Hide();
 					checkedMarkers.Add (currentMarker);
