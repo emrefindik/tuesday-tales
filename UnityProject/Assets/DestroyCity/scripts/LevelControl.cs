@@ -5,6 +5,8 @@ using System.Linq;
 
 public class LevelControl : MonoBehaviour {
 
+    public CoroutineResponse winCoroutineEnded;    
+
     public GameObject buildings;
     public GameObject[] realBuilding = new GameObject[4];
     public GameObject[] realBuildingbuildingCover = new GameObject[4];
@@ -59,6 +61,7 @@ public class LevelControl : MonoBehaviour {
     void Start() {
         initSystem();
 		initLevel();
+        winCoroutineEnded = new CoroutineResponse();
     }
 
     void initSystem()
@@ -125,7 +128,7 @@ public class LevelControl : MonoBehaviour {
 			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
 			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
 		} else {
-			if(winCanvas)
+			if(winCanvas && (winCoroutineEnded.Success == true))
 				winCanvas.SetActive (true);
 		}
     }
@@ -161,7 +164,7 @@ public class LevelControl : MonoBehaviour {
         {
             win = true;
             buildingDestroyedCount = -1;
-			MainController.single.addDestoryCityReward (score);
+			StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
         }
 
         if (Input.GetMouseButtonDown(0))
