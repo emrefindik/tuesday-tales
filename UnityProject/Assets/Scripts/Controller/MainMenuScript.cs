@@ -130,7 +130,7 @@ public class MainMenuScript : MonoBehaviour
 
     // Used to display the map
     [SerializeField]
-    private UniWebView _webView;
+    public UniWebView _webView;
 
     [SerializeField]
     private Canvas _mainMenuCanvas;

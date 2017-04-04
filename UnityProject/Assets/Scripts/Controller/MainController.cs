@@ -135,7 +135,7 @@ public class MainController : MonoBehaviour
 		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
-		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<PlaytestController> ()._webView);
+		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<MainMenuScript> ()._webView);
         mapWebView.Stop();
         mapWebView.url = UniWebViewHelper.streamingAssetURLForPath(MainMenuScript.MAP_ADDRESS);
         mapWebView.Load();
