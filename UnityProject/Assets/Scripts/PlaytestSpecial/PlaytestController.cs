@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 
 public class PlaytestController : MonoBehaviour {
 
+	// time interval between location marker updates on map, in seconds
+	const float LOCATION_MARKER_UPDATE_INTERVAL = 4.0f;
+
 	// frequency of queries on whether location service is enabled, in number per second
 	const int LOCATION_INITIALIZED_QUERIES_PER_SECOND = 4;
 
@@ -32,14 +35,21 @@ public class PlaytestController : MonoBehaviour {
 	private CoroutineResponse seeWhatsAroundSuccess;
 	private CoroutineResponse checkInSuccess;
 
+	//private Coroutine _locationUpdateCoroutine;
+
 	private bool init;
 	private bool mapLoaded;
 
 	private Path destroyPath;
 	private LocationCoord currentMarker;
 
+	// Playtest Special
+	ArrayList checkedMarkers;
+
 	public void Start()
 	{
+		//_locationUpdateCoroutine = null;
+
 		mapLoaded = false;
 		_pleaseWaitCanvas.enabled = true;
 		_checkedInCanvas.enabled = false;
@@ -52,6 +62,9 @@ public class PlaytestController : MonoBehaviour {
 		_webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
 		_webView.OnLoadComplete += onLoadComplete;
 		_webView.OnReceivedMessage += onReceivedMessage;
+
+		// Playtest Special
+		checkedMarkers = new ArrayList();
 
 	}
 
@@ -83,12 +96,12 @@ public class PlaytestController : MonoBehaviour {
 		}
 
 		response.reset();
-		yield return SpatialClient2.single.LoginUser(response, "hello", "hello");
+		yield return SpatialClient2.single.LoginUser(response, "5", "5");
 		Debug.Log ("Login User Return");
 		switch (response.Success)
 		{
 		case true:
-			yield return SpatialClient2.single.checkFirstLogin();
+			//yield return SpatialClient2.single.checkFirstLogin();
 
 			// TODO delete this
 			//List<Location> locations = new List<Location>();
@@ -148,11 +161,16 @@ public class PlaytestController : MonoBehaviour {
 				Input.location.lastData.latitude.ToString() + ',' +
 				Input.location.lastData.longitude.ToString() + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
-				SpatialClient2.PROJECT_ID + "\")");
+				SpatialClient2.PROJECT_ID + "\"," +
+				SpatialClient2.single.getScore().ToString() + ',' +
+				SpatialClient2.single.getTimer().ToString() + ',' + 
+				SpatialClient2.single.getMultiplier().ToString() + ')');
 			_pleaseWaitCanvas.enabled = false;
 			_webView.Show();
 			Debug.Log("uniwebview is showing");
 			mapLoaded = true;
+
+			//_locationUpdateCoroutine = StartCoroutine(updateCurrentLocation());
 		}
 		else
 		{
@@ -162,18 +180,27 @@ public class PlaytestController : MonoBehaviour {
 
 	void updateCurrentLocation()
 	{
-		_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
-			Input.location.lastData.latitude.ToString() + ',' +
-			Input.location.lastData.longitude.ToString() + ")");
+		//while(true){
+		if(Input.location.status == LocationServiceStatus.Running)
+			{
+				_webView.EvaluatingJavaScript(JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ")");
+			}
+			//yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
+		//}
 	}
 
-	public void addCheckedLocation()
+	/*public void addCheckedLocation()
 	{
 		Debug.Log ("Adding Checked Location");
 		_webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
 			currentMarker.lat + ',' +
-			currentMarker.lon + ")");
-	}
+			currentMarker.lon + ',' + 
+			SpatialClient2.single.getScore().ToString() + ',' +
+			SpatialClient2.single.getTimer().ToString() + ',' + 
+			SpatialClient2.single.getMultiplier().ToString() + ")");
+	} */
 
 	void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
 	{
@@ -182,9 +209,12 @@ public class PlaytestController : MonoBehaviour {
 		switch (message.path)
 		{
 		case "back":
+			//StopCoroutine(_locationUpdateCoroutine);
 			_webView.Hide();
 			break;
 		case "marker":
+			//StopCoroutine(_locationUpdateCoroutine);
+
 			// check for distance
 			Debug.Log ("Receive marker message: " + message.rawMessage);
 			double markerLat;
@@ -193,24 +223,41 @@ public class PlaytestController : MonoBehaviour {
 			double markerLon;
 			Double.TryParse (message.args ["lon"], out markerLon);
 			//Debug.Log ("markerLon:" + markerLon);
-			currentMarker = new LocationCoord ();
-			currentMarker.lat = markerLat;
-			currentMarker.lon = markerLon;
+			currentMarker = new LocationCoord (markerLat, markerLon);
 			//Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
 			//Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-			//if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 100)){
-				_webView.Hide();
-				// TODO get message.args and redirect to correct marker's destruction
-				MainController.single.goToDestroyCity();
-			//}
-			//else{
+			if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, 50)){
+				if(!checkedMarkersContains(currentMarker)){
+					_webView.Hide();
+					checkedMarkers.Add (currentMarker);
+					// TODO get message.args and redirect to correct marker's destruction
+					MainController.single.goToDestroyCity(message.args["id"]);
+				}
+			}
+			else{
 				// Load Error Canvas
-			//}
+			}
+			break;
+		case "resetscore":
+			StartCoroutine(SpatialClient2.single.resetStreak());
+			SpatialClient2.single.resetStreak();
 			break;
 		default:
 			break;
 		}
 	}
+
+	// Playtest Special
+	bool checkedMarkersContains(LocationCoord loc)
+	{
+		foreach(LocationCoord checkedMarker in checkedMarkers)
+		{
+			if (loc.lat == checkedMarker.lat && loc.lon == checkedMarker.lon)
+				return true;
+		}
+		return false;
+	}
+
 	// assigns true to result.value if location service is ready, otherwise assigns false
 	IEnumerator checkLocationService(CoroutineResponse result)
 	{
