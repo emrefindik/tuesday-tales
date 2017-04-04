@@ -22,8 +22,8 @@ public class LevelControl : MonoBehaviour {
 	Vector2 fingerEnd;
 
     // GUI
-    Vector2 barPos = new Vector2(80, 40);
-    Vector2 barSize = new Vector2(Screen.width-160, Screen.height/25);
+    Vector2 barPos = new Vector2(20, 40);
+    Vector2 barSize = new Vector2(Screen.width-40, Screen.height/10);
     const int scoreBase = 100;
 
     //float[] progress;
@@ -161,9 +161,7 @@ public class LevelControl : MonoBehaviour {
         {
             win = true;
             buildingDestroyedCount = -1;
-			MainController.single.addDestoryCityReward (score);
         }
-
         if (Input.GetMouseButtonDown(0))
         {
             fingerStart = Input.mousePosition;
@@ -176,7 +174,7 @@ public class LevelControl : MonoBehaviour {
         if (Input.GetMouseButton(0))
         {
             fingerEnd = Input.mousePosition;
-
+		
             //There was some movement! The tolerance variable is to detect some useful movement
             //i.e. an actual swipe rather than some jitter. This is the same as the value of 80
             //you used in your original code.

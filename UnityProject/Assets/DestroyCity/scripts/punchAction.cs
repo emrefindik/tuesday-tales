@@ -88,6 +88,7 @@ public class punchAction : MonoBehaviour {
         // mouse input need change to phone touch input
         if (Input.GetMouseButtonDown(0))
         {
+			Debug.Log ("Getting Mouse Button Down");
             tapCheckX = Input.mousePosition.x;
 			punchStrength = 0.0f;
 			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
@@ -96,6 +97,8 @@ public class punchAction : MonoBehaviour {
         }
 
 		if (Input.GetMouseButton (0)) {
+			Debug.Log ("Getting Mouse Button ");
+
 			// add punch strength
 			if (punchStrength < PUNCH_STRENGTH_MAX) {
 				punchStrength += PUNCH_STRENGTH_STEP;
@@ -117,6 +120,7 @@ public class punchAction : MonoBehaviour {
 
         if(Input.GetMouseButtonUp(0))
         {
+			
 			pressEffect.Stop ();
 
             if (Mathf.Abs(Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
@@ -158,9 +162,11 @@ public class punchAction : MonoBehaviour {
             //if (Mathf.Abs(newPosL.x - _inputPosition.x) >= .2f && punchReturning_l == false)
             if (punchReturning_l == false)
             {
+                
                 // Fist reaching out
                 if (Mathf.Abs(newPosL.y - destPosL.y) >= STOP_PUNCHING_GAP)
                 {
+                    
                     // First Y
 
                     //newPosL.y = Mathf.Lerp(currentFist_l.y, _inputPosition.y, (Time.time - startTimeL) * 4.5f);
@@ -254,24 +260,26 @@ public class punchAction : MonoBehaviour {
     {
         updateFistLocation();
         if(punchDirection == PUNCHINGLEFT)
-        {
+        {          
             startTimeL = Time.time;
             hitting_left = true;
             newPosL = new Vector2(currentFist_l.x, currentFist_l.y);
             //destPosL.x = Random.Range(-1.5f, 0.0f);
 			destPosL.x = -1.5f + punchStrength;
             destPosL.y = _inputPosition.y;
+            //leftFist.GetComponent<spawnFist>().sendPunch(true, destPosL.y, destPosL.x);
             pD.smashCity(new Vector3(destPosL.x, destPosL.y, 10.0f));
             leftFist.GetComponent<Collider>().enabled = true;
         }
         else
-        {
+        {           
             startTimeR = Time.time;
             hitting_right = true;
             newPosR = new Vector2(currentFist_r.x, currentFist_r.y);
             //destPosR.x = Random.Range(0.0f, 1.5f);
 			destPosR.x = 1.5f - punchStrength;
             destPosR.y = _inputPosition.y;
+            //rightFist.GetComponent<spawnFist>().sendPunch(false, destPosR.y, destPosR.x);
             pD.smashCity(new Vector3(destPosR.x, destPosR.y, 10.0f));
             rightFist.GetComponent<Collider>().enabled = true;
 

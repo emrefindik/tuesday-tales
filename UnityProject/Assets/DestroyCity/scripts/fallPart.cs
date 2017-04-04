@@ -9,10 +9,7 @@ public class fallPart : MonoBehaviour {
 
     public GameObject bloodEffect;
     public AudioClip smeshAudio;
-	public AudioClip screem;
-
     public AudioSource smesh;
-	public AudioSource screem_sound;
     public LevelControl healthControl;
 
 
@@ -20,9 +17,6 @@ public class fallPart : MonoBehaviour {
     {
         smesh = GetComponent<AudioSource>();
         smesh.clip = smeshAudio;
-
-		screem_sound = gameObject.AddComponent <AudioSource>() as AudioSource;
-		screem_sound.clip = screem;
     }
 
     void OnTriggerEnter(Collider c)
@@ -41,18 +35,12 @@ public class fallPart : MonoBehaviour {
 
         if(c.tag == "people")
         {
-			screem_sound.Play ();
-			Destroy(c.gameObject);
+            Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
             GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);
 			blood.transform.parent = Camera.main.transform;
             healthControl.increaseProgress(1);
         }
-		if (c.tag == "fire") {
-			SpriteRenderer fireRender = c.gameObject.GetComponent<SpriteRenderer> ();
-			fireRender.enabled = true;
-			Debug.Log ("fire work");
-		}
     }
 
 
