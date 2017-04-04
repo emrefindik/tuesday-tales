@@ -2,22 +2,27 @@
 <html>
 <body style="margin: 0" onresize="resizeMap()">
 <style>
-	#wrapper { position: relative; }
-	#map { z-index: 1 }
-	#statsscreen { position: absolute; top: 5px; right: 5px; width: 25%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
-	#scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 40%; }
-	#timertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 40%; }
-	#scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 40%; }
-	#timervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 40%; }
+    #wrapper { position: relative; }
+    #map { z-index: 1 }
+    #statsscreen { position: absolute; top: 5px; right: 5px; width: 50%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
+    #scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 30%; }
+    #timertextdiv { position: absolute; bottom: 35%; left: 5%; width: 50%; height: 30%; }
+    #multipliertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 30%; }
+    #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 30%; }
+    #timervalue { position: absolute; bottom: 35%; right: 5%; width: 40%; height: 30%; }
+    #multipliervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 30%; }
+    h1 { font-size: 20px; } 
 </style>
 <div id="wrapper">
-<div id="map"></div>
-<div id="statsscreen">
-	<div id="scoretextdiv"><h1 id="scoretext">Score:</h1></div>
-	<div id="timertextdiv"><h1 id="timetext">Time:</h1></div>
-	<div id="scorevalue"><h1 id="score"></h1></div>
-	<div id="timervalue"><h1 id="time"></h1></div>
-</div>
+	<div id="map"></div>
+	<div id="statsscreen">
+		<div id="scoretextdiv"><h1 id="scoretext">Score:</h1></div>
+		<div id="timertextdiv"><h1 id="timetext">Time:</h1></div>
+		<div id="multipliertextdiv"><h1 id="multipliertext">Combo:</h1></div>
+		<div id="scorevalue"><h1 id="score"></h1></div>
+		<div id="timervalue"><h1 id="time"></h1></div>
+		<div id="multipliervalue"><h1 id="multiplier"></h1></div>
+    </div>
 </div>
 <script>
 // furthest distance to fetch markers from, in meters
@@ -42,6 +47,11 @@ function updateScore(newScore)
     document.getElementById("score").innerHTML = newScore.toString();
 }
 
+function updateMultiplier(newMultiplier)
+{
+    document.getElementById("multiplier").innerHTML = newMultiplier.toString();
+}
+
 secondsRemaining = 0;
 function startTimer(seconds)
 {
@@ -64,8 +74,13 @@ function timeout()
 {
     clearInterval(timer);
     updateScore(0);
+	updateMultiplier(1);
 	pathMarkerSpatialIds = []
 	updatePath();
+	
+	// no need to display the timer
+	document.getElementById("timetext").innerHTML = "";
+	document.getElementById("time").innerHTML = "";
 	
 	// let Spatial know that the player timed out
     window.location.href = "uniwebview://resetscore";
@@ -173,6 +188,7 @@ function initializeMap() {
 	google.maps.event.addDomListener(window, 'resize', function() {
 		map.setCenter(mapCenter);
 	});
+	
 	var backButtonDiv = document.createElement('div');
     var backControl = new BackControl(backButtonDiv);
 
@@ -183,18 +199,18 @@ function initializeMap() {
                                               map: map,
                                               icon: {
                                               anchor: {
-                                              x: 81,
-                                              y: 108
+                                              x: 15,
+                                              y: 15
                                               },
                                               scaledSize: {
-                                              width: 162,
-                                              height: 216
+                                              width: 30,
+                                              height: 30
                                               },
-                                              url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
+                                              //url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
+                                                url: "http://matthewestone.com/PhotoTest/58deb4c133627.png"
                                               }
     });
 
-	// START OF EMRE'S CODE
 	destroyPath = new google.maps.Polyline({
                                               path: [],
                                               geodesic: true,
@@ -223,22 +239,19 @@ function initializeMap() {
 	});
 	
 	updatePath();
-	// END OF EMRE'S CODE
 }
 
 // lat = latitude the player is currently at
 // lon = longitude the player is currently at
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
-function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, pathMarkerIds) {
+function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
 	
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
 	
-	// START OF EMRE'S CODE
 	pathMarkerSpatialIds = pathMarkerIds;
-	// END OF EMRE'S CODE
 	
 	// get markers and store them into a global variable
 	var getReq = new XMLHttpRequest();
@@ -260,21 +273,22 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, pathMar
 		longitude.toString() + "&latitude=" + latitude.toString() + "&projectId=" +
 		projectID + "&meters=" + markerRadius.toString(), true);
 	getReq.send();
-	
-	updateScore(startScore);
-	if (score == 0)
-	{
-		// no need to display the "Time:" text
-		document.getElementById("timetext").innerHTML = "";
-	}
-	else
-	{
-		startTimer(timerSeconds);
-	}
+    
+    updateScore(startScore);
+    updateMultiplier(multiplier);
+    if (score == 0)
+    {
+        // no need to display the timer
+        document.getElementById("timetext").innerHTML = "";
+    }
+    else
+    {
+        startTimer(timerSeconds);
+    }
+    
 }
 
 resizeMap();
-loadMap(40.432645, -79.964834, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 150, 10, ["58decde4d409c000111235ac", "58dece21d409c000111235ad"]);
 
 
 </script>

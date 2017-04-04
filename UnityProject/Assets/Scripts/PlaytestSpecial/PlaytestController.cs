@@ -191,7 +191,7 @@ public class PlaytestController : MonoBehaviour {
 		//}
 	}
 
-	public void addCheckedLocation()
+	/*public void addCheckedLocation()
 	{
 		Debug.Log ("Adding Checked Location");
 		_webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
@@ -200,7 +200,7 @@ public class PlaytestController : MonoBehaviour {
 			SpatialClient2.single.getScore().ToString() + ',' +
 			SpatialClient2.single.getTimer().ToString() + ',' + 
 			SpatialClient2.single.getMultiplier().ToString() + ")");
-	}
+	} */
 
 	void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
 	{
@@ -231,7 +231,7 @@ public class PlaytestController : MonoBehaviour {
 					_webView.Hide();
 					checkedMarkers.Add (currentMarker);
 					// TODO get message.args and redirect to correct marker's destruction
-					MainController.single.goToDestroyCity();
+					MainController.single.goToDestroyCity(message.args["id"]);
 				}
 			}
 			else{

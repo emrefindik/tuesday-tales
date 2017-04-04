@@ -322,6 +322,7 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.PROJECT_ID + "\"," +
                 SpatialClient2.single.getScore().ToString() + ',' +
                 SpatialClient2.single.getTimer().ToString() + ',' +
+                SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
             _pleaseWaitCanvas.enabled = false;
             _webView.Show();
@@ -351,15 +352,15 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
-    public void addCheckedLocation()
-    {
-        /*Debug.Log("Adding Checked Location");
-        _webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
-            currentMarker.lat + ',' +
-            currentMarker.lon + ")"); */
-        _webView.EvaluatingJavaScript(
-            JS_CHECKIN_LOCATION + '(' + SpatialClient2.single.getStreakPathAsJsonString() + ')');
-    }
+//    public void addCheckedLocation()
+//    {
+//        /*Debug.Log("Adding Checked Location");
+//        _webView.EvaluatingJavaScript(JS_CHECKIN_LOCATION + '(' +
+//            currentMarker.lat + ',' +
+//            currentMarker.lon + ")"); */
+//        _webView.EvaluatingJavaScript(
+//            JS_CHECKIN_LOCATION + '(' + SpatialClient2.single.getStreakPathAsJsonString() + ')');
+//    }
 
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
@@ -370,6 +371,7 @@ public class MainMenuScript : MonoBehaviour
             case "back":
                 StopCoroutine(_locationUpdateCoroutine);
                 _mainMenuCanvas.enabled = true;
+                _webView.Stop();
                 _webView.Hide();
                 break;
             case "marker":
@@ -396,6 +398,7 @@ public class MainMenuScript : MonoBehaviour
                         "Checked in " + "egg" + " at " + Input.location.lastData.latitude.ToString()
                         + ", " + Input.location.lastData.longitude.ToString();
                     _checkedInCanvas.enabled = true;
+                    _webView.Stop();
                     _webView.Hide();
                 // TODO get message.args and redirect to correct marker's destruction
 

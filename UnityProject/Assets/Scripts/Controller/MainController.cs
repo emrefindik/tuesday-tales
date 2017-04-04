@@ -56,7 +56,7 @@ public class MainController : MonoBehaviour
 
         // START OF EMRE'S CODE
         yield return SpatialClient2.single.updateLastRampageWithMultiplier(amount, currentMarkerId);
-        mainMenuCamera.GetComponent<MainMenuScript>().addCheckedLocation();
+        //mainMenuCamera.GetComponent<MainMenuScript>().addCheckedLocation();
         winCoroutineEnded.setSuccess(true);
         // END OF EMRE'S CODE
 
