@@ -115,7 +115,7 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to main menu");
 
         mainMenuCamera.enabled = true;
-        menuScene.SetActive(true);
+        //menuScene.SetActive(true);
 		phoneCamera.enabled = false;
 		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
@@ -130,7 +130,7 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to map");
 
 		mainMenuCamera.enabled = true;
-		menuScene.SetActive(true);
+		//menuScene.SetActive(true);
 		phoneCamera.enabled = false;
 		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
@@ -150,7 +150,7 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to destory city gameplay");
 
         mainMenuCamera.enabled = false;
-        menuScene.SetActive(false);
+        //menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
 		phoneCamera.enabled = false;
 		phoneCameraScene.SetActive (false);
@@ -163,7 +163,7 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to phone camera");
 
 		mainMenuCamera.enabled = false;
-		menuScene.SetActive(false);
+		//menuScene.SetActive(false);
 		phoneCamera.enabled = true;
 		phoneCameraScene.SetActive (true);
 		if (destroyCityScene)

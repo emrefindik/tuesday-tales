@@ -162,6 +162,8 @@ public class MainMenuScript : MonoBehaviour
     private Text _wrongPasswordText;
     [SerializeField]
     private Text _connectionErrorText;
+	[SerializeField]
+	private Text _checkedInText;
     [SerializeField]
     private GameObject _eggMenuItemPrefab;
     [SerializeField]
@@ -267,6 +269,11 @@ public class MainMenuScript : MonoBehaviour
 
     }
 
+	public void onSubmit()
+	{
+		StartCoroutine (submit());
+	}
+
     public void onEggs()
     {
         _mainMenuCanvas.enabled = false;
@@ -368,10 +375,11 @@ public class MainMenuScript : MonoBehaviour
         Debug.Log(message.path);
         switch (message.path)
         {
-            case "back":
-                StopCoroutine(_locationUpdateCoroutine);
-                _mainMenuCanvas.enabled = true;
-                _webView.Stop();
+			case "back":
+				StopCoroutine (_locationUpdateCoroutine);
+				_mainMenuCanvas.enabled = true;
+				_webView.Stop ();
+				mapLoaded = false;
                 _webView.Hide();
                 break;
             case "marker":
@@ -380,30 +388,40 @@ public class MainMenuScript : MonoBehaviour
                 Debug.Log("Receive marker message: " + message.rawMessage);
                 double markerLat;
                 Double.TryParse(message.args["lat"], out markerLat);
-                //Debug.Log ("markerLat: " + markerLat);
+                Debug.Log ("markerLat: " + markerLat);
                 double markerLon;
                 Double.TryParse(message.args["lon"], out markerLon);
-                //Debug.Log ("markerLon:" + markerLon);
+                Debug.Log ("markerLon:" + markerLon);
                 /*currentMarker.lat = markerLat;
                 currentMarker.lon = markerLon; */
                 //Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
                 //Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-
+				
                 // TODO REPLACE THIS AFTER THE PLAYTEST
 
                 if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE)){
-                    _friendsEggsCanvas.enabled = false;
+					Debug.Log ("fack");
+					_friendsEggsCanvas.enabled = false;
+					Debug.Log ("fack2");
                     _eggsCanvas.enabled = false;
-                    _checkedInCanvas.GetComponent<Text>().text =
+					Debug.Log ("fack3");
+                    _checkedInText.text =
                         "Checked in " + "egg" + " at " + Input.location.lastData.latitude.ToString()
                         + ", " + Input.location.lastData.longitude.ToString();
+					Debug.Log ("fack4");
                     _checkedInCanvas.enabled = true;
+				_loginCanvas.enabled = false;
+				Debug.Log ("fack5");
                     _webView.Stop();
+				Debug.Log ("fack6");
+					mapLoaded = false;
                     _webView.Hide();
+				Debug.Log ("fack7");
                 // TODO get message.args and redirect to correct marker's destruction
 
                     // TODO check whether player is checking in or destroying city
                     MainController.single.goToDestroyCity(message.args["id"]);
+				Debug.Log ("fack8");
                 }
                 else{
                 // Load Error Canvas

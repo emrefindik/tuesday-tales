@@ -165,7 +165,7 @@ function updatePath() {
 				});
 		if (marker.clickListener == null)
 		{
-			marker.addListener('click', function() { onMarkerClick(marker.id, marker.getPosition().lat(), marker.getPosition().lng(), "no type"); });
+			marker.addListener('click', function() { onMarkerClick(marker.spatialId, marker.getPosition().lat(), marker.getPosition().lng(), "no type"); });
 		}
 	});
 	destroyPath.setPath(newPath);
@@ -235,7 +235,9 @@ function initializeMap() {
 			title: spatialMarker.name
 		});
 		googleMarker.spatialId = spatialMarker._id;
+        //googleMarker.clickListener = null;
 		googleMarkers.push(googleMarker);
+        googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, spatialMarker.loc.coordinates[1], spatialMarker.loc.coordinates[0], "no type"); });                   
 	});
 	
 	updatePath();
@@ -289,7 +291,6 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
 }
 
 resizeMap();
-
 
 </script>
 </body>
