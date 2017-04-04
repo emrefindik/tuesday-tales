@@ -1093,18 +1093,64 @@ public class FriendList
 [System.Serializable]
 public class MarkerMetadata
 {
+    private const string MAP_OVERLAY = "overlay";
+    private const string BUILDING_TO_DESTROY = "building";
+    private const string CHECK_IN_LOCATION = "checkin";
+
+    public enum MarkerType
+    {
+        GENERIC,
+        MAP_OVERLAY,
+        BUILDING_TO_DESTROY,
+        CHECK_IN_LOCATION
+    }
+
     [SerializeField]
     private string type;
-    public string Type
+
+    public MarkerType Type
     {
-        get { return type; }
-        private set { type = value; }
+        get
+        {
+            switch (type)
+            {
+                case MAP_OVERLAY:
+                    return MarkerType.MAP_OVERLAY;
+                case BUILDING_TO_DESTROY:
+                    return MarkerType.BUILDING_TO_DESTROY;
+                case CHECK_IN_LOCATION:
+                    return MarkerType.CHECK_IN_LOCATION;
+                default:
+                    return MarkerType.GENERIC;
+            }
+        }
+        set
+        {
+            switch (value)
+            {
+                case MarkerType.MAP_OVERLAY:
+                    type = MAP_OVERLAY;
+                    break;
+                case MarkerType.BUILDING_TO_DESTROY:
+                    type = BUILDING_TO_DESTROY;
+                    break;
+                case MarkerType.CHECK_IN_LOCATION:
+                    type = CHECK_IN_LOCATION;
+                    break;
+                case MarkerType.GENERIC:
+                    type = "";
+                    break;
+                default:
+                    break;
+            }
+        }
     }
+
     // TODO figure the fields out
 
-    public MarkerMetadata()
+    public MarkerMetadata(MarkerType t)
     {
-        type = "empty";
+        Type = t;
     }
 }
 
