@@ -42,6 +42,11 @@ public class LevelControl : MonoBehaviour {
     int number_of_buildings;
     bool win;   // check this status : whether has win
 
+	// For Jonathan's destroy city
+	int fallenPiecesCount;
+	public punchAction2 pA;
+
+
 	// Wait for other process to finish
 
 	static public FacebookManager.ShareStatus shareStatus;
@@ -53,6 +58,12 @@ public class LevelControl : MonoBehaviour {
         Up,
         Down
     };
+
+	public enum ScoreType
+	{
+		Building,
+		Human
+	}
 
     public List<Movement> movements = new List<Movement>();
 
@@ -78,7 +89,7 @@ public class LevelControl : MonoBehaviour {
             structures[i].GetComponent<PolygonCollider2D>().enabled = false;
         }
         progressStep = 1.0f / (num_of_pieces + num_of_people);
-       
+  
     }
 
 	void initLevel ()
@@ -91,6 +102,9 @@ public class LevelControl : MonoBehaviour {
 
 		win = false;
 		shareStatus = FacebookManager.ShareStatus.None;
+
+		// For Jonathan's destroy city
+		fallenPiecesCount = 0;
 	}
 
     private void OnGUI()
@@ -125,12 +139,12 @@ public class LevelControl : MonoBehaviour {
 			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
 			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
 		} else {
-			if(winCanvas)
-				winCanvas.SetActive (true);
+			//if(winCanvas)
+				//winCanvas.SetActive (true);
 		}
     }
 
-    public void increaseProgress(int amount)
+	public void increaseProgress(int amount, ScoreType type)
     {
         //progress[level] -= amount * progressStep;
         progressCount[level] -= amount;
@@ -145,6 +159,14 @@ public class LevelControl : MonoBehaviour {
             progressCount[level]--;
             buildingDestroyedCount++;
         }
+
+		if (type == ScoreType.Building) {
+			fallenPiecesCount++;
+			//Debug.Log (fallenPiecesCount);
+			if (fallenPiecesCount == num_of_pieces) {
+				pA.level2On = true;
+			}
+		}
     }
 
     public void increaseScore(int increment)
@@ -162,12 +184,15 @@ public class LevelControl : MonoBehaviour {
             win = true;
             buildingDestroyedCount = -1;
         }
+
+
         if (Input.GetMouseButtonDown(0))
         {
             fingerStart = Input.mousePosition;
             fingerEnd = Input.mousePosition;
         }
 
+		/*
         //GetMouseButton instead of TouchPhase.Moved
         //This returns true if the LMB is held down in standalone OR
         //there is a single finger touch on a mobile device
@@ -228,9 +253,10 @@ public class LevelControl : MonoBehaviour {
                     level= level-1;
                 }
 				*/
-            }
-        }
-
+            //}
+        //}
+		
+		/*
         //GetMouseButtonUp(0) instead of TouchPhase.Ended
         if (Input.GetMouseButtonUp(0))
         {
@@ -238,6 +264,7 @@ public class LevelControl : MonoBehaviour {
             fingerEnd = Vector2.zero;
             movements.Clear();
         }
+		*/
 
         if (switchNow)
         {

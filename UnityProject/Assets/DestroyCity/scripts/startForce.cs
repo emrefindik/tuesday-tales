@@ -5,7 +5,7 @@ using UnityEngine;
 public class startForce : MonoBehaviour
 {
     public float dirCorrection = 1;
-    public float speed = 4000;
+    public float speed = 6000;
     public float destPosX;
     // Use this for initialization
     void Start()

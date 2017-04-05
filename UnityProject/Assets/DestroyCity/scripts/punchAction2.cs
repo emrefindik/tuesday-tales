@@ -13,7 +13,7 @@ public class punchAction2 : MonoBehaviour {
     float startTimeL;
     float startTimeR;
 
-    const float HIT_TIME_BASE = 3.0f;
+    const float HIT_TIME_BASE = 100.0f;
     public float HitTime_left = HIT_TIME_BASE;
     public float HitTime_right = HIT_TIME_BASE;
 
@@ -31,7 +31,7 @@ public class punchAction2 : MonoBehaviour {
 
     Vector3 _inputPosition;
     float tapCheckX;
-    const float TAPTOLERENCE = 10;
+    const float TAPTOLERENCE = 10000;
 
     //float newPosY = 0.0f;
     //float newPosX = 0.0f;
@@ -63,7 +63,7 @@ public class punchAction2 : MonoBehaviour {
     const float BUILDING_CENTER_X = 0.0f;
 
     const float STOP_PUNCHING_GAP = 0.02f;
-    const float TRANSITION_Y_TIME = 9.0f;
+    const float TRANSITION_Y_TIME = 20.0f;
 
 	// one touch control for now
 	float punchStrength;
@@ -73,6 +73,9 @@ public class punchAction2 : MonoBehaviour {
 	//ParticleSystem pressEffectInstance;
 	ParticleSystem.Particle[] m_Particles;
 
+	// For Jonathan's Destroy City
+	public bool level2On;
+
     void Start () {
         startTimeL = 0.0f;
         startTimeR = 0.0f;
@@ -81,6 +84,8 @@ public class punchAction2 : MonoBehaviour {
 
         leftFist.GetComponent<Collider>().enabled = false;
         leftFist.GetComponent<Collider>().enabled = false;
+
+		level2On = false;
     }
 
 	void Update () {
@@ -88,16 +93,18 @@ public class punchAction2 : MonoBehaviour {
         // mouse input need change to phone touch input
         if (Input.GetMouseButtonDown(0))
         {
-			Debug.Log ("Getting Mouse Button Down");
+			//Debug.Log ("Getting Mouse Button Down");
+			/*
             tapCheckX = Input.mousePosition.x;
-			punchStrength = 0.0f;
 			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+			*/
+			punchStrength = PUNCH_STRENGTH_MAX;
 			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -0.2f);
 			pressEffect.Play ();
         }
 
 		if (Input.GetMouseButton (0)) {
-			Debug.Log ("Getting Mouse Button ");
+			//Debug.Log ("Getting Mouse Button ");
 
 			// add punch strength
 			if (punchStrength < PUNCH_STRENGTH_MAX) {
@@ -120,7 +127,10 @@ public class punchAction2 : MonoBehaviour {
 
         if(Input.GetMouseButtonUp(0))
         {
-			
+
+			tapCheckX = Input.mousePosition.x;
+			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+
 			pressEffect.Stop ();
 
             if (Mathf.Abs(Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
@@ -266,8 +276,10 @@ public class punchAction2 : MonoBehaviour {
             newPosL = new Vector2(currentFist_l.x, currentFist_l.y);
             //destPosL.x = Random.Range(-1.5f, 0.0f);
 			destPosL.x = -1.5f + punchStrength;
-            destPosL.y = _inputPosition.y;
-            leftFist.GetComponent<spawnFist>().sendPunch(true, destPosL.y, destPosL.x);
+			destPosL.y = _inputPosition.y;	
+			if (level2On) {
+				leftFist.GetComponent<spawnFist> ().sendPunch (true, destPosL.y, destPosL.x);
+			}
             //pD.smashCity(new Vector3(destPosL.x, destPosL.y, 10.0f));
             leftFist.GetComponent<Collider>().enabled = true;
         }
@@ -279,7 +291,9 @@ public class punchAction2 : MonoBehaviour {
             //destPosR.x = Random.Range(0.0f, 1.5f);
 			destPosR.x = 1.5f - punchStrength;
             destPosR.y = _inputPosition.y;
-            rightFist.GetComponent<spawnFist>().sendPunch(false, destPosR.y, destPosR.x);
+			if (level2On) {
+				rightFist.GetComponent<spawnFist> ().sendPunch (false, destPosR.y, destPosR.x);
+			}
             //pD.smashCity(new Vector3(destPosR.x, destPosR.y, 10.0f));
             rightFist.GetComponent<Collider>().enabled = true;
 

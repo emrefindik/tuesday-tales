@@ -29,7 +29,7 @@ public class fallPart : MonoBehaviour {
             gravity.useGravity = true;
             gravity.GetComponent<Collider>().enabled = false;
             StartCoroutine(Shake());
-            healthControl.increaseProgress(1);
+			healthControl.increaseProgress(1, LevelControl.ScoreType.Building);
         }
 
 
@@ -39,7 +39,7 @@ public class fallPart : MonoBehaviour {
             Transform newPos = c.gameObject.GetComponent<Transform>();
             GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);
 			blood.transform.parent = Camera.main.transform;
-            healthControl.increaseProgress(1);
+			healthControl.increaseProgress(1, LevelControl.ScoreType.Human);
         }
     }
 

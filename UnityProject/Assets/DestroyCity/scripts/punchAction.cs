@@ -13,7 +13,7 @@ public class punchAction : MonoBehaviour {
     float startTimeL;
     float startTimeR;
 
-    const float HIT_TIME_BASE = 3.0f;
+    const float HIT_TIME_BASE = 100.0f;
     public float HitTime_left = HIT_TIME_BASE;
     public float HitTime_right = HIT_TIME_BASE;
 
@@ -63,11 +63,11 @@ public class punchAction : MonoBehaviour {
     const float BUILDING_CENTER_X = 0.0f;
 
     const float STOP_PUNCHING_GAP = 0.02f;
-    const float TRANSITION_Y_TIME = 9.0f;
+    const float TRANSITION_Y_TIME = 20.0f;
 
 	// one touch control for now
 	float punchStrength;
-	const float PUNCH_STRENGTH_MAX = 1.5f;
+	const float PUNCH_STRENGTH_MAX = 1.45f;
 	const float PUNCH_STRENGTH_STEP = 0.04f;
 	public ParticleSystem pressEffect;
 	//ParticleSystem pressEffectInstance;
@@ -88,16 +88,16 @@ public class punchAction : MonoBehaviour {
         // mouse input need change to phone touch input
         if (Input.GetMouseButtonDown(0))
         {
-			Debug.Log ("Getting Mouse Button Down");
-            tapCheckX = Input.mousePosition.x;
-			punchStrength = 0.0f;
-			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+			//Debug.Log ("Getting Mouse Button Down");
+            //tapCheckX = Input.mousePosition.x;
+			punchStrength = PUNCH_STRENGTH_MAX;
+			//_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
 			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -0.2f);
 			pressEffect.Play ();
         }
 
 		if (Input.GetMouseButton (0)) {
-			Debug.Log ("Getting Mouse Button ");
+			//Debug.Log ("Getting Mouse Button ");
 
 			// add punch strength
 			if (punchStrength < PUNCH_STRENGTH_MAX) {
@@ -120,7 +120,8 @@ public class punchAction : MonoBehaviour {
 
         if(Input.GetMouseButtonUp(0))
         {
-			
+			tapCheckX = Input.mousePosition.x;
+			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
 			pressEffect.Stop ();
 
             if (Mathf.Abs(Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
@@ -128,8 +129,6 @@ public class punchAction : MonoBehaviour {
 
             //_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
             
-
-
 
             if (_inputPosition.x < BUILDING_CENTER_X && !hitting_left)
             {
@@ -261,6 +260,7 @@ public class punchAction : MonoBehaviour {
         updateFistLocation();
         if(punchDirection == PUNCHINGLEFT)
         {          
+			Debug.Log ("PunchLeft");
             startTimeL = Time.time;
             hitting_left = true;
             newPosL = new Vector2(currentFist_l.x, currentFist_l.y);
@@ -272,7 +272,8 @@ public class punchAction : MonoBehaviour {
             leftFist.GetComponent<Collider>().enabled = true;
         }
         else
-        {           
+        {   
+			Debug.Log ("PunchRight");
             startTimeR = Time.time;
             hitting_right = true;
             newPosR = new Vector2(currentFist_r.x, currentFist_r.y);
