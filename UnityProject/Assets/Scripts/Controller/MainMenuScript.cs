@@ -234,7 +234,7 @@ public class MainMenuScript : MonoBehaviour {
         switch (response.Success)
         {
             case true:
-                //yield return SpatialClient2.single.checkFirstLogin();
+                yield return SpatialClient2.single.checkFirstLogin();
 
                 // TODO delete this
                 List<Location> locations = new List<Location>();
@@ -491,8 +491,7 @@ public class MainMenuScript : MonoBehaviour {
             {
                 previousCanvas = c;
                 c.enabled = false;
-				if(pleaseWaitCanvas)
-                	pleaseWaitCanvas.enabled = true;
+                pleaseWaitCanvas.enabled = true;
                 return;
             }
         }
@@ -506,8 +505,7 @@ public class MainMenuScript : MonoBehaviour {
             if (c.enabled)
             {
                 c.enabled = false;
-				if(checkedInCanvas)
-                	checkInErrorCanvas.enabled = true;
+                checkInErrorCanvas.enabled = true;
                 return;
             }
         }
@@ -515,17 +513,14 @@ public class MainMenuScript : MonoBehaviour {
 
     public static void displayErrorFromWaitScreen(string errorText)
     {
-		if(pleaseWaitCanvas)
-        	pleaseWaitCanvas.enabled = false;
+        pleaseWaitCanvas.enabled = false;
         displayError(errorText);
     }
 
     public static void closeWaitScreen()
     {
-		if(pleaseWaitCanvas)
-        	pleaseWaitCanvas.enabled = false;
-		if(previousCanvas)
-			previousCanvas.enabled = true;
+        pleaseWaitCanvas.enabled = false;
+        previousCanvas.enabled = true;
     }
 
 }
