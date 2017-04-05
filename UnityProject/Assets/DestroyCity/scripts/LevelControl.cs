@@ -270,7 +270,7 @@ public class LevelControl : MonoBehaviour {
         {
             goToLevel(level);
         }
-        pD.switchCity(level);
+        //pD.switchCity(level);
 }
 
     void goToLevel(int level)

@@ -6,20 +6,24 @@ public class punchAction : MonoBehaviour {
 
     public GameObject leftFist;
     public GameObject rightFist;
+	public GameObject monster;
     public PixelDestruction pD;
+	/*
     Vector2 currentFist_l;
     Vector2 currentFist_r;
-
+    */
+	/*
     float startTimeL;
     float startTimeR;
 
     const float HIT_TIME_BASE = 100.0f;
     public float HitTime_left = HIT_TIME_BASE;
     public float HitTime_right = HIT_TIME_BASE;
-
+*/
     //public bool punchNowL = false;
     //public bool punchNowR = false;
 
+	/*
     [HideInInspector]
     public  bool hitting_left = false;
     [HideInInspector]
@@ -28,6 +32,7 @@ public class punchAction : MonoBehaviour {
     public bool punchReturning_l=false;
     [HideInInspector]
     public bool punchReturning_r = false;
+    */
 
     Vector3 _inputPosition;
     float tapCheckX;
@@ -38,19 +43,21 @@ public class punchAction : MonoBehaviour {
 
     //const float newPosY_r = -1.78f;
     //const float newPosX_r = 5;
+	/*
     Vector2 newPosL;
     Vector2 newPosR;
     Vector2 destPosL;
     Vector2 destPosR;
+    */
     const float IDLE_L_X = -5.0f;
 
     //bool currentTimeOff;
 
     //float _currentTime;
-
+	/*
     float startTime_l;
     float startTime_r;
-
+	*/
     //float j = 0;
     //float i = 0;
     //float h = 0;
@@ -62,25 +69,29 @@ public class punchAction : MonoBehaviour {
     const bool PUNCHINGRIGHT = true;
     const float BUILDING_CENTER_X = 0.0f;
 
+	/*
     const float STOP_PUNCHING_GAP = 0.02f;
     const float TRANSITION_Y_TIME = 20.0f;
-
+	*/
 	// one touch control for now
 	float punchStrength;
-	const float PUNCH_STRENGTH_MAX = 1.45f;
+	const float PUNCH_STRENGTH_MAX = 4.9f;
 	const float PUNCH_STRENGTH_STEP = 0.04f;
 	public ParticleSystem pressEffect;
 	//ParticleSystem pressEffectInstance;
 	ParticleSystem.Particle[] m_Particles;
 
+	const float PUNCH_Z = -1;
+
     void Start () {
+		/*
         startTimeL = 0.0f;
         startTimeR = 0.0f;
         newPosL = new Vector2(0.0f, 0.0f);
         newPosR = new Vector2(-1.78f, 5.0f);
-
+		*/
         leftFist.GetComponent<Collider>().enabled = false;
-        leftFist.GetComponent<Collider>().enabled = false;
+        rightFist.GetComponent<Collider>().enabled = false;
     }
 
 	void Update () {
@@ -130,28 +141,31 @@ public class punchAction : MonoBehaviour {
             //_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
             
 
-            if (_inputPosition.x < BUILDING_CENTER_X && !hitting_left)
-            {
+            //if (_inputPosition.x < BUILDING_CENTER_X && !hitting_left)
+			if (_inputPosition.x < BUILDING_CENTER_X)
+			{
                 initPunch(PUNCHINGLEFT);
             }
-            if (_inputPosition.x >= BUILDING_CENTER_X && !hitting_right)
-            {
+            //if (_inputPosition.x >= BUILDING_CENTER_X && !hitting_right)
+			if (_inputPosition.x >= BUILDING_CENTER_X)
+			{
                 initPunch(PUNCHINGRIGHT);
             }
         }
 
-        updateTimer();
-        punch();
+        //updateTimer();
+        //punch();
 
     }
 
-
+	/*
      void updateFistLocation()
     {
         currentFist_l = new Vector2(leftFist.transform.position.x, leftFist.transform.position.y);
         currentFist_r = new Vector2(rightFist.transform.position.x, rightFist.transform.position.y);
     }
-
+	*/
+	/*
     void punch()
     {
         updateFistLocation();
@@ -251,12 +265,14 @@ public class punchAction : MonoBehaviour {
             }
         }
     }
+	*/
 
     /*
      * Update location and increase timer
      */
     void initPunch(bool punchDirection)
     {
+		/*
         updateFistLocation();
         if(punchDirection == PUNCHINGLEFT)
         {          
@@ -285,12 +301,24 @@ public class punchAction : MonoBehaviour {
             rightFist.GetComponent<Collider>().enabled = true;
 
         }
+        */
+		GameObject fist;
+		Vector2 dest;
+		if (punchDirection == PUNCHINGLEFT) {
+			dest = new Vector2 (IDLE_L_X + punchStrength, _inputPosition.y);
+			fist = Instantiate (leftFist, new Vector3 (IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
+
+		} else {
+			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
+			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
+		}
+		fist.GetComponent<Punch> ().sendPunch (dest);
+		fist.transform.SetParent(monster.transform, true);
+		pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
     }
 
-    /*
-     *  Update timer and set booleans
-     */
-    void updateTimer()
+	/*
+	void updateTimer()
     {
         // Update Left Fist
         if (hitting_left)
@@ -331,5 +359,6 @@ public class punchAction : MonoBehaviour {
 
 
     }
+    */
 
 }
