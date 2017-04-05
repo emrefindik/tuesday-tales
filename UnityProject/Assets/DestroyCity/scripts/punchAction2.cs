@@ -24,7 +24,7 @@ public class punchAction2 : MonoBehaviour {
 
 	// one touch control for now
 	float punchStrength;
-	const float PUNCH_STRENGTH_MAX = 4.9f;
+	const float PUNCH_STRENGTH_MAX = 5.1f;
 	const float PUNCH_STRENGTH_STEP = 0.04f;
 	public ParticleSystem pressEffect;
 	//ParticleSystem pressEffectInstance;
@@ -33,16 +33,25 @@ public class punchAction2 : MonoBehaviour {
 	const float PUNCH_Z = -1;
 	// For Jonathan's Destroy City
 	public bool level2On;
+	public GameObject ground;
+	const float groundY = -5.0f;
+
+	bool locked = false;
 
     void Start () {
-
         leftFist.GetComponent<Collider>().enabled = false;
         rightFist.GetComponent<Collider>().enabled = false;
 
+		locked = false;
 		level2On = false;
     }
 
 	void Update () {
+
+		if (locked) {
+			locked = false;
+			return;
+		}
 
 		// mouse input need change to phone touch input
 		if (Input.GetMouseButtonDown(0))
@@ -81,13 +90,13 @@ public class punchAction2 : MonoBehaviour {
 
 
 	}
-
-
+		
 	void initPunch(bool punchDirection)
 	{
 		GameObject fist;
 		Vector2 dest;
 		if (punchDirection == PUNCHINGLEFT) {
+			Debug.Log ("Punching Left");
 			dest = new Vector2 (IDLE_L_X + punchStrength, _inputPosition.y);
 			fist = Instantiate (leftFist, new Vector3 (IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {
@@ -95,6 +104,7 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 		} else {
+			Debug.Log ("Punching Right");
 			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
 			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {
@@ -104,8 +114,18 @@ public class punchAction2 : MonoBehaviour {
 		fist.GetComponent<Punch> ().sendPunch (dest);
 		fist.transform.SetParent(monster.transform, true);
 
-		Debug.Log (dest.x);
+		//Debug.Log (dest.x);
 		//pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
+	}
+
+	public void punchGround()
+	{
+		locked = true;
+		Debug.Log ("punch ground");
+		_inputPosition = new Vector3 (0.0f, groundY, 0.0f);
+		initPunch(PUNCHINGLEFT);
+		initPunch(PUNCHINGRIGHT);
+		ground.GetComponent<Ground> ().startShake ();
 	}
 
 }

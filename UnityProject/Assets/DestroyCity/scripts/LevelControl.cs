@@ -164,7 +164,9 @@ public class LevelControl : MonoBehaviour {
 			fallenPiecesCount++;
 			//Debug.Log (fallenPiecesCount);
 			if (fallenPiecesCount == num_of_pieces) {
-				pA.level2On = true;
+				if (pA) {
+					pA.level2On = true;
+				}
 			}
 		}
     }

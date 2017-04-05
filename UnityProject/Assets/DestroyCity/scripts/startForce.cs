@@ -44,7 +44,7 @@ public class startForce : MonoBehaviour
     }
     void OnCollisionEnter()
     {
-        Debug.Log("Collided");
+        //Debug.Log("Collided");
         Destroy(this.gameObject);
     }
 }
