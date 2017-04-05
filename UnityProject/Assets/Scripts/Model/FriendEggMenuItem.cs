@@ -52,10 +52,8 @@ public class FriendEggMenuItem : MonoBehaviour
         }
         else
         {
-            MainMenuScript.FriendsEggsCanvas.enabled = false;
-            MainMenuScript.CheckInErrorMessage.text = "Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
-                " is currently holding onto this egg, they have to send it back to you first.";
-            MainMenuScript.CheckInErrorCanvas.enabled = true;
+            MainMenuScript.displayError("Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
+                " is currently holding onto this egg, they have to send it back to you first.");
         }
     }
 
@@ -63,7 +61,7 @@ public class FriendEggMenuItem : MonoBehaviour
     {
         foreach (Location loc in _egg._hatchLocations)
         {
-            if (GeographyMaster.calculateDistance(loc, Input.location.lastData.latitude, Input.location.lastData.longitude) <= MAX_CHECK_IN_DISTANCE)
+            if (Geography.withinDistance(loc.Latitude, loc.Longitude, Input.location.lastData.latitude, Input.location.lastData.longitude, MAX_CHECK_IN_DISTANCE))
             {
                 yield return checkInEgg();                
                 openCanvas.enabled = false;
