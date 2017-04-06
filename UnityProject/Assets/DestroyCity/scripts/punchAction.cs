@@ -62,8 +62,8 @@ public class punchAction : MonoBehaviour {
     //float i = 0;
     //float h = 0;
     //float z = 0;
-    float timeCountLX = 0;
-    float timeCountRX = 0;
+    //float timeCountLX = 0;
+    //float timeCountRX = 0;
 
     const bool PUNCHINGLEFT = false;
     const bool PUNCHINGRIGHT = true;

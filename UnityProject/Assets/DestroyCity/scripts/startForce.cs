@@ -8,6 +8,7 @@ public class startForce : MonoBehaviour
     public float speed = 6000;
     public float destPosX;
     // Use this for initialization
+	float damping = 0.5f;
     void Start()
     {
         transform.GetComponent<Rigidbody>().AddForce(new Vector3(speed * dirCorrection, 0, 0));
@@ -18,7 +19,7 @@ public class startForce : MonoBehaviour
     {
         if(dirCorrection > 0)
         {
-            if (transform.position.x > destPosX)
+            if (transform.position.x > destPosX + damping)
             {
                 Debug.Log("Reached DESTINATION");
                 Destroy(this.gameObject);
@@ -26,7 +27,7 @@ public class startForce : MonoBehaviour
         }
         else if (dirCorrection < 0)
         {
-            if (transform.position.x < destPosX)
+            if (transform.position.x < destPosX - damping)
             {
                 Debug.Log("Reached DESTINATION");
                 Destroy(this.gameObject);

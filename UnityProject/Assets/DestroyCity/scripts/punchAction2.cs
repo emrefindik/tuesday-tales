@@ -15,8 +15,8 @@ public class punchAction2 : MonoBehaviour {
 
 	const float IDLE_L_X = -5.0f;
 
-	float timeCountLX = 0;
-	float timeCountRX = 0;
+	//float timeCountLX = 0;
+	//float timeCountRX = 0;
 
 	const bool PUNCHINGLEFT = false;
 	const bool PUNCHINGRIGHT = true;

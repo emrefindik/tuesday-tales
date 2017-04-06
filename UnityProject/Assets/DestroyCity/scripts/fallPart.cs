@@ -9,14 +9,19 @@ public class fallPart : MonoBehaviour {
 
     public GameObject bloodEffect;
     public AudioClip smeshAudio;
-    public AudioSource smesh;
+	public AudioClip screamAudio;
+    AudioSource smesh;
+	AudioSource scream;
     public LevelControl healthControl;
 
 
     void Start()
     {
         smesh = GetComponent<AudioSource>();
-        smesh.clip = smeshAudio;
+		smesh.clip = smeshAudio;
+		scream = gameObject.AddComponent<AudioSource>();
+		scream.clip = screamAudio;
+		scream.playOnAwake = false;
     }
 
     void OnTriggerEnter(Collider c)
@@ -35,6 +40,7 @@ public class fallPart : MonoBehaviour {
 
         if(c.tag == "people")
         {
+			scream.Play ();
             Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
             GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);

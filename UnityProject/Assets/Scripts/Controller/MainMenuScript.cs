@@ -472,13 +472,14 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
-    /*public void onTestDestruction()
+    public void onTestDestruction()
     {
         Debug.Log("multiplier: " + SpatialClient2.single.getMultiplier().ToString());
         Debug.Log("score: " + SpatialClient2.single.getScore().ToString());
         //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
-        MainController.single.goToDestroyCity();
-    } */
+        MainController.single.goToDestroyCity("");
+		_mainMenuCanvas.enabled = false;
+    } 
 
     public void onTestCamera()
     {
