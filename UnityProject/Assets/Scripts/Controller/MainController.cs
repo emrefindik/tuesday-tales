@@ -16,7 +16,7 @@ public class MainController : MonoBehaviour
     public Camera mainMenuCamera;
     public GameObject menuScene;
     public GameObject destroyCityPrefab;
-	public GameObject destroyCityScene;
+	GameObject destroyCityScene;
 	public Camera phoneCamera;
 	public GameObject phoneCameraScene;
     public string currentMarkerId;

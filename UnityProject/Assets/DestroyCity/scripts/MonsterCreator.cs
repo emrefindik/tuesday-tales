@@ -25,7 +25,7 @@ public class MonsterCreator : MonoBehaviour {
 	public GameObject rightHand;
 
 	Color monsterColor;
-	Color eyeColor;
+	//Color eyeColor;
 
 	// Use this for initialization
 	void Start () {
@@ -40,7 +40,7 @@ public class MonsterCreator : MonoBehaviour {
 		eyeType = Random.Range (0, eyeSprites.Length - 1);
 		bodyType = Random.Range (0, bodySprites.Length - 1);
 		monsterColor = Random.ColorHSV (0.0f, 1.0f, 0.5f, 1.0f, 0.6f, 1.0f);
-		eyeColor = Random.ColorHSV (0.0f, 0.5f, 0.8f, 1.0f, 0.9f, 1.0f);
+		//eyeColor = Random.ColorHSV (0.0f, 0.5f, 0.8f, 1.0f, 0.9f, 1.0f);
 
 	}
 
@@ -53,7 +53,7 @@ public class MonsterCreator : MonoBehaviour {
 
 		renderer = leftEye.GetComponent<SpriteRenderer> ();
 		renderer.sprite = eyeSprites [eyeType];
-		renderer.material.color = eyeColor;
+		//renderer.material.color = eyeColor;
 
 		renderer = body.GetComponent<SpriteRenderer> ();
 		renderer.sprite = bodySprites [bodyType];

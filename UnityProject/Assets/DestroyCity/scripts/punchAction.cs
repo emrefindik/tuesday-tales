@@ -6,20 +6,24 @@ public class punchAction : MonoBehaviour {
 
     public GameObject leftFist;
     public GameObject rightFist;
+	public GameObject monster;
     public PixelDestruction pD;
+	/*
     Vector2 currentFist_l;
     Vector2 currentFist_r;
-
+    */
+	/*
     float startTimeL;
     float startTimeR;
 
-    const float HIT_TIME_BASE = 3.0f;
+    const float HIT_TIME_BASE = 100.0f;
     public float HitTime_left = HIT_TIME_BASE;
     public float HitTime_right = HIT_TIME_BASE;
-
+*/
     //public bool punchNowL = false;
     //public bool punchNowR = false;
 
+	/*
     [HideInInspector]
     public  bool hitting_left = false;
     [HideInInspector]
@@ -28,6 +32,7 @@ public class punchAction : MonoBehaviour {
     public bool punchReturning_l=false;
     [HideInInspector]
     public bool punchReturning_r = false;
+    */
 
     Vector3 _inputPosition;
     float tapCheckX;
@@ -38,49 +43,55 @@ public class punchAction : MonoBehaviour {
 
     //const float newPosY_r = -1.78f;
     //const float newPosX_r = 5;
+	/*
     Vector2 newPosL;
     Vector2 newPosR;
     Vector2 destPosL;
     Vector2 destPosR;
+    */
     const float IDLE_L_X = -5.0f;
 
     //bool currentTimeOff;
 
     //float _currentTime;
-
+	/*
     float startTime_l;
     float startTime_r;
-
+	*/
     //float j = 0;
     //float i = 0;
     //float h = 0;
     //float z = 0;
-    float timeCountLX = 0;
-    float timeCountRX = 0;
+    //float timeCountLX = 0;
+    //float timeCountRX = 0;
 
     const bool PUNCHINGLEFT = false;
     const bool PUNCHINGRIGHT = true;
     const float BUILDING_CENTER_X = 0.0f;
 
+	/*
     const float STOP_PUNCHING_GAP = 0.02f;
-    const float TRANSITION_Y_TIME = 9.0f;
-
+    const float TRANSITION_Y_TIME = 20.0f;
+	*/
 	// one touch control for now
 	float punchStrength;
-	const float PUNCH_STRENGTH_MAX = 1.5f;
+	const float PUNCH_STRENGTH_MAX = 4.9f;
 	const float PUNCH_STRENGTH_STEP = 0.04f;
 	public ParticleSystem pressEffect;
 	//ParticleSystem pressEffectInstance;
 	ParticleSystem.Particle[] m_Particles;
 
+	const float PUNCH_Z = -1;
+
     void Start () {
+		/*
         startTimeL = 0.0f;
         startTimeR = 0.0f;
         newPosL = new Vector2(0.0f, 0.0f);
         newPosR = new Vector2(-1.78f, 5.0f);
-
+		*/
         leftFist.GetComponent<Collider>().enabled = false;
-        leftFist.GetComponent<Collider>().enabled = false;
+        rightFist.GetComponent<Collider>().enabled = false;
     }
 
 	void Update () {
@@ -88,14 +99,17 @@ public class punchAction : MonoBehaviour {
         // mouse input need change to phone touch input
         if (Input.GetMouseButtonDown(0))
         {
-            tapCheckX = Input.mousePosition.x;
-			punchStrength = 0.0f;
-			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
+			//Debug.Log ("Getting Mouse Button Down");
+            //tapCheckX = Input.mousePosition.x;
+			punchStrength = PUNCH_STRENGTH_MAX;
+			//_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
 			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -0.2f);
 			pressEffect.Play ();
         }
 
 		if (Input.GetMouseButton (0)) {
+			//Debug.Log ("Getting Mouse Button ");
+
 			// add punch strength
 			if (punchStrength < PUNCH_STRENGTH_MAX) {
 				punchStrength += PUNCH_STRENGTH_STEP;
@@ -117,6 +131,8 @@ public class punchAction : MonoBehaviour {
 
         if(Input.GetMouseButtonUp(0))
         {
+			tapCheckX = Input.mousePosition.x;
+			_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
 			pressEffect.Stop ();
 
             if (Mathf.Abs(Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
@@ -125,30 +141,31 @@ public class punchAction : MonoBehaviour {
             //_inputPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f));
             
 
-
-
-            if (_inputPosition.x < BUILDING_CENTER_X && !hitting_left)
-            {
+            //if (_inputPosition.x < BUILDING_CENTER_X && !hitting_left)
+			if (_inputPosition.x < BUILDING_CENTER_X)
+			{
                 initPunch(PUNCHINGLEFT);
             }
-            if (_inputPosition.x >= BUILDING_CENTER_X && !hitting_right)
-            {
+            //if (_inputPosition.x >= BUILDING_CENTER_X && !hitting_right)
+			if (_inputPosition.x >= BUILDING_CENTER_X)
+			{
                 initPunch(PUNCHINGRIGHT);
             }
         }
 
-        updateTimer();
-        punch();
+        //updateTimer();
+        //punch();
 
     }
 
-
+	/*
      void updateFistLocation()
     {
         currentFist_l = new Vector2(leftFist.transform.position.x, leftFist.transform.position.y);
         currentFist_r = new Vector2(rightFist.transform.position.x, rightFist.transform.position.y);
     }
-
+	*/
+	/*
     void punch()
     {
         updateFistLocation();
@@ -158,9 +175,11 @@ public class punchAction : MonoBehaviour {
             //if (Mathf.Abs(newPosL.x - _inputPosition.x) >= .2f && punchReturning_l == false)
             if (punchReturning_l == false)
             {
+                
                 // Fist reaching out
                 if (Mathf.Abs(newPosL.y - destPosL.y) >= STOP_PUNCHING_GAP)
                 {
+                    
                     // First Y
 
                     //newPosL.y = Mathf.Lerp(currentFist_l.y, _inputPosition.y, (Time.time - startTimeL) * 4.5f);
@@ -246,42 +265,60 @@ public class punchAction : MonoBehaviour {
             }
         }
     }
+	*/
 
     /*
      * Update location and increase timer
      */
     void initPunch(bool punchDirection)
     {
+		/*
         updateFistLocation();
         if(punchDirection == PUNCHINGLEFT)
-        {
+        {          
+			Debug.Log ("PunchLeft");
             startTimeL = Time.time;
             hitting_left = true;
             newPosL = new Vector2(currentFist_l.x, currentFist_l.y);
             //destPosL.x = Random.Range(-1.5f, 0.0f);
 			destPosL.x = -1.5f + punchStrength;
             destPosL.y = _inputPosition.y;
+            //leftFist.GetComponent<spawnFist>().sendPunch(true, destPosL.y, destPosL.x);
             pD.smashCity(new Vector3(destPosL.x, destPosL.y, 10.0f));
             leftFist.GetComponent<Collider>().enabled = true;
         }
         else
-        {
+        {   
+			Debug.Log ("PunchRight");
             startTimeR = Time.time;
             hitting_right = true;
             newPosR = new Vector2(currentFist_r.x, currentFist_r.y);
             //destPosR.x = Random.Range(0.0f, 1.5f);
 			destPosR.x = 1.5f - punchStrength;
             destPosR.y = _inputPosition.y;
+            //rightFist.GetComponent<spawnFist>().sendPunch(false, destPosR.y, destPosR.x);
             pD.smashCity(new Vector3(destPosR.x, destPosR.y, 10.0f));
             rightFist.GetComponent<Collider>().enabled = true;
 
         }
+        */
+		GameObject fist;
+		Vector2 dest;
+		if (punchDirection == PUNCHINGLEFT) {
+			dest = new Vector2 (IDLE_L_X + punchStrength, _inputPosition.y);
+			fist = Instantiate (leftFist, new Vector3 (IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
+
+		} else {
+			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
+			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
+		}
+		fist.GetComponent<Punch> ().sendPunch (dest);
+		fist.transform.SetParent(monster.transform, true);
+		pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
     }
 
-    /*
-     *  Update timer and set booleans
-     */
-    void updateTimer()
+	/*
+	void updateTimer()
     {
         // Update Left Fist
         if (hitting_left)
@@ -322,5 +359,6 @@ public class punchAction : MonoBehaviour {
 
 
     }
+    */
 
 }
