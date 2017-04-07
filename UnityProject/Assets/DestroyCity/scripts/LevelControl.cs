@@ -15,6 +15,7 @@ public class LevelControl : MonoBehaviour {
 	public GameObject winCanvas;
 	public GameObject gameCanvas;
 	public GameObject findEggCanvas;
+	public GameObject editEggNameCanvas;
 	public GameObject shareSucceedCanvas;
     public bool switchNow=false;
 	public Texture2D barFull;
@@ -59,7 +60,7 @@ public class LevelControl : MonoBehaviour {
 	// Shake Action
 	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
 	const float lowPassKernelWidthInSeconds = 1.0f;
-	float shakeDetectionThreshold = 2.0f;
+	float shakeDetectionThreshold = 6.0f;
 	float lowPassFilterFactor = accelerometerUpdateInterval /
 		lowPassKernelWidthInSeconds;
 	Vector3 lowPassValue;
@@ -67,6 +68,12 @@ public class LevelControl : MonoBehaviour {
 	float shakeInterval = 10.0f;
 
 	GameObject shakeText;
+	GameObject ground;
+
+	// REWARD:
+	int eggIndex;
+	string eggName;
+
 
     public enum Movement
     {
@@ -132,9 +139,11 @@ public class LevelControl : MonoBehaviour {
 		winCanvas.SetActive(false);
 		shareSucceedCanvas.SetActive(false);
 		findEggCanvas.SetActive (false);
+		editEggNameCanvas.SetActive (false);
 
 
 		score = 0;
+		eggIndex = -1;
 		buildingDestroyedCount = 0;
 
 		win = false;
@@ -142,8 +151,6 @@ public class LevelControl : MonoBehaviour {
 
 		// For Jonathan's destroy city
 		fallenPiecesCount = 0;
-		GetComponent<SpriteControl> ().deactivateColor ();
-
 		// Shake Action
 		shakeDetectionThreshold *= shakeDetectionThreshold;
 		lowPassValue = Input.acceleration;
@@ -151,6 +158,7 @@ public class LevelControl : MonoBehaviour {
 
 		shakeText = GameObject.Find ("ShakeText");
 		shakeText.SetActive (false);
+		ground = GameObject.Find ("Ground");
 	}
 		
     private void OnGUI()
@@ -182,17 +190,16 @@ public class LevelControl : MonoBehaviour {
 			GUI.EndGroup ();
 			GUI.EndGroup ();
 
-			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
-			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
+			//GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
+			//GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
 		} else {
 			if (findEggCanvas.activeSelf)
 				return;
-			if (winCanvas && (winCoroutineEnded.Success == true)) {
-			//if (winCanvas) {
-				Debug.Log ("show win");
+			//if (winCanvas && (winCoroutineEnded.Success == true)) {
+			if (winCanvas) {
 				GameObject scoreText = winCanvas.transform.FindChild ("ScoreText").gameObject;
-				Debug.Log (scoreText.GetComponent<Text> ().text);
-				scoreText.GetComponent<Text> ().text = "x " + score.ToString();
+				scoreText.GetComponent<Text> ().text = "x " + score.ToString ();
+				//Debug.Log (scoreText.GetComponent<Text> ().text);
 				winCanvas.SetActive (true);
 			}
 		}
@@ -262,6 +269,7 @@ public class LevelControl : MonoBehaviour {
 			shakeText.SetActive (true);
             buildingDestroyedCount = -1;
 			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			ground.GetComponent<Ground>().startShake(0.5f);
         }
 
 		/*
@@ -286,12 +294,13 @@ public class LevelControl : MonoBehaviour {
 				shakeNow  = false;
 				shakeText.SetActive (false);
 				GameObject mainController = GameObject.Find ("MainController");
-				int eggIndex = mainController.GetComponent<EggGenerator> ().generate ();
-				GameObject EggImage = findEggCanvas.transform.FindChild ("EggImage").gameObject;
-				EggImage.GetComponent<Image> ().sprite = mainController.GetComponent<EggGenerator>().eggSprites[eggIndex];
-				//StartCoroutine (startShakeCountDown ());
-				findEggCanvas.SetActive(true);
-				win = true;
+				eggIndex = mainController.GetComponent<KaijuDatabase> ().generateEgg ();
+				if (eggIndex != -1) {
+					GameObject EggImage = findEggCanvas.transform.FindChild ("EggImage").gameObject;
+					EggImage.GetComponent<Image> ().sprite = mainController.GetComponent<KaijuDatabase> ().eggSprites [eggIndex];
+					//StartCoroutine (startShakeCountDown ());
+				}
+				StartCoroutine (showReward ());
 			}
 
 
@@ -304,11 +313,31 @@ public class LevelControl : MonoBehaviour {
         //pD.switchCity(level);
 	}
 
-	public void closeFindEggCanvas()
+	IEnumerator showReward()
 	{
-		findEggCanvas.SetActive (false);
+		//TODO: shake according to the streak
+		yield return new WaitForSeconds(2.0f);
+		pA.punchGround(2);
+		yield return new WaitForSeconds (.3f);
+		if(eggIndex != -1)
+			findEggCanvas.SetActive(true);
+		win = true;
 	}
 
+	public void closeEggCanvas()
+	{
+		findEggCanvas.SetActive (false);
+		editEggNameCanvas.SetActive (false);
+		GameObject inputName = editEggNameCanvas.transform.FindChild ("InputEggName").gameObject;
+		eggName = inputName.GetComponent<InputField> ().text;
+		Debug.Log (eggName);
+	}
+
+	public void openEditEggNameCanvas()
+	{
+		editEggNameCanvas.SetActive (true);
+	}
+		
     void goToLevel(int level)
     {
         float currentX = 0;

@@ -14,6 +14,11 @@ public class PhoneImageController : MonoBehaviour {
 	public WebCamTexture pCamera = null;
 	public GameObject camDisplayPlane;
 
+	public GameObject KaijuSelfieModel;
+	public GameObject BuildingSelfieModel;
+	public GameObject EggSelfieModel;
+
+
 	string frontCamName;
 	string backCamName;
 
@@ -22,12 +27,46 @@ public class PhoneImageController : MonoBehaviour {
 	bool GUION;
 	bool CAMREADY;
 
+	enum CameraMode{
+		BuildingDestruction,
+		EggHatching,
+		Kaiju,
+		None
+	}
+
 	// Use this for initialization
 	void Start () {
+		initCamera (CameraMode.Kaiju);
+	}
+
+	void initCamera(CameraMode mode)
+	{
 		startCamera ();
 		takingPhoto = false;
 		GUION = true;
 		CAMREADY = false;
+
+		KaijuSelfieModel.SetActive (false);
+		BuildingSelfieModel.SetActive (false);
+		EggSelfieModel.SetActive (false);
+
+		Debug.Log (mode);
+		switch (mode) {
+		case CameraMode.BuildingDestruction:
+			BuildingSelfieModel.SetActive (true);
+			break;
+		case CameraMode.EggHatching:
+			EggSelfieModel.SetActive (true);
+			break;
+		case CameraMode.Kaiju:
+			KaijuSelfieModel.SetActive (true);
+			// TODO: get monster information from spatial
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (2, 1, 1, Color.blue);
+			break;
+		default:
+			break;	
+		}
+
 	}
 
 	void Update()
@@ -35,6 +74,7 @@ public class PhoneImageController : MonoBehaviour {
 		if (pCamera.width < 100 && !CAMREADY) {
 			return;
 		} else {
+			// Means getting image
 			if (!CAMREADY) {
 				double ratio = (float)pCamera.height / (float)pCamera.width;
 				Debug.Log (Screen.width);
@@ -66,6 +106,8 @@ public class PhoneImageController : MonoBehaviour {
 			takePhoto ();
 			return;
 		}
+
+		/*
 		float buttonWidth = Screen.width/3;
 		float buttonHeight = Screen.height/5;
 		float buttonMargine = buttonWidth/3;
@@ -85,6 +127,12 @@ public class PhoneImageController : MonoBehaviour {
 		if (GUI.Button(buttonRect, GetButtonLabel("Back"))) {
 			MainController.single.goToMainMenu ();
 		}
+		*/
+	}
+
+	public void initTakingPhoto()
+	{
+		takingPhoto = true;
 	}
 
 	void startCamera()

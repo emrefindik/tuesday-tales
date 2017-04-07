@@ -312,7 +312,7 @@ public class punchAction : MonoBehaviour {
 			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
 			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 		}
-		fist.GetComponent<Punch> ().sendPunch (dest);
+		fist.GetComponent<Punch> ().sendPunch (dest, Punch.PunchDirection.X);
 		fist.transform.SetParent(monster.transform, true);
 		pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
     }

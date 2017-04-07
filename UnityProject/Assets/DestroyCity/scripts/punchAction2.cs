@@ -14,6 +14,8 @@ public class punchAction2 : MonoBehaviour {
 	const float TAPTOLERENCE = 10;
 
 	const float IDLE_L_X = -5.0f;
+	const float IDLE_L_Y = 10f;
+	const float BANG_L_X = -2f;
 
 	//float timeCountLX = 0;
 	//float timeCountRX = 0;
@@ -36,7 +38,7 @@ public class punchAction2 : MonoBehaviour {
 	public GameObject ground;
 	const float groundY = -5.0f;
 
-	bool locked = false;
+	bool locked = false;	// ignore input lock
 
 	/*
 	// Shake Action
@@ -85,7 +87,7 @@ public class punchAction2 : MonoBehaviour {
 			locked = false;
 			return;
 		}
-
+			
 		// mouse input need change to phone touch input
 		if (Input.GetMouseButtonDown(0))
 		{
@@ -161,21 +163,46 @@ public class punchAction2 : MonoBehaviour {
 				fist.GetComponent<spawnFist> ().sendPunch (false, dest.y, dest.x);
 			}
 		}
-		fist.GetComponent<Punch> ().sendPunch (dest);
+		fist.GetComponent<Punch> ().sendPunch (dest, Punch.PunchDirection.X);
 		fist.transform.SetParent(monster.transform, true);
 
 		//Debug.Log (dest.x);
 		//pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
 	}
 
-	public void punchGround()
+	public void punchGround(int times)
 	{
-		locked = true;
+		//locked = true;
+		ground.GetComponent<Ground> ().startShake (1.0f * times);
 		Debug.Log ("punch ground");
-		_inputPosition = new Vector3 (0.0f, groundY, 0.0f);
-		initPunch(PUNCHINGLEFT);
-		initPunch(PUNCHINGRIGHT);
-		ground.GetComponent<Ground> ().startShake ();
+		StartCoroutine(bangGround(times));
+		//_inputPosition = new Vector3 (0.0f, groundY, 0.0f);
+		//initPunch(PUNCHINGLEFT);
+		//initPunch(PUNCHINGRIGHT);
+		//ground.GetComponent<Ground> ().startShake ();
+	}
+
+	IEnumerator bangGround(int times)
+	{
+		Debug.Log ("Banging");
+		GameObject fist;
+		Vector2 dest;
+		if (times % 2 == 0) {
+			dest = new Vector2 (BANG_L_X, groundY);
+			fist = Instantiate (leftFist, new Vector3 (dest.x, IDLE_L_Y, PUNCH_Z), Quaternion.identity);
+			Debug.Log ("leftFist");
+		} else {
+			dest = new Vector2 (-BANG_L_X, groundY);
+			fist = Instantiate (rightFist, new Vector3 (dest.x, IDLE_L_Y, PUNCH_Z), Quaternion.identity);
+			Debug.Log ("rightFist");
+		}
+		fist.GetComponent<Punch> ().sendPunch (dest, Punch.PunchDirection.Y);
+		fist.transform.SetParent(monster.transform, true);
+		yield return new WaitForSeconds (0.2f);
+
+		times = times-1;
+		if(times > 0)
+			StartCoroutine (bangGround (times));
 	}
 
 }
