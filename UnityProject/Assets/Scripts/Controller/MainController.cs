@@ -141,6 +141,7 @@ public class MainController : MonoBehaviour
 				{"Time", DateTime.UtcNow.ToString()},
 				{"DestructionTime", destructionTime}
 			});
+			markerIdAnalytics = null;
 		}
 		lastGameState = gameState;
 		Debug.Log ("go to map");
