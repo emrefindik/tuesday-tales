@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using System;
+using UnityEngine.Analytics;
 
 public class SpatialClient2 : MonoBehaviour
 {
@@ -37,6 +38,12 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     private LoginResponse userSession = null;
+
+	public string userId{
+		get{
+			return userSession.User.Id;
+		}
+	}
 
     private Dictionary<string, FriendData> friends = new Dictionary<string, FriendData>();
     public IEnumerable<FriendData> Friends
@@ -102,6 +109,12 @@ public class SpatialClient2 : MonoBehaviour
     // START OF EMRE'S CODE
     public IEnumerator resetStreak()
     {
+		Analytics.CustomEvent ("EndOfStreak", new IDictionary<string,object> {
+			{"PlayerId", userId},
+			{"StreakLength",userSession.User.Metadata.StreakMarkers.length},
+			{"StreakStart",userSession.User.Metadata.StreakMarkers [0]},
+			{"StreakEnd", userSession.User.Metadata.StreakMarkers [userSession.User.Metadata.StreakMarkers.length-1]}
+		});
         userSession.User.Metadata.resetStreak();
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
         Debug.Log("reset streak");
