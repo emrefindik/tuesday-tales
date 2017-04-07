@@ -8,11 +8,6 @@ public class EggMenuItem : FriendEggMenuItem
     public static OwnedEgg eggToSend;
 
     public Button _sendToFriendButton;
-    
-    public void ownEggCheckInButtonHandler()
-    {
-        StartCoroutine(checkInButtonHandler(MainMenuScript.EggsCanvas));
-    }
 
     // TODO implement this
     public void sendToFriendButtonHandler()

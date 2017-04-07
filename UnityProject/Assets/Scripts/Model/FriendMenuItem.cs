@@ -30,6 +30,6 @@ public class FriendMenuItem : MonoBehaviour
         MainMenuScript.FriendsCanvas.enabled = false;
         EggMenuItem.eggToSend._friendUserID = _friend.Friend.Id;
         //fd.friend.metadata.friendsEggs.Add(_egg); don't do this since we can't update friends' metadata
-        StartCoroutine(SpatialClient2.single.UpdateMetadata("Could not send egg " + EggMenuItem.eggToSend._name + " to " + _friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION));
+        StartCoroutine(SpatialClient2.single.UpdateMetadata("Could not send egg " + EggMenuItem.eggToSend.Name + " to " + _friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION));
     }
 }

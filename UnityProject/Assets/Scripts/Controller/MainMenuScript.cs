@@ -8,7 +8,10 @@ using UnityEngine.SceneManagement;
 public class MainMenuScript : MonoBehaviour
 {
     // time interval between location marker updates on map, in seconds
-    const float LOCATION_MARKER_UPDATE_INTERVAL = 4.0f;
+    const float LOCATION_MARKER_UPDATE_INTERVAL = 2.0f;
+
+    // time interval between updates on whether eggs on the eggs canvas can be checked in, in seconds
+    const float CHECK_INNABLE_UPDATE_INTERVAL = 10.0f;
 
     // frequency of queries on whether location service is enabled, in number per second
     const int LOCATION_INITIALIZED_QUERIES_PER_SECOND = 4;
@@ -23,106 +26,77 @@ public class MainMenuScript : MonoBehaviour
 
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
     const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
-    const string JS_CHECKIN_LOCATION = "addPointToPath";
+    //const string JS_CHECKIN_LOCATION = "addPointToPath";
 
     private static Canvas errorCanvas;
     public static Canvas ErrorCanvas
     {
-        get
-        {
-            return errorCanvas;
-        }
-        private set
-        {
-            errorCanvas = value;
-        }
+        get { return errorCanvas; }
+        private set { errorCanvas = value; }
     }
 
     // Displays all of the player's own eggs
     private static Canvas eggsCanvas;
     public static Canvas EggsCanvas
     {
-        get
-        {
-            return eggsCanvas;
-        }
-        private set
-        {
-            eggsCanvas = value;
-        }
+        get { return eggsCanvas; }
+        private set { eggsCanvas = value; }
     }
 
     // Temporary. May get rid of it if we decided to get rid of sending eggs completely
     private static Canvas friendsCanvas;
     public static Canvas FriendsCanvas
     {
-        get
-        {
-            return friendsCanvas;
-        }
-        private set
-        {
-            friendsCanvas = value;
-        }
+        get { return friendsCanvas; }
+        private set { friendsCanvas = value; }
     }
 
     // Displays all the eggs from all the friends
     private static Canvas friendsEggsCanvas;
     public static Canvas FriendsEggsCanvas
     {
-        get
-        {
-            return friendsEggsCanvas;
-        }
-        private set
-        {
-            friendsEggsCanvas = value;
-        }
+        get { return friendsEggsCanvas; }
+        private set { friendsEggsCanvas = value; }
     }
 
     private static Canvas checkedInCanvas;
     public static Canvas CheckedInCanvas
     {
-        get
-        {
-            return checkedInCanvas;
-        }
-        private set
-        {
-            checkedInCanvas = value;
-        }
+        get { return checkedInCanvas; }
+        private set { checkedInCanvas = value; }
     }
 
     private static Canvas checkInErrorCanvas;
     public static Canvas CheckInErrorCanvas
     {
-        get
-        {
-            return checkInErrorCanvas;
-        }
-        private set
-        {
-            checkInErrorCanvas = value;
-        }
+        get { return checkInErrorCanvas; }
+        private set { checkInErrorCanvas = value; }
     }
 
     private static Text checkInErrorMessage;
     public static Text CheckInErrorMessage
     {
-        get
-        {
-            return checkInErrorMessage;
-        }
-        private set
-        {
-            checkInErrorMessage = value;
-        }
+        get { return checkInErrorMessage; }
+        private set { checkInErrorMessage = value; }
+    }
+
+    private static UniWebView webView;
+    public static UniWebView WebView
+    {
+        get { return webView; }
+        private set { webView = value; }
     }
 
     // the canvas that directed to the wait screen
     private static Canvas previousCanvas;
 
     private static Canvas pleaseWaitCanvas;
+
+    private static Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> idMarkers;
+    public static void removeEntryFromIdMarkers(string id, OwnedEgg egg)
+    {
+        idMarkers[id].Remove(egg);
+    }
 
     private bool mapLoaded;
 
@@ -185,12 +159,19 @@ public class MainMenuScript : MonoBehaviour
 
     private Coroutine _locationUpdateCoroutine;
 
+    List<SpatialMarker> _markersByDistance;
+    Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> _idMarkers;
+    CoroutineResponse _spatialResponse;
+    Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> _placeTypes;
+    Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
+    Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
+
 
     // Use this for initialization
     void Start()
     {
         _locationUpdateCoroutine = null;
-
+        webView = _webView;
         errorCanvas = _locationStartErrorCanvas;
         eggsCanvas = _eggsCanvas;
         checkedInCanvas = _checkedInCanvas;
@@ -217,7 +198,6 @@ public class MainMenuScript : MonoBehaviour
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
         _webView.OnReceivedMessage += onReceivedMessage;
-
     }
 
     public void Update()
@@ -246,7 +226,7 @@ public class MainMenuScript : MonoBehaviour
             case true:
                 // initialize egg menu
                 addButtons();
-
+                initializeCheckinDataStructures();
                 // logged in, switch to main menu
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = false;
@@ -382,56 +362,42 @@ public class MainMenuScript : MonoBehaviour
 				mapLoaded = false;
                 _webView.Hide();
                 break;
-            case "marker":
+            case "eggs":
+                /* StopCoroutine(_locationUpdateCoroutine);
+                _friendsEggsCanvas.enabled = false;
+                _eggsCanvas.enabled = false;
+                _checkedInText.text =
+                    "Checked in " + "egg" + " at " + Input.location.lastData.latitude.ToString()
+                    + ", " + Input.location.lastData.longitude.ToString();
+                _checkedInCanvas.enabled = true;
+                _webView.Stop();
+                mapLoaded = false;
+                _webView.Hide(); */
+
+                _webView.Stop();
                 StopCoroutine(_locationUpdateCoroutine);
-                // check for distance
-                Debug.Log("Receive marker message: " + message.rawMessage);
-                double markerLat;
-                Double.TryParse(message.args["lat"], out markerLat);
-                Debug.Log ("markerLat: " + markerLat);
-                double markerLon;
-                Double.TryParse(message.args["lon"], out markerLon);
-                Debug.Log ("markerLon:" + markerLon);
-                /*currentMarker.lat = markerLat;
-                currentMarker.lon = markerLon; */
-                //Debug.Log ("Device Lat:" + Input.location.lastData.latitude);
-                //Debug.Log ("Device Lon:" + Input.location.lastData.longitude);
-				
-                // TODO REPLACE THIS AFTER THE PLAYTEST
+                _eggsCanvas.enabled = true;
+                StartCoroutine(updateCheckinnables());
+                mapLoaded = false;
+                _webView.Hide();
 
-                if(Geography.withinDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, markerLat, markerLon, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE)){
-					Debug.Log ("fack");
-					_friendsEggsCanvas.enabled = false;
-					Debug.Log ("fack2");
-                    _eggsCanvas.enabled = false;
-					Debug.Log ("fack3");
-                    _checkedInText.text =
-                        "Checked in " + "egg" + " at " + Input.location.lastData.latitude.ToString()
-                        + ", " + Input.location.lastData.longitude.ToString();
-					Debug.Log ("fack4");
-                    _checkedInCanvas.enabled = true;
-				_loginCanvas.enabled = false;
-				Debug.Log ("fack5");
-                    _webView.Stop();
-				Debug.Log ("fack6");
-					mapLoaded = false;
-                    _webView.Hide();
-				Debug.Log ("fack7");
-                // TODO get message.args and redirect to correct marker's destruction
-
-                    // TODO check whether player is checking in or destroying city
-                    MainController.single.goToDestroyCity(message.args["id"]);
-				Debug.Log ("fack8");
-                }
-                else{
-                // Load Error Canvas
-                }
-
-                // END OF PART TO BE REPLACED AFTER THE PLAYTEST
-
+                // TODO update to actually check in
+                break;
+            case "destroy":
+                StopCoroutine(_locationUpdateCoroutine);
+                _webView.Stop();
+                mapLoaded = false;
+                _webView.Hide();
+                MainController.single.goToDestroyCity(message.args["id"]);
                 break;
             case "resetscore":
                 StartCoroutine(SpatialClient2.single.resetStreak());
+                break;
+            case "camera":
+                // TODO transfer to camera
+                break;
+            case "kaiju":
+
                 break;
             default:
                 break;
@@ -530,6 +496,99 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
+    public void initializeCheckinDataStructures()
+    {
+        _markersByDistance = new List<SpatialMarker>();
+        _idMarkers = new Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>>();
+        idMarkers = _idMarkers;
+        _spatialResponse = new CoroutineResponse();
+        _placeTypes = new Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>>();
+        _googleResponses = new Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse>();
+        _googleMarkers = new Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>>();
+        foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+        {
+            foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
+            {
+                if (loc.needToBeVisited())
+                {
+                    if (!_placeTypes.ContainsKey(loc.LocationType))
+                        _placeTypes[loc.LocationType] = new Dictionary<OwnedEgg, HashSet<GenericLocation>>();
+                    if (!_placeTypes[loc.LocationType].ContainsKey(item.Egg))
+                        _placeTypes[loc.LocationType][item.Egg] = new HashSet<GenericLocation>();
+                    _placeTypes[loc.LocationType][item.Egg].Add(loc);
+                }
+            }
+        }
+        foreach (GenericLocation.GooglePlacesType type in _placeTypes.Keys)
+        {
+            _googleResponses[type] = new CoroutineResponse();
+            _googleMarkers[type] = new List<BasicMarker>();
+        }
+        foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+        {
+            item.Egg.initializeCheckInnables();
+        }
+    }
+
+    public IEnumerator updateCheckinnables()
+    {
+        while (_eggsCanvas.enabled)
+        {
+            StartCoroutine(SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE, true, _markersByDistance, _spatialResponse));
+            foreach (GenericLocation.GooglePlacesType type in _placeTypes.Keys)
+            {
+                StartCoroutine(SpatialClient2.single.GetGoogleLocationsByDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE, _googleMarkers[type], type, _googleResponses[type]));
+            }
+
+            bool coroutinesGoing = true;
+            while (coroutinesGoing)
+            {
+                yield return null;
+                coroutinesGoing = false;
+                if (_spatialResponse.Success == null)
+                {
+                    coroutinesGoing = true;
+                    continue;
+                }
+                foreach (CoroutineResponse response in _googleResponses.Values)
+                {
+                    if (response.Success == null)
+                    {
+                        coroutinesGoing = true;
+                        continue;
+                    }
+                }
+            }
+
+            foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+            {
+                item.Egg.CheckInnableLocs.Clear();
+                item.Egg.CheckInnableMarkers.Clear();
+            }
+            foreach (GenericLocation.GooglePlacesType type in _googleMarkers.Keys)
+            {
+                if (_googleMarkers[type].Count > 0)
+                {
+                    foreach (OwnedEgg egg in _placeTypes[type].Keys)
+                    {
+                        egg.CheckInnableLocs[_googleMarkers[type][0]] = _placeTypes[type][egg];
+                    }
+                }
+            }
+            foreach (SpatialMarker marker in _markersByDistance)
+            {
+                if (idMarkers.ContainsKey(marker.Id))
+                {
+                    foreach (OwnedEgg egg in idMarkers[marker.Id].Keys)
+                    {
+                        egg.CheckInnableMarkers.Add(idMarkers[marker.Id][egg]);
+                    }
+                }
+            }
+            yield return new WaitForSeconds(CHECK_INNABLE_UPDATE_INTERVAL);
+        }
+    }
+
     public static void displayWaitScreen()
     {
         foreach (Canvas c in FindObjectsOfType<Canvas>())
@@ -566,7 +625,10 @@ public class MainMenuScript : MonoBehaviour
 
     public static void closeWaitScreen()
     {
-        pleaseWaitCanvas.enabled = false;
-        previousCanvas.enabled = true;
+        if (pleaseWaitCanvas.enabled)
+        {
+            pleaseWaitCanvas.enabled = false;
+            previousCanvas.enabled = true;
+        }
     }
 }

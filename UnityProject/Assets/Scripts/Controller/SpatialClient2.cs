@@ -11,21 +11,9 @@ public class SpatialClient2 : MonoBehaviour
     // Test Project ID: 588fb546604ae700118697c5
     public const string baseURL = "https://spatial-api-poc.herokuapp.com";
     public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // new test project ID
+    public const string GOOGLE_API_KEY = "AIzaSyCejidwxDYN4APVvtlE7ZPsBtVdhB7JG70";
 
     public static SpatialClient2 single;
-
-    private List<Marker> markers = new List<Marker>();
-    public List<Marker> Markers
-    {
-        get
-        {
-            return markers;
-        }
-        private set
-        {
-            markers = value;
-        }
-    }
 
     Dictionary<string, OwnedEgg> eggsOwned = new Dictionary<string, OwnedEgg>();
     public IEnumerable<OwnedEgg> EggsOwned
@@ -63,6 +51,10 @@ public class SpatialClient2 : MonoBehaviour
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
+
+        // delete this. this is for test
+        List<BasicMarker> bms = new List<BasicMarker>();
+        StartCoroutine(GetGoogleLocationsByDistance(43.44, -79.94, 3000, bms, GenericLocation.GooglePlacesType.STORE, new CoroutineResponse()));
     }
 
     private void Update()
@@ -139,14 +131,14 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator addEggToSelf(OwnedEgg egg)
     {
-        eggsOwned[egg._id] = egg;
-        yield return UpdateMetadataWithEggs("Could not add egg " + egg._name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        eggsOwned[egg.Id] = egg;
+        yield return UpdateMetadataWithEggs("Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
     public IEnumerator addEggToFriendsEggs(OwnedEgg egg)
     {
         userSession.User.Metadata.FriendsEggs.Add(egg);
-        yield return UpdateMetadata("Could not add egg " + egg._name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata("Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
     public string getNameOfFriend(string friendUserID)
@@ -254,7 +246,7 @@ public class SpatialClient2 : MonoBehaviour
         if (metadata != null)
             form.AddField("metadata", JsonUtility.ToJson(metadata));
         else
-            form.AddField("metadata", JsonUtility.ToJson(new MarkerMetadata()));
+            form.AddField("metadata", JsonUtility.ToJson(new MarkerMetadata(MarkerMetadata.MarkerType.GENERIC)));
 
         WWW www = new WWW(url, form);
         yield return www;
@@ -271,7 +263,7 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetMarkersByProject(string projectID = PROJECT_ID)
+    public IEnumerator GetMarkersByProject(List<SpatialMarker> markers, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -300,8 +292,40 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetMarkersByDistance(double longitude, double latitude, string projectID = PROJECT_ID)
+    public IEnumerator GetGoogleLocationsByDistance(double latitude, double longitude, double radius, List<BasicMarker> basicMarkers, GenericLocation.GooglePlacesType type, CoroutineResponse response)
     {
+        response.reset();
+        basicMarkers.Clear();
+        string url = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={0},{1}&radius={2}&type={3}&key={4}", latitude, longitude, radius, GenericLocation.googlePlacesTypeToString(type), GOOGLE_API_KEY);
+        WWW www = new WWW(url);
+        yield return www;
+
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            Debug.Log(www.error);
+        }
+        else
+        {
+            NearbySearchResponse rm = JsonUtility.FromJson<NearbySearchResponse>(www.text);
+            if (rm.status == "OK")
+            {
+                foreach (GooglePlaceResult result in rm.results)
+                    basicMarkers.Add(new BasicMarker(result.name, new Location(result.geometry.location.lat, result.geometry.location.lng)));
+                response.setSuccess(true);
+                Debug.Log(www.text);
+                Debug.Log(JsonUtility.ToJson(rm.results[0]));
+            }
+            else
+            {
+                response.setSuccess(false);
+                Debug.Log("Get google places failed. Status: " + rm.status);
+            }
+        }
+    }
+
+    public IEnumerator GetMarkersByDistance(double longitude, double latitude, List<SpatialMarker> markers, CoroutineResponse response, string projectID = PROJECT_ID)
+    {
+        response.reset();
         ready = false;
 
         string url = string.Format("{0}/v1/markers-by-distance", baseURL);
@@ -318,6 +342,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+            response.setSuccess(false);
             markers.Clear();
         }
         else
@@ -327,18 +352,22 @@ public class SpatialClient2 : MonoBehaviour
             {
                 markers = rm.Markers;
                 ready = true;
+                response.setSuccess(true);
                 Debug.Log(www.text);
             }
             else
             {
+                response.setSuccess(false);
                 Debug.Log("Get markers by Distance failed.");
             }
         }
 
     }
 
-    public IEnumerator GetMarkersByDistance(double longitude, double latitude, double value, bool isMeter, string projectID = PROJECT_ID)
+    public IEnumerator GetMarkersByDistance(double longitude, double latitude, double value, bool isMeter, List<SpatialMarker> markers, CoroutineResponse response, string projectID = PROJECT_ID)
     {
+        response.reset();
+        markers.Clear();
         ready = false;
 
         string url = string.Format("{0}/v1/markers-by-distance", baseURL);
@@ -363,6 +392,7 @@ public class SpatialClient2 : MonoBehaviour
         // Post Process
         if (!string.IsNullOrEmpty(www.error))
         {
+            response.setSuccess(false);
             print(www.error);
         }
         else
@@ -372,10 +402,12 @@ public class SpatialClient2 : MonoBehaviour
             {
                 markers = rm.Markers;
                 ready = true;
+                response.setSuccess(true);
                 Debug.Log(www.text);
             }
             else
             {
+                response.setSuccess(false);
                 Debug.Log("Get markers by distance failed.");
             }
         }
@@ -576,27 +608,35 @@ public class SpatialClient2 : MonoBehaviour
                     fd.Friend.Metadata.initializeEggsOwned();
                 if (fd.Friend.Metadata.FriendsEggs == null)
                     fd.Friend.Metadata.initializeFriendsEggs();
-                foreach (OwnedEgg egg in fd.Friend.Metadata.EggsOwned)
+                // TODO request system for accepting eggs
+
+                /*foreach (OwnedEgg egg in fd.Friend.Metadata.EggsOwned)
                 {
                     if (egg._friendUserID == userSession.User.Id)
                     {
-                        // todo request system for accepting eggs?
+                        // TODO request system for accepting eggs
                         userSession.User.Metadata.FriendsEggs.Add(egg);
                         metadataUpdated = true;
                     }
-                }
+                } */
                 foreach (OwnedEgg egg in fd.Friend.Metadata.FriendsEggs)
                 {
-                    if (egg._id.StartsWith(userSession.User.Id))
+                    if (egg.Id.StartsWith(userSession.User.Id))
                     {
-                        // even if this is not a new egg, update the entire egg, since its attributes may have changed while at the friend
-                        eggsOwned[egg._id] = egg;
+                        if (eggsOwned.ContainsKey(egg.Id))
+                        {
+                            eggsOwned[egg.Id].updateCheckins(egg);
+                        }
+                        else
+                        {
+                            eggsOwned[egg.Id] = egg;
+                        }
                         ownEggsUpdated = true;
                     }
                 }
             }
-            if (ownEggsUpdated) yield return UpdateMetadataWithEggs("Could not refresh your egg list. Check your internet connection.");
-            else if (metadataUpdated) yield return UpdateMetadata("Could not refresh the list for the eggs you are holding onto from your friends. Check your internet connection.");
+            if (ownEggsUpdated) yield return UpdateMetadataWithEggs("Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION);
+            else if (metadataUpdated) yield return UpdateMetadata("Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
             ready = true;
             Debug.Log(www.text);
             MainMenuScript.closeWaitScreen();
@@ -664,6 +704,25 @@ public class SpatialClient2 : MonoBehaviour
 	}
 }
 
+[System.Serializable]
+public class NearbySearchResponse
+{
+    //List<string> html_attributions;
+    public List<GooglePlaceResult> results;
+    public string status;
+}
+
+[System.Serializable]
+public class GooglePlaceResult
+{
+    public GooglePlaceGeometry geometry;
+    public string name;
+}
+[System.Serializable]
+public class GooglePlaceGeometry
+{
+    public LocationCoord location;
+}
 
 [System.Serializable]
 public class LoginResponse
@@ -733,7 +792,6 @@ public class UserData
 [System.Serializable]
 public class UserMetadata
 {
-    // START OF EMRE'S CODE
 
     // start time stamp to offset Spatial times by
     // set to UTC March 30th, 8:00 PM
@@ -747,7 +805,8 @@ public class UserMetadata
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
 
-    // END OF EMRE'S CODE
+    [SerializeField]
+    private KaijuList kaiju;
 
     [SerializeField]
     private EggList eggsOwned;
@@ -889,8 +948,8 @@ public class ResponseMarkersMessage
     }
 
     [SerializeField]
-    private List<Marker> markers = new List<Marker> { };
-    public List<Marker> Markers
+    private List<SpatialMarker> markers = new List<SpatialMarker> { };
+    public List<SpatialMarker> Markers
     {
         get { return markers; }
         private set { markers = value; }
@@ -898,7 +957,43 @@ public class ResponseMarkersMessage
 }
 
 [System.Serializable]
-public class Marker
+public class BasicMarker
+{
+    // maximum distance that two markers that are supposed to be the same place can be, in meters
+    public const double MINIMUM_MARKER_SEPARATION = 50.0;
+
+    [SerializeField]
+    protected string name;
+    public string Name
+    {
+        get { return name; }
+        private set { name = value; }
+    }
+
+    [SerializeField]
+    protected Location loc;
+    public Location Loc
+    {
+        get { return loc; }
+        private set { loc = value; }
+    }
+
+    public BasicMarker(string nm, Location location)
+    {
+        loc = location;
+        name = nm;
+    }
+
+    override public bool Equals(object obj)
+    {
+        if (obj == null || GetType() != obj.GetType()) return false;
+        BasicMarker bm = (BasicMarker)obj;
+        return (bm.name.ToLower() == name.ToLower()) || Geography.withinDistance(bm.loc.Latitude, bm.loc.Longitude, loc.Latitude, loc.Longitude, MINIMUM_MARKER_SEPARATION);
+    }
+}
+
+[System.Serializable]
+public class MarkerWithSpatialId : BasicMarker
 {
     [SerializeField]
     private string _id;
@@ -909,21 +1004,46 @@ public class Marker
     }
 
     [SerializeField]
-    private string name;
-    public string Name
-    {
-        get { return name; }
-        private set { name = value; }
-    }
-
-    [SerializeField]
-    private string description;
+    protected string description;
     public string Description
     {
         get { return description; }
         private set { description = value; }
     }
 
+    public MarkerWithSpatialId(string nm, Location location) : base(nm, location) {}
+}
+
+[System.Serializable]
+public class HatchLocationMarker : MarkerWithSpatialId, CheckInPlace
+{
+    [SerializeField]
+    private bool visited;
+
+    public HatchLocationMarker(string nm, Location location) : base(nm, location)
+    {
+        visited = false;
+    }
+
+    public string getDescriptor()
+    {
+        return name;
+    }
+
+    public bool needToBeVisited()
+    {
+        return !visited;
+    }
+
+    public void markVisited()
+    {
+        visited = true;
+    }
+}
+
+[System.Serializable]
+public class SpatialMarker : MarkerWithSpatialId
+{
     [SerializeField]
     private string projectId;
     public string ProjectId
@@ -934,21 +1054,14 @@ public class Marker
 
     [SerializeField]
     private MarkerMetadata metadata;
+
+    private SpatialMarker(string nm, Location location) : base(nm, location) { }
+
     public MarkerMetadata Metadata
     {
         get { return metadata; }
         private set { metadata = value; }
     }
-
-    [SerializeField]
-    private Location loc;
-    public Location Loc
-    {
-        get { return loc; }
-        private set { loc = value; }
-    }
-
-    public bool __v;
 }
 
 [System.Serializable]
@@ -1091,6 +1204,46 @@ public class FriendList
 }
 
 [System.Serializable]
+public class ImageBounds
+{
+    private double north;
+    public double North
+    {
+        get { return north; }
+        private set { north = value; }
+    }
+
+    private double south;
+    public double South
+    {
+        get { return south; }
+        private set { south = value; }
+    }
+
+    private double east;
+    public double East
+    {
+        get { return east; }
+        private set { east = value; }
+    }
+
+    private double west;
+    public double West
+    {
+        get { return west; }
+        private set { west = value; }
+    }
+
+    public ImageBounds(double n, double s, double e, double w)
+    {
+        north = n;
+        south = s;
+        east = e;
+        west = w;
+    }
+}
+
+[System.Serializable]
 public class MarkerMetadata
 {
     private const string MAP_OVERLAY = "overlay";
@@ -1146,6 +1299,13 @@ public class MarkerMetadata
         }
     }
 
+    [SerializeField]
+    private string destroyedImagePath;
+    [SerializeField]
+    private string intactImagePath;
+    [SerializeField]
+    private ImageBounds imageBounds;
+
     // TODO figure the fields out
 
     public MarkerMetadata(MarkerType t)
@@ -1186,7 +1346,7 @@ public class EggList : IEnumerable<OwnedEgg>
         Dictionary<string, OwnedEgg> dict = new Dictionary<string, OwnedEgg>();
         foreach (OwnedEgg egg in list)
         {
-            dict[egg._id] = egg;
+            dict[egg.Id] = egg;
         }
         return dict;
     }
@@ -1197,6 +1357,50 @@ public class EggList : IEnumerable<OwnedEgg>
     }
 
     public OwnedEgg this[int index]
+    {
+        get { return list[index]; }
+        // there should be no set!
+    }
+}
+
+/** An immutable list of kaiju. */
+[System.Serializable]
+public class KaijuList : IEnumerable<Kaiju>
+{
+    [SerializeField]
+    private List<Kaiju> list;
+
+    public KaijuList()
+    {
+        list = new List<Kaiju>();
+    }
+
+    public KaijuList(IEnumerable<Kaiju> kaiju)
+    {
+        list = new List<Kaiju>(kaiju);
+    }
+
+    public IEnumerator<Kaiju> GetEnumerator()
+    {
+        return list.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return list.GetEnumerator();
+    }
+
+    public int length()
+    {
+        return list.Count;
+    }
+
+    public void hatchEgg(OwnedEgg egg)
+    {
+        list.Add(egg.KaijuEmbryo);
+    }
+
+    public Kaiju this[int index]
     {
         get { return list[index]; }
         // there should be no set!

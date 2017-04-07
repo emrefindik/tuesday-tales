@@ -27,7 +27,7 @@ public class FriendEggMenuItem : MonoBehaviour
         {
             _egg = value;
             // TODO uncomment this after figuring out how to store the images _eggImage.sprite = e.egg.image;
-            _eggNameText.text = value._name;
+            _eggNameText.text = value.Name;
             if (value._friendUserID != null) _friendNameText.text = SpatialClient2.single.getNameOfFriend(value._friendUserID);
         }
     }
@@ -44,20 +44,12 @@ public class FriendEggMenuItem : MonoBehaviour
 
     }
 
-    public void friendEggCheckInButtonHandler()
+    public void checkInButtonHandler()
     {
-        if (_egg._friendUserID != null)
-        {
-            StartCoroutine(checkInButtonHandler(MainMenuScript.FriendsEggsCanvas));
-        }
-        else
-        {
-            MainMenuScript.displayError("Your friend " + SpatialClient2.single.getNameOfFriend(_egg._friendUserID) +
-                " is currently holding onto this egg, they have to send it back to you first.");
-        }
+        StartCoroutine(checkInEgg());
     }
 
-    protected IEnumerator checkInButtonHandler(Canvas openCanvas)
+    /*protected IEnumerator checkInButtonHandler(Canvas openCanvas)
     {
         foreach (Location loc in _egg._hatchLocations)
         {
@@ -74,12 +66,14 @@ public class FriendEggMenuItem : MonoBehaviour
         }
         // could not check in since too far from desired location
         MainMenuScript.displayError("You are too far from a desirable location to check in " + _egg._name + '!');
-    }
+    } */
 
     public IEnumerator checkInEgg()
     {
-        _egg._size += EGG_SIZE_INCREMENT;
-        yield return SpatialClient2.single.UpdateMetadata("Could not check in egg " + _egg._name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+        MainMenuScript.displayWaitScreen();
+        _egg.checkIn();
+        yield return SpatialClient2.single.UpdateMetadata("Could not check in egg " + _egg.Name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+        MainMenuScript.closeWaitScreen();
     }
 
 }

@@ -11,7 +11,10 @@
     #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 30%; }
     #timervalue { position: absolute; bottom: 35%; right: 5%; width: 40%; height: 30%; }
     #multipliervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 30%; }
-    h1 { font-size: 20px; } 
+	#eggsButton { position: absolute; right: 4%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
+	#kaijuButton { position: absolute; left: 37%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
+	#cameraButton { position: absolute; left: 4%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
+    h1 { font-size: 20px; }
 </style>
 <div id="wrapper">
 	<div id="map"></div>
@@ -23,11 +26,48 @@
 		<div id="timervalue"><h1 id="time"></h1></div>
 		<div id="multipliervalue"><h1 id="multiplier"></h1></div>
     </div>
+	<button id="eggsButton" onclick="toEggs()">Look at Your Eggs</button>
+	<button id="kaijuButton" onclick="toKaiju()">Select Your Kaiju</button>
+	<button id="cameraButton" onclick="toCamera()">Take a Photo</button>
 </div>
 <script>
 // furthest distance to fetch markers from, in meters
 markerRadius = 6000;
 score = 0;
+
+function toEggs() {
+	window.location.href = "uniwebview://eggs";
+}
+
+function toKaiju() {
+	window.location.href = "uniwebview://kaiju";
+}
+
+function toCamera() {
+	window.location.href = "uniwebview://camera";
+}
+
+function deg2rad(deg) {
+	return deg * (Math.PI / 180);
+}
+
+function withinDistance(lat1, lon1, lat2, lon2, radius) {
+    return radius > getDistanceFromLatLonInM(lat1, lon1, lat2, lon2);
+}
+
+function withinDistance(loc1, loc2, radius){
+    return radius > getDistanceFromLatLonInM(loc1.lat(), loc1.lng(), loc2.lat(), loc2.lng());
+}
+
+function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+	var dLat = deg2rad(lat2-lat1);
+	var dLon = deg2rad(lon2-lon1);
+	var a = 
+		Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+		Math.sin(dLon/2) * Math.sin(dLon/2); 
+	return (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 6371000;
+}
 
 function updateCurrentLocation(lat, lon){
     latitude = lat;
@@ -97,39 +137,12 @@ function updateTimer()
     updateDisplayedTime();
 }
 
-function onMarkerClick(markerId, lat, lon, markerType) {
-	window.location.href = "uniwebview://marker?id=" + markerId + "&lat="+lat+"&lon="+lon+"&type=" + markerType;
-}
-
-function BackControl(controlDiv) {
-
-	// Set CSS for the control border.
-	var controlUI = document.createElement('div');
-	controlUI.style.backgroundColor = '#fff';
-	controlUI.style.border = '2px solid #fff';
-	controlUI.style.borderRadius = '3px';
-	controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-	controlUI.style.cursor = 'pointer';
-	controlUI.style.marginBottom = '22px';
-	controlUI.style.textAlign = 'center';
-	controlUI.title = 'Click to go back to the menu';
-	controlDiv.appendChild(controlUI);
-
-	// Set CSS for the control interior.
-	var controlText = document.createElement('div');
-	controlText.style.color = 'rgb(25,25,25)';
-	controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-	controlText.style.fontSize = '14px';
-	controlText.style.lineHeight = '38px';
-	controlText.style.paddingLeft = '5px';
-	controlText.style.paddingRight = '5px';
-	controlText.innerHTML = 'Back to Menu';
-	controlUI.appendChild(controlText);
-
-	// Setup the click event listeners: simply set the map to Chicago.
-	controlUI.addEventListener('click', function() {
-		window.location.href = "uniwebview://back";
-	});
+function onMarkerClick(markerId, markerPosition) {
+	if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
+		window.location.href = "uniwebview://destroy?id=" + markerId;
+	} else {
+		// TODO show error screen
+	}
 }
 
 function updatePath() {
@@ -137,43 +150,19 @@ function updatePath() {
 	googleMarkers.forEach(function(marker) {
 		for (var i = 0; i < pathMarkerSpatialIds.length; i++) {
 			if (pathMarkerSpatialIds[i] == marker.spatialId) {
-				marker.setIcon({
-					path: google.maps.SymbolPath.CIRCLE,
-					scale: 15,
-					strokeWeight: 1,
-					strokeOpacity: 0.3,
-					fillColor: 'grey',
-					fillOpacity: 1
-				});
-				if (marker.clickListener != null)
-				{
-					marker.removeListener(marker.clickListener);
-					marker.clickListener = null;
-				}
 				newPath.push(marker.getPosition());
+				marker.setMap(null);
+				marker.intactOverlay.setMap(null);
+				marker.destroyedOverlay.setMap(map);
 				return;
 			}
 		}
 		// we know marker is not in path
-		marker.setIcon({
-					path: google.maps.SymbolPath.CIRCLE,
-					scale: 15,
-					strokeWeight: 2,
-					strokeColor: 'black',
-					fillColor: 'blue',
-					fillOpacity: 1
-				});
-		if (marker.clickListener == null)
-		{
-			marker.addListener('click', function() { onMarkerClick(marker.spatialId, marker.getPosition().lat(), marker.getPosition().lng(), "no type"); });
-		}
+		marker.setMap(map);
+		marker.intactOverlay.setMap(map);
+		marker.destroyedOverlay.setMap(null);
 	});
 	destroyPath.setPath(newPath);
-}
-
-function addPointToPath(updatedPathMarkerIds) {
-    pathMarkerSpatialIds = updatedPathMarkerIds;
-	updatePath();
 }
 
 function initializeMap() {
@@ -189,11 +178,6 @@ function initializeMap() {
 		map.setCenter(mapCenter);
 	});
 	
-	var backButtonDiv = document.createElement('div');
-    var backControl = new BackControl(backButtonDiv);
-
-    backButtonDiv.index = 1;
-    map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(backButtonDiv);
     meLocation = new google.maps.Marker({
                                               position: {lat: latitude, lng: longitude},
                                               map: map,
@@ -221,25 +205,33 @@ function initializeMap() {
                                               
     destroyPath.setMap(map);
 	googleMarkers = [];
-    
-	spatialMarkers.forEach(function(spatialMarker) {		
-		var googleMarker = new google.maps.Marker({
-			position: {lat: spatialMarker.loc.coordinates[1], lng: spatialMarker.loc.coordinates[0]},
-			map: map,
-			label: {
-				color: "yellow",
-				fontSize: "35px",
-				fontWeight: "bold",
-				text: spatialMarker.name
-			},
-			title: spatialMarker.name
-		});
-		googleMarker.spatialId = spatialMarker._id;
-        //googleMarker.clickListener = null;
-		googleMarkers.push(googleMarker);
-        googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, spatialMarker.loc.coordinates[1], spatialMarker.loc.coordinates[0], "no type"); });                   
+	spatialMarkers.forEach(function(spatialMarker) {
+		switch (spatialMarker.metadata.type) {
+			case "building":
+				var googleMarker = new google.maps.Marker({
+					position: {lat: spatialMarker.loc.coordinates[1], lng: spatialMarker.loc.coordinates[0]},
+					label: {
+						color: "yellow",
+						fontSize: "35px",
+						fontWeight: "bold",
+						text: spatialMarker.name
+					},
+					title: spatialMarker.name
+				});
+				googleMarker.spatialId = spatialMarker._id;
+				googleMarker.addListener('click', function() { onMarkerClick(googleMarker.spatialId, googleMarker.getPosition()); });
+				googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
+				googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
+				googleMarkers.push(googleMarker);
+				break;
+			case "overlay":
+				var mapOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
+				mapOverlay.setMap(map);
+				break;
+			default:
+				break;
+		}
 	});
-	
 	updatePath();
 }
 
@@ -248,7 +240,6 @@ function initializeMap() {
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
 function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
-	
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
@@ -291,7 +282,8 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
 }
 
 resizeMap();
-
+//loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
+loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
 </script>
 </body>
 </html>
