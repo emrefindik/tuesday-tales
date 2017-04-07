@@ -38,13 +38,46 @@ public class punchAction2 : MonoBehaviour {
 
 	bool locked = false;
 
+	/*
+	// Shake Action
+	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
+	const float lowPassKernelWidthInSeconds = 1.0f;
+	float shakeDetectionThreshold = 2.0f;
+	float lowPassFilterFactor = accelerometerUpdateInterval /
+		lowPassKernelWidthInSeconds;
+	Vector3 lowPassValue;
+	bool shakable = false;
+	float shakeInterval = 10.0f;
+
+	GameObject shakeText;
+	*/
+
     void Start () {
         leftFist.GetComponent<Collider>().enabled = false;
         rightFist.GetComponent<Collider>().enabled = false;
 
 		locked = false;
 		level2On = false;
+
+		/*
+		// Shake Action
+		shakeDetectionThreshold *= shakeDetectionThreshold;
+		lowPassValue = Input.acceleration;
+		//StartCoroutine (startShakeCountDown());
+
+		shakeText = GameObject.Find ("ShakeText");
+		shakeText.SetActive (false);
+		*/
     }
+
+	/*
+	public IEnumerator startShakeCountDown()
+	{
+		yield return new WaitForSeconds (shakeInterval);
+		shakable = true;
+		shakeText.SetActive (true);
+	}
+	*/
 
 	void Update () {
 
@@ -88,6 +121,25 @@ public class punchAction2 : MonoBehaviour {
 			}
 		}
 
+		/*
+		if (shakable) {
+			Vector3 acceleration = Input.acceleration;
+			lowPassValue = Vector3.Lerp(lowPassValue, acceleration, lowPassFilterFactor);
+			Vector3 deltaAcceleration = acceleration - lowPassValue;
+
+			if (deltaAcceleration.sqrMagnitude >= shakeDetectionThreshold)
+			{
+				// Perform your "shaking actions" here. If necessary, add suitable
+				// guards in the if check above to avoid redundant handling during
+				// the same shake (e.g. a minimum refractory period).
+				//Debug.Log("Shake event detected at time "+Time.time);
+				//punchGround();
+				shakable = false;
+				shakeText.SetActive (false);
+				//StartCoroutine (startShakeCountDown ());
+			}
+		}
+		*/
 
 	}
 		
@@ -96,7 +148,6 @@ public class punchAction2 : MonoBehaviour {
 		GameObject fist;
 		Vector2 dest;
 		if (punchDirection == PUNCHINGLEFT) {
-			Debug.Log ("Punching Left");
 			dest = new Vector2 (IDLE_L_X + punchStrength, _inputPosition.y);
 			fist = Instantiate (leftFist, new Vector3 (IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {
@@ -104,7 +155,6 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 		} else {
-			Debug.Log ("Punching Right");
 			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
 			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {

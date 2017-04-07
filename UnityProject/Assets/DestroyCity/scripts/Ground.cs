@@ -20,7 +20,9 @@ public class Ground : MonoBehaviour {
 	void Update () {
 		if (shake) {
 			offset = Mathf.PingPong (Time.time, 0.05f);
-			transform.position = new Vector3 (transform.position.x, baseY + offset *  10f, this.transform.position.z);
+			transform.position = new Vector3 (transform.position.x, baseY + offset * 50f, transform.position.z);
+		} else {
+			transform.position = new Vector3 (transform.position.x, baseY, transform.position.z);
 		}
 	}
 

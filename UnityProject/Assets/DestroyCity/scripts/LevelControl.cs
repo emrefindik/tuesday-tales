@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Linq;
 
 public class LevelControl : MonoBehaviour {
@@ -13,16 +14,17 @@ public class LevelControl : MonoBehaviour {
     public GameObject[] structures = new GameObject[4];
 	public GameObject winCanvas;
 	public GameObject gameCanvas;
+	public GameObject findEggCanvas;
 	public GameObject shareSucceedCanvas;
     public bool switchNow=false;
 	public Texture2D barFull;
 	public Texture2D barEmpty;
 	public int score;
 
-	PixelDestruction pD;
+	//PixelDestruction pD;
     float[] levelPositions;
-	Vector2 fingerStart;
-	Vector2 fingerEnd;
+	//Vector2 fingerStart;
+	//Vector2 fingerEnd;
 
     // GUI
     Vector2 barPos = new Vector2(20, 40);
@@ -51,10 +53,20 @@ public class LevelControl : MonoBehaviour {
 	int fallenPiecesCount;
 	public punchAction2 pA;
 
-
 	// Wait for other process to finish
-
 	static public FacebookManager.ShareStatus shareStatus;
+
+	// Shake Action
+	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
+	const float lowPassKernelWidthInSeconds = 1.0f;
+	float shakeDetectionThreshold = 2.0f;
+	float lowPassFilterFactor = accelerometerUpdateInterval /
+		lowPassKernelWidthInSeconds;
+	Vector3 lowPassValue;
+	bool shakeNow = false;
+	float shakeInterval = 10.0f;
+
+	GameObject shakeText;
 
     public enum Movement
     {
@@ -95,7 +107,7 @@ public class LevelControl : MonoBehaviour {
 
     void initSystem()
     {
-        pD = FindObjectOfType(typeof(PixelDestruction)) as PixelDestruction;
+        //pD = FindObjectOfType(typeof(PixelDestruction)) as PixelDestruction;
 
         number_of_buildings = realBuilding.Length;
         levelPositions = new float[number_of_buildings];
@@ -119,6 +131,8 @@ public class LevelControl : MonoBehaviour {
 	{
 		winCanvas.SetActive(false);
 		shareSucceedCanvas.SetActive(false);
+		findEggCanvas.SetActive (false);
+
 
 		score = 0;
 		buildingDestroyedCount = 0;
@@ -128,8 +142,17 @@ public class LevelControl : MonoBehaviour {
 
 		// For Jonathan's destroy city
 		fallenPiecesCount = 0;
-	}
+		GetComponent<SpriteControl> ().deactivateColor ();
 
+		// Shake Action
+		shakeDetectionThreshold *= shakeDetectionThreshold;
+		lowPassValue = Input.acceleration;
+		//StartCoroutine (startShakeCountDown());
+
+		shakeText = GameObject.Find ("ShakeText");
+		shakeText.SetActive (false);
+	}
+		
     private void OnGUI()
     {
 		switch (shareStatus) {
@@ -162,8 +185,16 @@ public class LevelControl : MonoBehaviour {
 			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
 			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
 		} else {
-			if(winCanvas && (winCoroutineEnded.Success == true))
+			if (findEggCanvas.activeSelf)
+				return;
+			if (winCanvas && (winCoroutineEnded.Success == true)) {
+			//if (winCanvas) {
+				Debug.Log ("show win");
+				GameObject scoreText = winCanvas.transform.FindChild ("ScoreText").gameObject;
+				Debug.Log (scoreText.GetComponent<Text> ().text);
+				scoreText.GetComponent<Text> ().text = "x " + score.ToString();
 				winCanvas.SetActive (true);
+			}
 		}
     }
 
@@ -181,6 +212,8 @@ public class LevelControl : MonoBehaviour {
 			if (fallenPiecesCount == num_of_pieces) {
 				if (pA) {
 					pA.level2On = true;
+					//StartCoroutine (pA.startShakeCountDown ());
+					GetComponent<SpriteControl> ().activateColor ();
 				}
 			}
 			progressAmount = ProgressAmount.Building;
@@ -210,7 +243,7 @@ public class LevelControl : MonoBehaviour {
             buildingDestroyedCount++;
         }
 
-		Debug.Log (progressCount [level]);
+		//Debug.Log (progressCount [level]);
     }
 
     public void increaseScore(int increment)
@@ -225,24 +258,56 @@ public class LevelControl : MonoBehaviour {
         //if(buildingDestroyedCount == number_of_buildings)
 		if(buildingDestroyedCount == number_of_buildings)
         {
-            win = true;
+            shakeNow = true;
+			shakeText.SetActive (true);
             buildingDestroyedCount = -1;
-			StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
         }
 
-
+		/*
         if (Input.GetMouseButtonDown(0))
         {
             fingerStart = Input.mousePosition;
             fingerEnd = Input.mousePosition;
         }
+        */
+		if (shakeNow) {
+			Vector3 acceleration = Input.acceleration;
+			lowPassValue = Vector3.Lerp(lowPassValue, acceleration, lowPassFilterFactor);
+			Vector3 deltaAcceleration = acceleration - lowPassValue;
+
+			if (deltaAcceleration.sqrMagnitude >= shakeDetectionThreshold)
+			{
+				// Perform your "shaking actions" here. If necessary, add suitable
+				// guards in the if check above to avoid redundant handling during
+				// the same shake (e.g. a minimum refractory period).
+				//Debug.Log("Shake event detected at time "+Time.time);
+				//punchGround();
+				shakeNow  = false;
+				shakeText.SetActive (false);
+				GameObject mainController = GameObject.Find ("MainController");
+				int eggIndex = mainController.GetComponent<EggGenerator> ().generate ();
+				GameObject EggImage = findEggCanvas.transform.FindChild ("EggImage").gameObject;
+				EggImage.GetComponent<Image> ().sprite = mainController.GetComponent<EggGenerator>().eggSprites[eggIndex];
+				//StartCoroutine (startShakeCountDown ());
+				findEggCanvas.SetActive(true);
+				win = true;
+			}
+
+
+		}
 
         if (switchNow)
         {
             goToLevel(level);
         }
         //pD.switchCity(level);
-}
+	}
+
+	public void closeFindEggCanvas()
+	{
+		findEggCanvas.SetActive (false);
+	}
 
     void goToLevel(int level)
     {
