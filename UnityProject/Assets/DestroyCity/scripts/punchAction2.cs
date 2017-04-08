@@ -14,6 +14,8 @@ public class punchAction2 : MonoBehaviour {
 	const float TAPTOLERENCE = 10;
 
 	const float IDLE_L_X = -5.0f;
+	const float IDLE_L_Y = 10f;
+	const float BANG_L_X = -2f;
 
 	//float timeCountLX = 0;
 	//float timeCountRX = 0;
@@ -36,7 +38,21 @@ public class punchAction2 : MonoBehaviour {
 	public GameObject ground;
 	const float groundY = -5.0f;
 
-	bool locked = false;
+	bool locked = false;	// ignore input lock
+
+	/*
+	// Shake Action
+	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
+	const float lowPassKernelWidthInSeconds = 1.0f;
+	float shakeDetectionThreshold = 2.0f;
+	float lowPassFilterFactor = accelerometerUpdateInterval /
+		lowPassKernelWidthInSeconds;
+	Vector3 lowPassValue;
+	bool shakable = false;
+	float shakeInterval = 10.0f;
+
+	GameObject shakeText;
+	*/
 
     void Start () {
         leftFist.GetComponent<Collider>().enabled = false;
@@ -44,7 +60,26 @@ public class punchAction2 : MonoBehaviour {
 
 		locked = false;
 		level2On = false;
+
+		/*
+		// Shake Action
+		shakeDetectionThreshold *= shakeDetectionThreshold;
+		lowPassValue = Input.acceleration;
+		//StartCoroutine (startShakeCountDown());
+
+		shakeText = GameObject.Find ("ShakeText");
+		shakeText.SetActive (false);
+		*/
     }
+
+	/*
+	public IEnumerator startShakeCountDown()
+	{
+		yield return new WaitForSeconds (shakeInterval);
+		shakable = true;
+		shakeText.SetActive (true);
+	}
+	*/
 
 	void Update () {
 
@@ -52,7 +87,7 @@ public class punchAction2 : MonoBehaviour {
 			locked = false;
 			return;
 		}
-
+			
 		// mouse input need change to phone touch input
 		if (Input.GetMouseButtonDown(0))
 		{
@@ -88,6 +123,25 @@ public class punchAction2 : MonoBehaviour {
 			}
 		}
 
+		/*
+		if (shakable) {
+			Vector3 acceleration = Input.acceleration;
+			lowPassValue = Vector3.Lerp(lowPassValue, acceleration, lowPassFilterFactor);
+			Vector3 deltaAcceleration = acceleration - lowPassValue;
+
+			if (deltaAcceleration.sqrMagnitude >= shakeDetectionThreshold)
+			{
+				// Perform your "shaking actions" here. If necessary, add suitable
+				// guards in the if check above to avoid redundant handling during
+				// the same shake (e.g. a minimum refractory period).
+				//Debug.Log("Shake event detected at time "+Time.time);
+				//punchGround();
+				shakable = false;
+				shakeText.SetActive (false);
+				//StartCoroutine (startShakeCountDown ());
+			}
+		}
+		*/
 
 	}
 		
@@ -96,7 +150,6 @@ public class punchAction2 : MonoBehaviour {
 		GameObject fist;
 		Vector2 dest;
 		if (punchDirection == PUNCHINGLEFT) {
-			Debug.Log ("Punching Left");
 			dest = new Vector2 (IDLE_L_X + punchStrength, _inputPosition.y);
 			fist = Instantiate (leftFist, new Vector3 (IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {
@@ -104,28 +157,52 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 		} else {
-			Debug.Log ("Punching Right");
 			dest = new Vector2 (-IDLE_L_X - punchStrength, _inputPosition.y);
 			fist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, dest.y, PUNCH_Z), Quaternion.identity);
 			if (level2On) {
 				fist.GetComponent<spawnFist> ().sendPunch (false, dest.y, dest.x);
 			}
 		}
-		fist.GetComponent<Punch> ().sendPunch (dest);
+		fist.GetComponent<Punch> ().sendPunch (dest, Punch.PunchDirection.X);
 		fist.transform.SetParent(monster.transform, true);
 
 		//Debug.Log (dest.x);
 		//pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
 	}
 
-	public void punchGround()
+	public void punchGround(int times)
 	{
-		locked = true;
+		//locked = true;
+		ground.GetComponent<Ground> ().startShake (1.0f * times);
 		Debug.Log ("punch ground");
-		_inputPosition = new Vector3 (0.0f, groundY, 0.0f);
-		initPunch(PUNCHINGLEFT);
-		initPunch(PUNCHINGRIGHT);
-		ground.GetComponent<Ground> ().startShake ();
+		StartCoroutine(bangGround(times));
+		//_inputPosition = new Vector3 (0.0f, groundY, 0.0f);
+		//initPunch(PUNCHINGLEFT);
+		//initPunch(PUNCHINGRIGHT);
+		//ground.GetComponent<Ground> ().startShake ();
+	}
+
+	IEnumerator bangGround(int times)
+	{
+		Debug.Log ("Banging");
+		GameObject fist;
+		Vector2 dest;
+		if (times % 2 == 0) {
+			dest = new Vector2 (BANG_L_X, groundY);
+			fist = Instantiate (leftFist, new Vector3 (dest.x, IDLE_L_Y, PUNCH_Z), Quaternion.identity);
+			Debug.Log ("leftFist");
+		} else {
+			dest = new Vector2 (-BANG_L_X, groundY);
+			fist = Instantiate (rightFist, new Vector3 (dest.x, IDLE_L_Y, PUNCH_Z), Quaternion.identity);
+			Debug.Log ("rightFist");
+		}
+		fist.GetComponent<Punch> ().sendPunch (dest, Punch.PunchDirection.Y);
+		fist.transform.SetParent(monster.transform, true);
+		yield return new WaitForSeconds (0.2f);
+
+		times = times-1;
+		if(times > 0)
+			StartCoroutine (bangGround (times));
 	}
 
 }

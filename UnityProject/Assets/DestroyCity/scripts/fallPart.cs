@@ -43,7 +43,7 @@ public class fallPart : MonoBehaviour {
 			scream.Play ();
             Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
-            GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);
+			GameObject blood = Instantiate(bloodEffect, newPos.position + new Vector3(0, 0, -3), transform.rotation);
 			blood.transform.parent = Camera.main.transform;
 			healthControl.increaseProgress(1, LevelControl.ScoreType.Human);
         }

@@ -24,7 +24,7 @@ public class characterControl : MonoBehaviour {
 		//lastX = minX;
 		//destX = maxX;
 		t = Random.Range(0.0f, 1.0f);
-		increment = 1.0f;
+		increment = 2.0f;
 	}
 	
 	// Update is called once per frame

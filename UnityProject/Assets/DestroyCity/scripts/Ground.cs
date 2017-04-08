@@ -5,33 +5,41 @@ using UnityEngine;
 public class Ground : MonoBehaviour {
 
 	public float offset;
+	public AudioClip buildingCollapseAudio;
+	AudioSource buildingCollapse;
 	private float baseY;
 	bool shake;
-	float duration = .1f;
+	float duration = .3f;
 	float magnitude = .1f;
 
 	// Use this for initialization
 	void Start () {
 		baseY = transform.position.y;
 		shake = false;
+		buildingCollapse = gameObject.AddComponent<AudioSource>();
+		buildingCollapse.clip = buildingCollapseAudio;
+		buildingCollapse.playOnAwake = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (shake) {
 			offset = Mathf.PingPong (Time.time, 0.05f);
-			transform.position = new Vector3 (transform.position.x, baseY + offset *  10f, this.transform.position.z);
+			transform.position = new Vector3 (transform.position.x, baseY + offset * 1f, transform.position.z);
+		} else {
+			transform.position = new Vector3 (transform.position.x, baseY, transform.position.z);
 		}
 	}
 
-	public void startShake(){
+	public void startShake(float seconds){
 		shake = true;
-		StartCoroutine(stopShake());
+		buildingCollapse.Play ();
+		StartCoroutine(stopShake(seconds));
 		StartCoroutine(Shake());
 	}
 
-	IEnumerator stopShake(){
-		yield return new WaitForSeconds (1);
+	IEnumerator stopShake(float seconds){
+		yield return new WaitForSeconds (seconds);
 		shake = false;
 	}
 
