@@ -135,7 +135,7 @@ public class MainController : MonoBehaviour
 	public void goToMapView()
 	{
 		if (markerIdAnalytics != null) {
-			Analytics.CustomEvent ("BuildingDestruction", new IDictionary<string,Object> {
+			Analytics.CustomEvent ("BuildingDestruction", new Dictionary<string,object> {
 				{"BuildingId", markerIdAnalytics},
 				{"PlayerId", SpatialClient2.single.userId},
 				{"Time", DateTime.UtcNow.ToString()},

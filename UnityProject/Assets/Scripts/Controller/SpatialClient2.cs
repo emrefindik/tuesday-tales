@@ -109,11 +109,11 @@ public class SpatialClient2 : MonoBehaviour
     // START OF EMRE'S CODE
     public IEnumerator resetStreak()
     {
-		Analytics.CustomEvent ("EndOfStreak", new IDictionary<string,object> {
+		Analytics.CustomEvent ("EndOfStreak", new Dictionary<string,object> {
 			{"PlayerId", userId},
-			{"StreakLength",userSession.User.Metadata.StreakMarkers.length},
+			{"StreakLength",userSession.User.Metadata.StreakMarkers.length()},
 			{"StreakStart",userSession.User.Metadata.StreakMarkers [0]},
-			{"StreakEnd", userSession.User.Metadata.StreakMarkers [userSession.User.Metadata.StreakMarkers.length-1]}
+			{"StreakEnd", userSession.User.Metadata.StreakMarkers [userSession.User.Metadata.StreakMarkers.length()-1]}
 		});
         userSession.User.Metadata.resetStreak();
         yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
