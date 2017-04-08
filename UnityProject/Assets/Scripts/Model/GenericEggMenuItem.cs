@@ -11,11 +11,11 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
     // maximum distance between check in point and user's current point, in meters
     public const double MAX_CHECK_IN_DISTANCE = 400.0;
 
-    public Image _eggImage;
-    public Text _eggNameText;
-    public Text _friendNameText;
+    private Image _eggImage;
+    private Text _eggNameText;
+    private Text _friendNameText;
 
-    public Button _checkInButton;
+    private Button _checkInButton;
 
     protected OwnedEgg _egg;
     public OwnedEgg Egg
@@ -49,6 +49,16 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
     }
 
     public abstract IEnumerator checkInEgg();
+
+    public void enableCheckInButton()
+    {
+        _checkInButton.enabled = true;
+    }
+
+    public void disableCheckInButton()
+    {
+        _checkInButton.enabled = false;
+    }
 
     // Use this for initialization
     void Start () {
