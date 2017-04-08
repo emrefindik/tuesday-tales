@@ -29,6 +29,11 @@ public class SpatialClient2 : MonoBehaviour
         get { return userSession.User.Metadata.EggsOwned; }
     }
 
+    public IEnumerable<Kaiju> Kaiju
+    {
+        get { return userSession.User.Metadata.Kaiju; }
+    }
+
     private bool ready = false;
     private UserList allUser = new UserList();
     private Project project;

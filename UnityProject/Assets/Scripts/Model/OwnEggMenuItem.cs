@@ -37,6 +37,9 @@ public class OwnEggMenuItem : FriendEggMenuItem
     {
         SpatialClient2.single.hatchEgg(_egg);
         Destroy(gameObject);
+        GameObject newKaijuMenuItem = GameObject.Instantiate(MainMenuScript.KaijuMenuItemPrefab);
+        newKaijuMenuItem.transform.SetParent(MainMenuScript.KaijuMenuContentPanel, false);
+        newKaijuMenuItem.GetComponent<KaijuMenuItem>().Kaiju = _egg.KaijuEmbryo;
     }
 
     override protected void refreshView()

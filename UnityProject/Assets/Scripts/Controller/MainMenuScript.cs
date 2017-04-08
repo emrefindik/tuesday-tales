@@ -80,6 +80,20 @@ public class MainMenuScript : MonoBehaviour
     private static Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> placeTypes;
     private static Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> googleMarkers;
 
+    private static GameObject kaijuMenuItemPrefab;
+    public static GameObject KaijuMenuItemPrefab
+    {
+        get { return kaijuMenuItemPrefab; }
+        private set { kaijuMenuItemPrefab = value; }
+    }
+
+    private static Transform kaijuMenuContentPanel;
+    public static Transform KaijuMenuContentPanel
+    {
+        get { return kaijuMenuContentPanel; }
+        private set { kaijuMenuContentPanel = value; }
+    }
+
     private Path destroyPath;
 
     // Used to display the map
@@ -127,18 +141,22 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Transform _friendEggMenuContentPanel;
     [SerializeField]
+    private Transform _kaijuMenuContentPanel;
+    [SerializeField]
+    private GameObject _kaijuMenuItemPrefab;
+    [SerializeField]
     private InputField _userNameField;
     [SerializeField]
     private InputField _passwordField;
 
     private Coroutine _locationUpdateCoroutine;
 
-    List<SpatialMarker> _markersByDistance;
-    Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> _idMarkers;
-    CoroutineResponse _spatialResponse;
-    Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> _placeTypes;
-    Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
-    Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
+    private List<SpatialMarker> _markersByDistance;
+    private Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> _idMarkers;
+    private CoroutineResponse _spatialResponse;
+    private Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> _placeTypes;
+    private Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
+    private Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
 
 
     // Use this for initialization
@@ -151,6 +169,8 @@ public class MainMenuScript : MonoBehaviour
         //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
         //friendsEggsCanvas = _friendsEggsCanvas;
+        kaijuMenuItemPrefab = _kaijuMenuItemPrefab;
+        kaijuMenuContentPanel = _kaijuMenuContentPanel;
 
         _loginCanvas.enabled = true;
         _wrongPasswordText.enabled = false;
@@ -462,6 +482,12 @@ public class MainMenuScript : MonoBehaviour
             GameObject eggMenuItem = GameObject.Instantiate(_eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(_eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
+        }
+        foreach (Kaiju k in SpatialClient2.single.Kaiju)
+        {
+            GameObject kaijuMenuItem = GameObject.Instantiate(MainMenuScript.KaijuMenuItemPrefab);
+            kaijuMenuItem.transform.SetParent(MainMenuScript.KaijuMenuContentPanel, false);
+            kaijuMenuItem.GetComponent<KaijuMenuItem>().Kaiju = k;
         }
         foreach (FriendData fd in SpatialClient2.single.Friends)
         {
