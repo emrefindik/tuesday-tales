@@ -12,6 +12,8 @@ public class MessageController : MonoBehaviour
     // the canvas that directed to the wait screen
     private Canvas _previousCanvas;
 
+    private int _canvasesWaiting;
+
     [SerializeField]
     private Canvas _pleaseWaitCanvas;
     [SerializeField]
@@ -22,6 +24,7 @@ public class MessageController : MonoBehaviour
     void Start()
     {
         single = this;
+        _canvasesWaiting = 0;
         _pleaseWaitCanvas.enabled = false;
         _errorCanvas.enabled = false;
     }
@@ -50,23 +53,32 @@ public class MessageController : MonoBehaviour
             hidePreviousScreen();
             _pleaseWaitCanvas.enabled = true;
         }
+        _canvasesWaiting++;
     }
 
     public void displayError(Canvas sender, string errorText)
     {
+        _canvasesWaiting = 0;
         _errorMessage.text = errorText;
-        _previousCanvas = sender;
-        hidePreviousScreen();
-        _pleaseWaitCanvas.enabled = false;
-        _errorCanvas.enabled = true;
-    }
-
-    public void closeWaitScreen()
-    {
         if (_pleaseWaitCanvas.enabled)
         {
             _pleaseWaitCanvas.enabled = false;
-            showPreviousScreen();
+        }
+        else
+        {
+            _previousCanvas = sender;
+            hidePreviousScreen();
+        }
+        _errorCanvas.enabled = true;
+    }
+
+    public void closeWaitScreen(bool showPrevious)
+    {
+        if (_canvasesWaiting > 0) _canvasesWaiting--;
+        if (_pleaseWaitCanvas.enabled && _canvasesWaiting == 0)
+        {
+            _pleaseWaitCanvas.enabled = false;
+            if (showPrevious) showPreviousScreen();
         }
     }
 

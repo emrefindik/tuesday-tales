@@ -226,14 +226,14 @@ public class MainMenuScript : MonoBehaviour
                 break;
             case false:
                 // wrong credentials
-                MessageController.single.closeWaitScreen();
+                MessageController.single.closeWaitScreen(true);
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
                 Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
-                MessageController.single.closeWaitScreen();
+                MessageController.single.closeWaitScreen(true);
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
                 Debug.Log("Connection Error");
@@ -318,8 +318,8 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getTimer().ToString() + ',' +
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
-            MessageController.single.closeWaitScreen();
             _webView.Show();
+            MessageController.single.closeWaitScreen(false);
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
 

@@ -553,7 +553,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen();
+            MessageController.single.closeWaitScreen(true);
         }
     }
 
@@ -581,7 +581,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen();
+            MessageController.single.closeWaitScreen(true);
         }
     }
 
@@ -639,7 +639,7 @@ public class SpatialClient2 : MonoBehaviour
             else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen();
+            MessageController.single.closeWaitScreen(true);
         }
     }
     
@@ -699,7 +699,7 @@ public class SpatialClient2 : MonoBehaviour
             ready = true;
 			Debug.Log(www.text);
             Debug.Log("user metadata updated");
-            MessageController.single.closeWaitScreen();
+            MessageController.single.closeWaitScreen(true);
 		}
 	}
 }
