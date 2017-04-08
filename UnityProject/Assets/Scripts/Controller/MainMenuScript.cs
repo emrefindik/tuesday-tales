@@ -197,7 +197,6 @@ public class MainMenuScript : MonoBehaviour
             case true:
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = false;
-                MessageController.single.closeWaitScreen();
                 // initialize egg menu
                 addButtons();
                 initializeCheckinDataStructures();
@@ -515,8 +514,10 @@ public class MainMenuScript : MonoBehaviour
 
     public IEnumerator updateCheckinnables()
     {
+        Debug.Log("updatecheckinnables");
         while (_eggsCanvas.enabled)
         {
+            Debug.Log("in while loop in updatecheckinnables");
             StartCoroutine(SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE, true, _markersByDistance, _spatialResponse));
             foreach (GenericLocation.GooglePlacesType type in _placeTypes.Keys)
             {

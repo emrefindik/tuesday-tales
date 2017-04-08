@@ -321,14 +321,15 @@ public class SpatialClient2 : MonoBehaviour
         response.reset();
         ready = false;
 
-        string url = string.Format("{0}/v1/markers-by-distance", baseURL);
+        string url = string.Format("{0}/v1/markers-by-distance?projectId={1}&latitude={2}&longitude={3}", baseURL, projectID, latitude, longitude);
 
-        WWWForm form = new WWWForm();
+        /*WWWForm form = new WWWForm();
         form.AddField("longitude", longitude.ToString());
         form.AddField("latitude", latitude.ToString());
         form.AddField("projectId", projectID);
 
-        WWW www = new WWW(url, form);
+        WWW www = new WWW(url, form); */
+        WWW www = new WWW(url);
         yield return www;
 
         // Post Process
@@ -362,10 +363,14 @@ public class SpatialClient2 : MonoBehaviour
         response.reset();
         markers.Clear();
         ready = false;
+        string url;
 
-        string url = string.Format("{0}/v1/markers-by-distance", baseURL);
+        if (isMeter)
+            url = string.Format("{0}/v1/markers-by-distance?projectId={1}&latitude={2}&longitude={3}&meters={4}", baseURL, projectID, latitude, longitude, value);
+        else
+            url = string.Format("{0}/v1/markers-by-distance?projectId={1}&latitude={2}&longitude={3}&miles={4}", baseURL, projectID, latitude, longitude, value);
 
-        WWWForm form = new WWWForm();
+        /*WWWForm form = new WWWForm();
         form.AddField("longitude", longitude.ToString());
         form.AddField("latitude", latitude.ToString());
         form.AddField("projectId", projectID);
@@ -379,7 +384,9 @@ public class SpatialClient2 : MonoBehaviour
             form.AddField("miles", value.ToString());
         }
 
-        WWW www = new WWW(url, form);
+        WWW www = new WWW(url, form); */
+
+        WWW www = new WWW(url);
         yield return www;
 
         // Post Process
