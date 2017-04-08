@@ -115,7 +115,7 @@ public class OwnedEgg// : ISerializationCallbackReceiver
             yield return SpatialClient2.single.addEggToSelf(egg);
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
-            eggMenuItem.GetComponent<EggMenuItem>().Egg = egg; // also updates the egg menu item's view
+            eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = egg; // also updates the egg menu item's view
         }
         else
         {
@@ -128,7 +128,7 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         if (SpatialClient2.single.isLoggedIn())
         {
             OwnedEgg egg = new OwnedEgg(eggName, SpatialClient2.single.newEggIdForFriend(friend));
-            yield return SpatialClient2.single.addEggToFriendsEggs(egg);
+            yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
         }
         else
         {

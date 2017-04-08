@@ -463,7 +463,7 @@ public class MainMenuScript : MonoBehaviour
         {
             GameObject eggMenuItem = GameObject.Instantiate(_eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(_eggMenuContentPanel, false);
-            eggMenuItem.GetComponent<EggMenuItem>().Egg = e; // also updates the egg menu item's view
+            eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
         }
         foreach (FriendData fd in SpatialClient2.single.Friends)
         {
@@ -474,7 +474,7 @@ public class MainMenuScript : MonoBehaviour
             {
                 GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
                 friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
-                friendEggMenuItem.GetComponent<EggMenuItem>().Egg = e; // also updates the egg menu item's view
+                friendEggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
             }
         }
     }
@@ -488,7 +488,7 @@ public class MainMenuScript : MonoBehaviour
         _placeTypes = new Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>>();
         _googleResponses = new Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse>();
         _googleMarkers = new Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>>();
-        foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+        foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
         {
             foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
             {
@@ -507,7 +507,7 @@ public class MainMenuScript : MonoBehaviour
             _googleResponses[type] = new CoroutineResponse();
             _googleMarkers[type] = new List<BasicMarker>();
         }
-        foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+        foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
         {
             item.Egg.initializeCheckInnables();
         }
@@ -543,7 +543,7 @@ public class MainMenuScript : MonoBehaviour
                 }
             }
 
-            foreach (EggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<EggMenuItem>())
+            foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
             {
                 item.Egg.CheckInnableLocs.Clear();
                 item.Egg.CheckInnableMarkers.Clear();

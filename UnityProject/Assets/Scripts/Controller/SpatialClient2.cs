@@ -125,9 +125,9 @@ public class SpatialClient2 : MonoBehaviour
         yield return UpdateMetadata(null, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
-    public IEnumerator addEggToFriendsEggs(OwnedEgg egg)
+    public IEnumerator addOrUpdateEggInFriendsEggs(OwnedEgg egg)
     {
-        userSession.User.Metadata.FriendEggsCheckedIn.Add(egg);
+        userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg);
         yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
@@ -144,7 +144,10 @@ public class SpatialClient2 : MonoBehaviour
         if (userSession.User.Metadata.EggsOwned == null ||
             userSession.User.Metadata.FriendEggsCheckedIn == null ||
             userSession.User.Metadata.StreakMarkers == null ||
-            userSession.User.Metadata.ScoreMultiplier == 0)
+            userSession.User.Metadata.ScoreMultiplier == 0 ||
+            userSession.User.Metadata.LastRampage == 0 ||
+            userSession.User.Metadata.StreakMarkers == null ||
+            userSession.User.Metadata.Kaiju == null)
         {
             Debug.Log("first login");
             userSession.User.Metadata.initialize();
@@ -768,7 +771,7 @@ public class UserData
 }
 
 [System.Serializable]
-public class UserMetadata : ISerializationCallbackReceiver
+public class UserMetadata// : ISerializationCallbackReceiver
 {
 
     // start time stamp to offset Spatial times by
@@ -785,6 +788,11 @@ public class UserMetadata : ISerializationCallbackReceiver
 
     [SerializeField]
     private KaijuList kaiju;
+    public KaijuList Kaiju
+    {
+        get { return kaiju; }
+        private set { kaiju = value; }
+    }
 
     [SerializeField]
     private EggList eggsOwned;
@@ -795,8 +803,8 @@ public class UserMetadata : ISerializationCallbackReceiver
     }
 
     [SerializeField]
-    private List<OwnedEgg> friendEggsCheckedIn;
-    public List<OwnedEgg> FriendEggsCheckedIn
+    private EggList friendEggsCheckedIn;
+    public EggList FriendEggsCheckedIn
     {
         get { return friendEggsCheckedIn; }
         private set { friendEggsCheckedIn = value; }
@@ -889,7 +897,7 @@ public class UserMetadata : ISerializationCallbackReceiver
     public void initialize()
     {
         eggsOwned = new EggList();
-        friendEggsCheckedIn = new List<OwnedEgg>();
+        friendEggsCheckedIn = new EggList();
         eggsCreated = 0;
         lastRampage = NO_RAMPAGE;
         score = 0;
@@ -906,7 +914,7 @@ public class UserMetadata : ISerializationCallbackReceiver
 
     public void initializeFriendsEggs()
     {
-        friendEggsCheckedIn = new List<OwnedEgg>();
+        friendEggsCheckedIn = new EggList();
     }
 
     public void incrementEggsCreated()
@@ -914,18 +922,18 @@ public class UserMetadata : ISerializationCallbackReceiver
         eggsCreated++;
     }
 
-    public void OnBeforeSerialize() {}
+    /*public void OnBeforeSerialize() {}
 
     public void OnAfterDeserialize()
     {
         if (eggsOwned == null) eggsOwned = new EggList();
-        if (friendEggsCheckedIn == null) friendEggsCheckedIn = new List<OwnedEgg>();
+        if (friendEggsCheckedIn == null) friendEggsCheckedIn = new EggList();
         if (lastRampage == 0) lastRampage = NO_RAMPAGE;
         if (streakMarkers == null) streakMarkers = new StreakPath();
         if (kaiju == null) kaiju = new KaijuList();
         if (scoreMultiplier == 0) scoreMultiplier = 1;
         if (streakTimerStart == 0) streakTimerStart = NO_STREAK;
-    }
+    } */
 }
 
 [System.Serializable]
