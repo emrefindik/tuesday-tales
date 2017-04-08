@@ -9,7 +9,8 @@ public class FacebookManager : MonoBehaviour {
 
 	// image server info
 	Texture2D uploadImage;
-	string URL = "http://matthewestone.com/PhotoTest/";
+
+	string URL = "http://tuesday-tales.etc.cmu.edu/Photos/";
 	string send = "SendPhoto.php";
 	string recv;
 

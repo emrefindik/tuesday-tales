@@ -9,20 +9,19 @@ public class fallPart : MonoBehaviour {
 
     public GameObject bloodEffect;
     public AudioClip smeshAudio;
-	public AudioClip screem;
-
-    public AudioSource smesh;
-	public AudioSource screem_sound;
+	public AudioClip screamAudio;
+    AudioSource smesh;
+	AudioSource scream;
     public LevelControl healthControl;
 
 
     void Start()
     {
         smesh = GetComponent<AudioSource>();
-        smesh.clip = smeshAudio;
-
-		screem_sound = gameObject.AddComponent <AudioSource>() as AudioSource;
-		screem_sound.clip = screem;
+		smesh.clip = smeshAudio;
+		scream = gameObject.AddComponent<AudioSource>();
+		scream.clip = screamAudio;
+		scream.playOnAwake = false;
     }
 
     void OnTriggerEnter(Collider c)
@@ -35,24 +34,19 @@ public class fallPart : MonoBehaviour {
             gravity.useGravity = true;
             gravity.GetComponent<Collider>().enabled = false;
             StartCoroutine(Shake());
-            healthControl.increaseProgress(1);
+			healthControl.increaseProgress(1, LevelControl.ScoreType.Building);
         }
 
 
         if(c.tag == "people")
         {
-			screem_sound.Play ();
-			Destroy(c.gameObject);
+			scream.Play ();
+            Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
-            GameObject blood = Instantiate(bloodEffect, newPos.position, transform.rotation);
+			GameObject blood = Instantiate(bloodEffect, newPos.position + new Vector3(0, 0, -3), transform.rotation);
 			blood.transform.parent = Camera.main.transform;
-            healthControl.increaseProgress(1);
+			healthControl.increaseProgress(1, LevelControl.ScoreType.Human);
         }
-		if (c.tag == "fire") {
-			SpriteRenderer fireRender = c.gameObject.GetComponent<SpriteRenderer> ();
-			fireRender.enabled = true;
-			Debug.Log ("fire work");
-		}
     }
 
 

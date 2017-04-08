@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Linq;
 
 public class LevelControl : MonoBehaviour {
@@ -12,29 +13,34 @@ public class LevelControl : MonoBehaviour {
     public GameObject[] realBuildingbuildingCover = new GameObject[4];
     public GameObject[] structures = new GameObject[4];
 	public GameObject winCanvas;
+	public GameObject gameCanvas;
+	public GameObject findEggCanvas;
+	public GameObject editEggNameCanvas;
 	public GameObject shareSucceedCanvas;
     public bool switchNow=false;
 	public Texture2D barFull;
 	public Texture2D barEmpty;
 	public int score;
 
-	PixelDestruction pD;
+	//PixelDestruction pD;
     float[] levelPositions;
-	Vector2 fingerStart;
-	Vector2 fingerEnd;
+	//Vector2 fingerStart;
+	//Vector2 fingerEnd;
 
     // GUI
-    Vector2 barPos = new Vector2(80, 40);
-    Vector2 barSize = new Vector2(Screen.width-160, Screen.height/25);
+    Vector2 barPos = new Vector2(20, 40);
+    Vector2 barSize = new Vector2(Screen.width-40, Screen.height/10);
     const int scoreBase = 100;
 
     //float[] progress;
     int[] progressCount;
     public int num_of_pieces;
     public int num_of_people;
-    float progressStep;
+	public int num_of_blocks;
+	int totalProgress;
+    //float progressStep;
     
-    float tolerance = 300;
+    //float tolerance = 300;
     int level = 0;
 
     float currentTime = 0;
@@ -44,9 +50,30 @@ public class LevelControl : MonoBehaviour {
     int number_of_buildings;
     bool win;   // check this status : whether has win
 
-	// Wait for other process to finish
+	// For Jonathan's destroy city
+	int fallenPiecesCount;
+	public punchAction2 pA;
 
+	// Wait for other process to finish
 	static public FacebookManager.ShareStatus shareStatus;
+
+	// Shake Action
+	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
+	const float lowPassKernelWidthInSeconds = 1.0f;
+	float shakeDetectionThreshold = 6.0f;
+	float lowPassFilterFactor = accelerometerUpdateInterval /
+		lowPassKernelWidthInSeconds;
+	Vector3 lowPassValue;
+	bool shakeNow = false;
+	float shakeInterval = 10.0f;
+
+	GameObject shakeText;
+	GameObject ground;
+
+	// REWARD:
+	int eggIndex;
+	string eggName;
+
 
     public enum Movement
     {
@@ -55,6 +82,27 @@ public class LevelControl : MonoBehaviour {
         Up,
         Down
     };
+
+	public enum ScoreType
+	{
+		Building,
+		Human,
+		Blocks
+	}
+
+	public enum ScoreAmount
+	{
+		Building = 2,
+		Human = 1,
+		Block = 3
+	}
+
+	public enum ProgressAmount
+	{
+		Human = 0,
+		Building = 1,
+		Block = 2
+	}
 
     public List<Movement> movements = new List<Movement>();
 
@@ -66,36 +114,53 @@ public class LevelControl : MonoBehaviour {
 
     void initSystem()
     {
-        pD = FindObjectOfType(typeof(PixelDestruction)) as PixelDestruction;
+        //pD = FindObjectOfType(typeof(PixelDestruction)) as PixelDestruction;
 
         number_of_buildings = realBuilding.Length;
         levelPositions = new float[number_of_buildings];
         //progress = new float[number_of_buildings];
         progressCount = new int[number_of_buildings];
-
         for (int i = 0; i < number_of_buildings; i++)
         {
             levelPositions[i] = -realBuilding[i].transform.position.x;
             //progress[i] = 1.0f;
-            progressCount[i] = num_of_pieces + num_of_people;
-            structures[i].GetComponent<PolygonCollider2D>().enabled = false;
+			//progressCount[i] = num_of_pieces + num_of_people +num_of_blocks;
+			// TODO: will there only be one building? if it is, remove the list.
+			totalProgress = num_of_pieces * (int)ProgressAmount.Building + num_of_blocks * (int)ProgressAmount.Block + num_of_people * (int)ProgressAmount.Human;
+			progressCount [i] = totalProgress;
+			structures[i].GetComponent<PolygonCollider2D>().enabled = false;
         }
-        progressStep = 1.0f / (num_of_pieces + num_of_people);
-       
+        //progressStep = 1.0f / (num_of_pieces + num_of_people);
+  
     }
 
 	void initLevel ()
 	{
 		winCanvas.SetActive(false);
 		shareSucceedCanvas.SetActive(false);
+		findEggCanvas.SetActive (false);
+		editEggNameCanvas.SetActive (false);
+
 
 		score = 0;
+		eggIndex = -1;
 		buildingDestroyedCount = 0;
 
 		win = false;
 		shareStatus = FacebookManager.ShareStatus.None;
-	}
 
+		// For Jonathan's destroy city
+		fallenPiecesCount = 0;
+		// Shake Action
+		shakeDetectionThreshold *= shakeDetectionThreshold;
+		lowPassValue = Input.acceleration;
+		//StartCoroutine (startShakeCountDown());
+
+		shakeText = GameObject.Find ("ShakeText");
+		shakeText.SetActive (false);
+		ground = GameObject.Find ("Ground");
+	}
+		
     private void OnGUI()
     {
 		switch (shareStatus) {
@@ -120,34 +185,72 @@ public class LevelControl : MonoBehaviour {
 		if (!win) {
 			GUI.BeginGroup (new Rect (barPos.x, barPos.y, barSize.x, barSize.y));
 			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barEmpty);
-			GUI.BeginGroup (new Rect (0, 0, barSize.x * (((float)progressCount [level]) / (num_of_people + num_of_pieces)), barSize.y));
+			GUI.BeginGroup (new Rect (0, 0, barSize.x * (((float)(progressCount [level]) / (totalProgress))), barSize.y));
 			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barFull);
 			GUI.EndGroup ();
 			GUI.EndGroup ();
 
-			GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
-			GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
+			//GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
+			//GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
 		} else {
-			if(winCanvas && (winCoroutineEnded.Success == true))
+			if (findEggCanvas.activeSelf)
+				return;
+			//if (winCanvas && (winCoroutineEnded.Success == true)) {
+			if (winCanvas) {
+				GameObject scoreText = winCanvas.transform.FindChild ("ScoreText").gameObject;
+				scoreText.GetComponent<Text> ().text = "x " + score.ToString ();
+				//Debug.Log (scoreText.GetComponent<Text> ().text);
 				winCanvas.SetActive (true);
+			}
 		}
     }
 
-    public void increaseProgress(int amount)
+	public void increaseProgress(int unit, ScoreType type)
     {
-        //progress[level] -= amount * progressStep;
-        progressCount[level] -= amount;
-        //Debug.Log(level);
-        //Debug.Log(progress[level]);
-        increaseScore(scoreBase * amount);
-        //Debug.Log(progressCount[level]);
+		if (progressCount [level] < 0)
+			return;
+		
+		ScoreAmount scoreAmount = 0;
+		ProgressAmount progressAmount = 0;
+		switch (type) {
+		case ScoreType.Building:
+
+			fallenPiecesCount++;
+			if (fallenPiecesCount == num_of_pieces) {
+				if (pA) {
+					pA.level2On = true;
+					//StartCoroutine (pA.startShakeCountDown ());
+					GetComponent<SpriteControl> ().activateColor ();
+				}
+			}
+			progressAmount = ProgressAmount.Building;
+			scoreAmount = ScoreAmount.Building;
+			break;
+
+		case ScoreType.Blocks:
+			progressAmount = ProgressAmount.Block;
+			scoreAmount = ScoreAmount.Block;
+			break;
+
+		case ScoreType.Human:
+			progressAmount = ProgressAmount.Human;
+			scoreAmount = ScoreAmount.Human;
+			break;
+		default:
+			break;
+		}
+
+		progressCount [level] -= unit * (int)progressAmount;
+		increaseScore(scoreBase * unit * (int)scoreAmount);
+        
         if (progressCount[level] == 0)
         {
-            structures[level].GetComponent<PolygonCollider2D>().enabled = true;
-            //Debug.Log("setCollider");
+            //structures[level].GetComponent<PolygonCollider2D>().enabled = true;
             progressCount[level]--;
             buildingDestroyedCount++;
         }
+
+		//Debug.Log (progressCount [level]);
     }
 
     public void increaseScore(int increment)
@@ -160,97 +263,81 @@ public class LevelControl : MonoBehaviour {
         // Check win
 		// Test Win Status
         //if(buildingDestroyedCount == number_of_buildings)
-		if(buildingDestroyedCount > number_of_buildings/30)
+		if(buildingDestroyedCount == number_of_buildings)
         {
-            win = true;
+            shakeNow = true;
+			shakeText.SetActive (true);
             buildingDestroyedCount = -1;
-			StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			ground.GetComponent<Ground>().startShake(0.5f);
         }
 
+		/*
         if (Input.GetMouseButtonDown(0))
         {
             fingerStart = Input.mousePosition;
             fingerEnd = Input.mousePosition;
         }
+        */
+		if (shakeNow) {
+			Vector3 acceleration = Input.acceleration;
+			lowPassValue = Vector3.Lerp(lowPassValue, acceleration, lowPassFilterFactor);
+			Vector3 deltaAcceleration = acceleration - lowPassValue;
 
-        //GetMouseButton instead of TouchPhase.Moved
-        //This returns true if the LMB is held down in standalone OR
-        //there is a single finger touch on a mobile device
-        if (Input.GetMouseButton(0))
-        {
-            fingerEnd = Input.mousePosition;
+			if (deltaAcceleration.sqrMagnitude >= shakeDetectionThreshold)
+			{
+				// Perform your "shaking actions" here. If necessary, add suitable
+				// guards in the if check above to avoid redundant handling during
+				// the same shake (e.g. a minimum refractory period).
+				//Debug.Log("Shake event detected at time "+Time.time);
+				//punchGround();
+				shakeNow  = false;
+				shakeText.SetActive (false);
+				GameObject mainController = GameObject.Find ("MainController");
+				eggIndex = mainController.GetComponent<KaijuDatabase> ().generateEgg ();
+				if (eggIndex != -1) {
+					GameObject EggImage = findEggCanvas.transform.FindChild ("EggImage").gameObject;
+					EggImage.GetComponent<Image> ().sprite = mainController.GetComponent<KaijuDatabase> ().eggSprites [eggIndex];
+					//StartCoroutine (startShakeCountDown ());
+				}
+				StartCoroutine (showReward ());
+			}
 
-            //There was some movement! The tolerance variable is to detect some useful movement
-            //i.e. an actual swipe rather than some jitter. This is the same as the value of 80
-            //you used in your original code.
-            if (Mathf.Abs(fingerEnd.x - fingerStart.x) > tolerance ||
-               Mathf.Abs(fingerEnd.y - fingerStart.y) > tolerance)
-            {
 
-                //There is more movement on the X axis than the Y axis
-                if (Mathf.Abs(fingerStart.x - fingerEnd.x) > Mathf.Abs(fingerStart.y - fingerEnd.y))
-                {
-                    //Right Swipe
-                    if ((fingerEnd.x - fingerStart.x) > 0)
-                        movements.Add(Movement.Right);
-                    //Left Swipe
-                    else
-                        movements.Add(Movement.Left);
-                }
-
-                //More movement along the Y axis than the X axis
-                else
-                {
-                    //Upward Swipe
-                    if ((fingerEnd.y - fingerStart.y) > 0)
-                        movements.Add(Movement.Up);
-                    //Downward Swipe
-                    else
-                        movements.Add(Movement.Down);
-                }
-
-                //After the checks are performed, set the fingerStart & fingerEnd to be the same
-                fingerStart = fingerEnd;
-
-				/*
-                //Now let's check if the Movement pattern is what we want
-                //In this example, I'm checking whether the pattern is Left, then Right, then Left again
-                // Debug.Log(CheckForPatternMove(0, 3, new List<Movement>() { Movement.Left, Movement.Right, Movement.Left }));
-                if (CheckForPatternMove(0, 1, new List<Movement>() { Movement.Left }))
-                {
-                    switchNow = true;
-                    if (level < 3 )
-                    {
-                        level = level + 1;
-                    }
-                    
-                }
-
-                if (CheckForPatternMove(0, 1, new List<Movement>() { Movement.Right }))
-                {
-                    switchNow = true;
-                    if (level>0  )
-                    level= level-1;
-                }
-				*/
-            }
-        }
-
-        //GetMouseButtonUp(0) instead of TouchPhase.Ended
-        if (Input.GetMouseButtonUp(0))
-        {
-            fingerStart = Vector2.zero;
-            fingerEnd = Vector2.zero;
-            movements.Clear();
-        }
+		}
 
         if (switchNow)
         {
             goToLevel(level);
         }
-        pD.switchCity(level);
-}
+        //pD.switchCity(level);
+	}
 
+	IEnumerator showReward()
+	{
+		//TODO: shake according to the streak
+		yield return new WaitForSeconds(2.0f);
+		pA.punchGround(2);
+		yield return new WaitForSeconds (.3f);
+		if(eggIndex != -1)
+			findEggCanvas.SetActive(true);
+		win = true;
+	}
+
+	public void closeEggCanvas()
+	{
+		findEggCanvas.SetActive (false);
+		editEggNameCanvas.SetActive (false);
+		GameObject inputName = editEggNameCanvas.transform.FindChild ("InputEggName").gameObject;
+		eggName = inputName.GetComponent<InputField> ().text;
+		Debug.Log (eggName);
+	}
+
+	public void openEditEggNameCanvas()
+	{
+		editEggNameCanvas.SetActive (true);
+	}
+		
     void goToLevel(int level)
     {
         float currentX = 0;
@@ -276,6 +363,7 @@ public class LevelControl : MonoBehaviour {
         }
     }
 
+	/*
     private bool CheckForPatternMove(int startIndex, int lengthOfPattern, List<Movement> movementToCheck)
     {
         if (switchNow == true)
@@ -303,7 +391,7 @@ public class LevelControl : MonoBehaviour {
         return tMovements.SequenceEqual(movementToCheck);
 
     }
-		
+	*/
     void GetcurrentTime()
     {
         if (currentTimeOff==true)
@@ -312,7 +400,7 @@ public class LevelControl : MonoBehaviour {
             currentTime = Time.time;
         }
     }
-		
+
 	public void BackToMainMenu()
 	{
 		MainController.single.goBack();
@@ -322,6 +410,7 @@ public class LevelControl : MonoBehaviour {
 	{
 		shareStatus = FacebookManager.ShareStatus.Init;
 		winCanvas.SetActive (false);
+		gameCanvas.SetActive (false);
 	}
 
 	void SendScreenshotToFacebook()
@@ -329,5 +418,6 @@ public class LevelControl : MonoBehaviour {
 		shareStatus = FacebookManager.ShareStatus.Sending;
 		FacebookManager.single.ShareScreenshotToFacebook();
 	}
+
 
 }

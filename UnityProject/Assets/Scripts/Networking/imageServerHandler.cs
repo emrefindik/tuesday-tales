@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class imageServerHandler : MonoBehaviour {
 	public Texture2D uploadTexture;
-	string URL = "http://matthewestone.com/PhotoTest/";
+	string URL = "http://tuesday-tales.etc.cmu.edu/Photos/";
 	string send = "SendPhoto.php";
 	string recv;
 	public Texture2D downloadTexture;
