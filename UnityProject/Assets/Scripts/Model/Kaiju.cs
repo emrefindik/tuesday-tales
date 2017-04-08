@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Kaiju
+public class Kaiju : ISerializationCallbackReceiver
 {
     [SerializeField]
     private SerializableColor _color;
@@ -12,10 +13,6 @@ public class Kaiju
     {
         get
         {
-            if (_clr == null)
-            {
-                _clr = new Color((float)_color.Red, (float)_color.Green, (float)_color.Blue, (float)_color.Alpha);
-            }
             return _clr;
         }
         private set
@@ -41,6 +38,17 @@ public class Kaiju
         private set { _name = value; }
     }
 
+    [SerializeField]
+    /** The user IDs (NOT FRIEND ID!) of the friend that helped you hatch this kaiju's egg */
+    private IdList _helpers;
+    public IEnumerable<string> Helpers
+    {
+        get {
+            if (_helpers != null) return _helpers;
+            return Enumerable.Empty<string>();
+        }
+    }
+
     public Kaiju(Color color, int handType, int headType, int bodyType, string name)
     {
         MonsterColor = color;
@@ -48,8 +56,29 @@ public class Kaiju
         _headType = headType;
         _bodyType = bodyType;
         _name = name;
+        _helpers = null; // not an empty list. the list will be created once the egg hatches.
     }
 
+    /** Hatch this kaiju. DOES NOT add it to the user metadata */
+    public void hatch(OwnedEgg egg)
+    {
+        if (_helpers == null) _helpers = new IdList(egg.Helpers);
+    }
+
+    public bool isHatched()
+    {
+        return _helpers != null;
+    }
+
+    public void OnBeforeSerialize()
+    {
+        _color.updateValues(_clr);
+    }
+
+    public void OnAfterDeserialize()
+    {
+        _clr = new Color((float)_color.Red, (float)_color.Green, (float)_color.Blue, (float)_color.Alpha);
+    }
 }
 
 [System.Serializable]

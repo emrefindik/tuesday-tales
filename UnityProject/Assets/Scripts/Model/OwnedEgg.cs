@@ -24,10 +24,30 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         private set { _checkInnableLocs = value; }
     }
 
-    /** The user ID (NOT FRIEND ID!) of the friend that is currently holding on to the egg */
-    public string _friendUserID;
+    /** The user IDs (NOT FRIEND ID!) of the friend that helped you hatch this egg */
+    private IdList _helpers;
+    public IEnumerable<string> Helpers
+    {
+        get
+        {
+            if (_helpers != null) return _helpers;
+            return Enumerable.Empty<string>();
+        }
+    }
+
+    /** The user IDs (NOT FRIEND ID!) of the friends you sent requests to */
+    private IdList _requests;
+    public IEnumerable<string> Requests
+    {
+        get
+        {
+            if (_requests != null) return _requests;
+            return Enumerable.Empty<string>();
+        }
+    }
 
     /** The egg ID */
+    [SerializeField]
     private string _id;
     public string Id
     {
@@ -35,6 +55,7 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         private set { _id = value; }
     }
 
+    [SerializeField]
     private string _name;
     public string Name
     {
@@ -42,11 +63,12 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         private set { _name = value; }
     }
 
-    private Kaiju kaiju;
+    [SerializeField]
+    private Kaiju _kaiju;
     public Kaiju KaijuEmbryo
     {
-        get { return kaiju; }
-        private set { kaiju = value; }
+        get { return _kaiju; }
+        private set { _kaiju = value; }
     }
 
     [SerializeField]
@@ -74,7 +96,8 @@ public class OwnedEgg// : ISerializationCallbackReceiver
     {
         _name = name;
         _id = id;
-        _friendUserID = null;
+        _helpers = new IdList();
+        _requests = new IdList();
         _markersToTake = new List<HatchLocationMarker>();
         _genericLocationsToTake = new List<GenericLocation>();
         //_size = STARTING_EGG_SIZE;
@@ -160,5 +183,21 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         {
             typeGlDict[location.LocationType].updateVisits(location);
         }
+    }
+
+    /** Returns true if request already sent to friend, false otherwise.
+      * Adds the friend user ID to the list of requests sent out */
+    public bool addRequest(string friendUserId)
+    {
+        if (_requests.Contains(friendUserId)) return false;
+        _requests.add(friendUserId);
+        return true;
+    }
+
+    /** Adds the friend user ID to the list of friends who helped this egg hatch,
+      * if that friend does not already exist in that list. */
+    public void addHelper(string friendUserId)
+    {
+        if (!_requests.Contains(friendUserId)) _requests.add(friendUserId);
     }
 }

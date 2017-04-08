@@ -28,7 +28,8 @@ public class FriendEggMenuItem : MonoBehaviour
             _egg = value;
             // TODO uncomment this after figuring out how to store the images _eggImage.sprite = e.egg.image;
             _eggNameText.text = value.Name;
-            if (value._friendUserID != null) _friendNameText.text = SpatialClient2.single.getNameOfFriend(value._friendUserID);
+            // TODO show names of all helper friends
+            //if (value._friendUserID != null) _friendNameText.text = SpatialClient2.single.getNameOfFriend(value._friendUserID);
         }
     }
 
@@ -70,10 +71,10 @@ public class FriendEggMenuItem : MonoBehaviour
 
     public IEnumerator checkInEgg()
     {
-        MainMenuScript.displayWaitScreen();
+        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
         _egg.checkIn();
-        yield return SpatialClient2.single.UpdateMetadata("Could not check in egg " + _egg.Name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
-        MainMenuScript.closeWaitScreen();
+        yield return SpatialClient2.single.UpdateMetadata(MainMenuScript.EggsCanvas, "Could not check in egg " + _egg.Name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+        MessageController.single.closeWaitScreen();
     }
 
 }

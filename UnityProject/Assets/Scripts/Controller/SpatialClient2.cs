@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
+using System.Linq;
 using System;
 
 public class SpatialClient2 : MonoBehaviour
@@ -15,31 +16,24 @@ public class SpatialClient2 : MonoBehaviour
 
     public static SpatialClient2 single;
 
-    Dictionary<string, OwnedEgg> eggsOwned = new Dictionary<string, OwnedEgg>();
-    public IEnumerable<OwnedEgg> EggsOwned
-    {
-        get
-        {
-            return eggsOwned.Values;
-        }
-    }
-
     private LoginResponse userSession = null;
 
-    private Dictionary<string, FriendData> friends = new Dictionary<string, FriendData>();
+    private Dictionary<string, FriendData> _friends = new Dictionary<string, FriendData>();
     public IEnumerable<FriendData> Friends
     {
-        get
-        {
-            return friends.Values;
-        }
+        get { return _friends.Values; }
     }
 
-    public bool ready = false;
-    public UserList allUser = new UserList();
-    public Project project;
+    public IEnumerable<OwnedEgg> EggsOwned
+    {
+        get { return userSession.User.Metadata.EggsOwned; }
+    }
 
-    public bool metadataUpdatedSuccessfully = false;
+    private bool ready = false;
+    private UserList allUser = new UserList();
+    private Project project;
+
+    private bool metadataUpdatedSuccessfully = false;
     private bool isCheckingStreak = false;
     private bool streakInitialized = false;
 
@@ -51,10 +45,6 @@ public class SpatialClient2 : MonoBehaviour
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
-
-        // delete this. this is for test
-        List<BasicMarker> bms = new List<BasicMarker>();
-        StartCoroutine(GetGoogleLocationsByDistance(43.44, -79.94, 3000, bms, GenericLocation.GooglePlacesType.STORE, new CoroutineResponse()));
     }
 
     private void Update()
@@ -95,7 +85,7 @@ public class SpatialClient2 : MonoBehaviour
     public IEnumerator resetStreak()
     {
         userSession.User.Metadata.resetStreak();
-        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
         Debug.Log("reset streak");
     }
 
@@ -103,13 +93,13 @@ public class SpatialClient2 : MonoBehaviour
     public IEnumerator updateLastRampage(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement, markerId);
-        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
     public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier, markerId);
-        yield return UpdateMetadata("Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
     // END OF EMRE'S CODE
 
@@ -131,20 +121,20 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator addEggToSelf(OwnedEgg egg)
     {
-        eggsOwned[egg.Id] = egg;
-        yield return UpdateMetadataWithEggs("Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
+        yield return UpdateMetadata(null, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
     public IEnumerator addEggToFriendsEggs(OwnedEgg egg)
     {
-        userSession.User.Metadata.FriendsEggs.Add(egg);
-        yield return UpdateMetadata("Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+        userSession.User.Metadata.FriendEggsCheckedIn.Add(egg);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
     public string getNameOfFriend(string friendUserID)
     {
-        if (friends.ContainsKey(friendUserID))
-            return friends[friendUserID].Friend.getName();
+        if (_friends.ContainsKey(friendUserID))
+            return _friends[friendUserID].Friend.getName();
         else
             return "";
     }
@@ -152,13 +142,13 @@ public class SpatialClient2 : MonoBehaviour
     private IEnumerator checkFirstLogin()
     {
         if (userSession.User.Metadata.EggsOwned == null ||
-            userSession.User.Metadata.FriendsEggs == null ||
+            userSession.User.Metadata.FriendEggsCheckedIn == null ||
             userSession.User.Metadata.StreakMarkers == null ||
             userSession.User.Metadata.ScoreMultiplier == 0)
         {
             Debug.Log("first login");
             userSession.User.Metadata.initialize();
-            yield return UpdateMetadata("Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
+            yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
         }
     }
 
@@ -466,7 +456,6 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator LoginUser(CoroutineResponse response, string userName, string password, string projectID = PROJECT_ID)
     {
-        MainMenuScript.displayWaitScreen();
         response.reset();
         ready = false;
 
@@ -487,18 +476,16 @@ public class SpatialClient2 : MonoBehaviour
         }
         else
         {
+            Debug.Log(www.text);
             userSession = JsonUtility.FromJson<LoginResponse>(www.text);
             yield return checkFirstLogin();
             yield return checkIfStreakIsOutdated();
             streakInitialized = true;
-            eggsOwned = userSession.User.Metadata.EggsOwned.makeDictionary();
             yield return GetFriends();
             ready = true;
-            Debug.Log(www.text);
             response.setSuccess(true);
         }
         // do not call displayError, since that error screen would direct to the main menu instead of the login screen
-        MainMenuScript.closeWaitScreen();
     }
 
     public IEnumerator checkIfStreakIsOutdated()
@@ -522,7 +509,7 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator AddFriend(string friendID, string projectID = PROJECT_ID)
     {
-        MainMenuScript.displayWaitScreen();
+        MessageController.single.displayWaitScreen(MainMenuScript.FriendsCanvas);
         ready = false;
 
         string url = baseURL + "/v1/project-friend/add-friend";
@@ -538,19 +525,19 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MainMenuScript.displayErrorFromWaitScreen("Could not add friend. Check your internet connection.");
+            MessageController.single.displayError(MainMenuScript.FriendsCanvas, "Could not add friend. Check your internet connection.");
         }
         else
         {
             ready = true;
             Debug.Log(www.text);
-            MainMenuScript.closeWaitScreen();
+            MessageController.single.closeWaitScreen();
         }
     }
 
     public IEnumerator RemoveFriend(string friendID, string token, string projectID = PROJECT_ID)
     {
-        MainMenuScript.displayWaitScreen();
+        MessageController.single.displayWaitScreen(MainMenuScript.FriendsCanvas);
         ready = false;
 
         string url = baseURL + "/v1/project-friend/remove-friend";
@@ -566,19 +553,19 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MainMenuScript.displayErrorFromWaitScreen("Could not remove friend. Check your internet connection.");
+            MessageController.single.displayError(MainMenuScript.FriendsCanvas, "Could not remove friend. Check your internet connection.");
         }
         else
         {
             ready = true;
             Debug.Log(www.text);
-            MainMenuScript.closeWaitScreen();
+            MessageController.single.closeWaitScreen();
         }
     }
 
     public IEnumerator GetFriends(string projectID = PROJECT_ID)
     {
-        MainMenuScript.displayWaitScreen();
+        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
         ready = false;
         
         /*WWWForm form = new WWWForm();
@@ -594,7 +581,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MainMenuScript.displayErrorFromWaitScreen("Could not get friends. Check your internet connection.");
+            MessageController.single.displayError(MainMenuScript.EggsCanvas, "Could not get friends. Check your internet connection.");
         }
         else
         {
@@ -603,11 +590,7 @@ public class SpatialClient2 : MonoBehaviour
             bool ownEggsUpdated = false;
             foreach (FriendData fd in friendList.Friends)
             {
-                friends[fd.Friend.Id] = fd;
-                if (fd.Friend.Metadata.EggsOwned == null)
-                    fd.Friend.Metadata.initializeEggsOwned();
-                if (fd.Friend.Metadata.FriendsEggs == null)
-                    fd.Friend.Metadata.initializeFriendsEggs();
+                _friends[fd.Friend.Id] = fd;
                 // TODO request system for accepting eggs
 
                 /*foreach (OwnedEgg egg in fd.Friend.Metadata.EggsOwned)
@@ -619,27 +602,21 @@ public class SpatialClient2 : MonoBehaviour
                         metadataUpdated = true;
                     }
                 } */
-                foreach (OwnedEgg egg in fd.Friend.Metadata.FriendsEggs)
+                if (fd.Friend.Metadata.FriendEggsCheckedIn == null) fd.Friend.Metadata.initializeFriendsEggs();
+                foreach (OwnedEgg egg in fd.Friend.Metadata.FriendEggsCheckedIn)
                 {
                     if (egg.Id.StartsWith(userSession.User.Id))
                     {
-                        if (eggsOwned.ContainsKey(egg.Id))
-                        {
-                            eggsOwned[egg.Id].updateCheckins(egg);
-                        }
-                        else
-                        {
-                            eggsOwned[egg.Id] = egg;
-                        }
+                        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
                         ownEggsUpdated = true;
                     }
                 }
             }
-            if (ownEggsUpdated) yield return UpdateMetadataWithEggs("Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION);
-            else if (metadataUpdated) yield return UpdateMetadata("Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+            if (ownEggsUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION);
+            else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
             ready = true;
             Debug.Log(www.text);
-            MainMenuScript.closeWaitScreen();
+            MessageController.single.closeWaitScreen();
         }
     }
     
@@ -664,16 +641,16 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator UpdateMetadataWithEggs(string errorText)
+    /* public IEnumerator UpdateMetadataWithEggs(string errorText)
     {
         // update the actual eggsOwned list on the metadata
         userSession.User.Metadata.initializeEggsOwned(eggsOwned.Values);
         yield return UpdateMetadata(errorText);
-    }
+    } */
 
-	public IEnumerator UpdateMetadata(string errorText)
+	public IEnumerator UpdateMetadata(Canvas sender, string errorText)
 	{
-        MainMenuScript.displayWaitScreen();
+        MessageController.single.displayWaitScreen(sender);
         metadataUpdatedSuccessfully = false;
         ready = false;
         Debug.Log("updating user metadata");
@@ -691,7 +668,7 @@ public class SpatialClient2 : MonoBehaviour
 		if (!string.IsNullOrEmpty(www.error))
 		{
             print(www.error);
-            MainMenuScript.displayErrorFromWaitScreen(errorText);
+            MessageController.single.displayError(sender, errorText);
 		}
 		else
 		{
@@ -699,7 +676,7 @@ public class SpatialClient2 : MonoBehaviour
             ready = true;
 			Debug.Log(www.text);
             Debug.Log("user metadata updated");
-            MainMenuScript.closeWaitScreen();
+            MessageController.single.closeWaitScreen();
 		}
 	}
 }
@@ -790,7 +767,7 @@ public class UserData
 }
 
 [System.Serializable]
-public class UserMetadata
+public class UserMetadata : ISerializationCallbackReceiver
 {
 
     // start time stamp to offset Spatial times by
@@ -817,11 +794,11 @@ public class UserMetadata
     }
 
     [SerializeField]
-    private List<OwnedEgg> friendsEggs;
-    public List<OwnedEgg> FriendsEggs
+    private List<OwnedEgg> friendEggsCheckedIn;
+    public List<OwnedEgg> FriendEggsCheckedIn
     {
-        get { return friendsEggs; }
-        private set { friendsEggs = value; }
+        get { return friendEggsCheckedIn; }
+        private set { friendEggsCheckedIn = value; }
     }
 
     [SerializeField]
@@ -903,36 +880,50 @@ public class UserMetadata
     }
     // END OF EMRE'S CODE
 
-    public void initializeEggsOwned(IEnumerable<OwnedEgg> eggs)
+    /*public void initializeEggsOwned(IEnumerable<OwnedEgg> eggs)
     {
         eggsOwned = new EggList(eggs);
-    }
+    } */
 
     public void initialize()
     {
         eggsOwned = new EggList();
-        friendsEggs = new List<OwnedEgg>();
+        friendEggsCheckedIn = new List<OwnedEgg>();
         eggsCreated = 0;
         lastRampage = NO_RAMPAGE;
         score = 0;
         scoreMultiplier = 1;
         streakMarkers = new StreakPath();
         streakTimerStart = NO_STREAK;
+        kaiju = new KaijuList();
     }
 
     public void initializeEggsOwned()
     {
         eggsOwned = new EggList();
-    }
+    } 
 
     public void initializeFriendsEggs()
     {
-        friendsEggs = new List<OwnedEgg>();
+        friendEggsCheckedIn = new List<OwnedEgg>();
     }
 
     public void incrementEggsCreated()
     {
         eggsCreated++;
+    }
+
+    public void OnBeforeSerialize() {}
+
+    public void OnAfterDeserialize()
+    {
+        if (eggsOwned == null) eggsOwned = new EggList();
+        if (friendEggsCheckedIn == null) friendEggsCheckedIn = new List<OwnedEgg>();
+        if (lastRampage == 0) lastRampage = NO_RAMPAGE;
+        if (streakMarkers == null) streakMarkers = new StreakPath();
+        if (kaiju == null) kaiju = new KaijuList();
+        if (scoreMultiplier == 0) scoreMultiplier = 1;
+        if (streakTimerStart == 0) streakTimerStart = NO_STREAK;
     }
 }
 
@@ -984,10 +975,8 @@ public class BasicMarker
         name = nm;
     }
 
-    override public bool Equals(object obj)
+    public bool isSame(BasicMarker bm)
     {
-        if (obj == null || GetType() != obj.GetType()) return false;
-        BasicMarker bm = (BasicMarker)obj;
         return (bm.name.ToLower() == name.ToLower()) || Geography.withinDistance(bm.loc.Latitude, bm.loc.Longitude, loc.Latitude, loc.Longitude, MINIMUM_MARKER_SEPARATION);
     }
 }
@@ -1314,24 +1303,23 @@ public class MarkerMetadata
     }
 }
 
-/** An immutable list of eggs. Use in the eggsOwned field. */
 [System.Serializable]
-public class EggList : IEnumerable<OwnedEgg>
+public abstract class ImmutableList<T> : IEnumerable<T>
 {
     [SerializeField]
-    private List<OwnedEgg> list;
+    protected List<T> list;
 
-    public EggList()
+    public ImmutableList()
     {
-        list = new List<OwnedEgg>();
+        list = new List<T>();
     }
 
-    public EggList(IEnumerable<OwnedEgg> eggs)
+    public ImmutableList(IEnumerable<T> items)
     {
-        list = new List<OwnedEgg>(eggs);
+        list = new List<T>(items);
     }
 
-    public IEnumerator<OwnedEgg> GetEnumerator()
+    public IEnumerator<T> GetEnumerator()
     {
         return list.GetEnumerator();
     }
@@ -1341,69 +1329,102 @@ public class EggList : IEnumerable<OwnedEgg>
         return list.GetEnumerator();
     }
 
-    public Dictionary<string, OwnedEgg> makeDictionary()
+    public int Count
     {
-        Dictionary<string, OwnedEgg> dict = new Dictionary<string, OwnedEgg>();
-        foreach (OwnedEgg egg in list)
-        {
-            dict[egg.Id] = egg;
-        }
-        return dict;
+        get { return list.Count; }
     }
 
-    public int length()
-    {
-        return list.Count;
-    }
-
-    public OwnedEgg this[int index]
+    public T this[int index]
     {
         get { return list[index]; }
         // there should be no set!
     }
 }
 
+[System.Serializable]
+public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
+{
+    private HashSet<string> ids;
+
+    public IdList() : base()
+    {
+        ids = new HashSet<string>();
+    }
+
+    public IdList(IEnumerable<string> items) : base(items)
+    {
+        ids = new HashSet<string>(list);
+    }
+
+    public void OnAfterDeserialize()
+    {
+        ids = new HashSet<string>(list);
+    }
+
+    public void OnBeforeSerialize()
+    {
+        list = new List<string>(ids);
+    }
+
+    public bool containsId(string id)
+    {
+        return ids.Contains(id);
+    }
+
+    public void add(string id)
+    {
+        ids.Add(id);
+        list.Add(id);
+    }
+}
+
+/** An immutable list of eggs. Use in the eggsOwned field. */
+[System.Serializable]
+public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
+{
+    protected Dictionary<string, OwnedEgg> eggs;
+
+    public void OnAfterDeserialize()
+    {
+        eggs = new Dictionary<string, OwnedEgg>();
+        foreach (OwnedEgg egg in list)
+        {
+            Debug.Log(egg.Id);
+            eggs[egg.Id] = egg;
+        }
+        Debug.Log(eggs);
+    }
+
+    public void OnBeforeSerialize()
+    {
+        list = new List<OwnedEgg>(eggs.Values);
+    }
+
+    public void checkAndAdd(OwnedEgg egg)
+    {
+        if (!eggs.ContainsKey(egg.Id))
+        {
+            list.Add(egg);
+            eggs[egg.Id] = egg;
+        }
+        else
+            eggs[egg.Id].updateCheckins(egg);
+    }
+
+    public EggList() : base()
+    {
+        eggs = new Dictionary<string, OwnedEgg>();
+    }
+}
+
 /** An immutable list of kaiju. */
 [System.Serializable]
-public class KaijuList : IEnumerable<Kaiju>
+public class KaijuList : ImmutableList<Kaiju>
 {
-    [SerializeField]
-    private List<Kaiju> list;
-
-    public KaijuList()
-    {
-        list = new List<Kaiju>();
-    }
-
-    public KaijuList(IEnumerable<Kaiju> kaiju)
-    {
-        list = new List<Kaiju>(kaiju);
-    }
-
-    public IEnumerator<Kaiju> GetEnumerator()
-    {
-        return list.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return list.GetEnumerator();
-    }
-
-    public int length()
-    {
-        return list.Count;
-    }
-
     public void hatchEgg(OwnedEgg egg)
     {
+        egg.KaijuEmbryo.hatch(egg);
         list.Add(egg.KaijuEmbryo);
-    }
-
-    public Kaiju this[int index]
-    {
-        get { return list[index]; }
-        // there should be no set!
     }
 }
 
@@ -1450,50 +1471,16 @@ public class PathMarker
 
 // the streak path, containing marker ids
 [System.Serializable]
-public class StreakPath : IEnumerable<string>
+public class StreakPath : ImmutableList<string>
 {
-    [SerializeField]
-    private List<string> _markerIds;
-
-    public StreakPath()
-    {
-        _markerIds = new List<string>();
-    }
-
-    public StreakPath(IEnumerable<string> markerIds)
-    {
-        _markerIds = new List<string>(markerIds);
-    }
-
-    public IEnumerator<string> GetEnumerator()
-    {
-        return _markerIds.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _markerIds.GetEnumerator();
-    }
-
     public void resetPath()
     {
-        _markerIds.Clear();
+        list.Clear();
     }
 
     public void addMarkerId(string markerId)
     {
-        _markerIds.Add(markerId);
-    }
-
-    public int length()
-    {
-        return _markerIds.Count;
-    }
-
-    public string this[int index]
-    {
-        get { return _markerIds[index]; }
-        // there should be no set!
+        list.Add(markerId);
     }
 }
 

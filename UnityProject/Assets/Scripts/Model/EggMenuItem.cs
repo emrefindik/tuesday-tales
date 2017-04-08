@@ -12,12 +12,8 @@ public class EggMenuItem : FriendEggMenuItem
     // TODO implement this
     public void sendToFriendButtonHandler()
     {
-        if (_egg._friendUserID == null)
-        {
-            Debug.Log("no friend");
-            eggToSend = _egg;
-            MainMenuScript.EggsCanvas.enabled = false;
-            MainMenuScript.FriendsCanvas.enabled = true;
-        }
+        eggToSend = _egg;
+        MainMenuScript.EggsCanvas.enabled = false;
+        MainMenuScript.FriendsCanvas.enabled = true;
     }
 }

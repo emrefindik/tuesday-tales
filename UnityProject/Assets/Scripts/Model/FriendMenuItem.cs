@@ -23,13 +23,14 @@ public class FriendMenuItem : MonoBehaviour
         }
     }
 
-    /** Sets the friend field of this egg. Called by a FriendMenuItem */
+    /** Sends an egg check in request to a friend */
     public void sendToFriend()
     {        
         MainMenuScript.EggsCanvas.enabled = true;
         MainMenuScript.FriendsCanvas.enabled = false;
-        EggMenuItem.eggToSend._friendUserID = _friend.Friend.Id;
-        //fd.friend.metadata.friendsEggs.Add(_egg); don't do this since we can't update friends' metadata
-        StartCoroutine(SpatialClient2.single.UpdateMetadata("Could not send egg " + EggMenuItem.eggToSend.Name + " to " + _friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION));
+        if (EggMenuItem.eggToSend.addRequest(_friend.Friend.Id))
+            StartCoroutine(SpatialClient2.single.UpdateMetadata(MainMenuScript.FriendsCanvas, "Could not send request to " + _friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION));
+        else
+            MessageController.single.displayError(MainMenuScript.FriendsCanvas, "You already sent a request to " + _friend.Friend.getName() + '!');
     }
 }

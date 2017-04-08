@@ -21,6 +21,9 @@ public class MainController : MonoBehaviour
 	public GameObject phoneCameraScene;
     public string currentMarkerId;
 
+    [SerializeField]
+    private MainMenuScript _mainMenuScript;
+
     /*public int screams;
 	public float timer; */
     //private int multiplier;
@@ -135,7 +138,8 @@ public class MainController : MonoBehaviour
 		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
-		UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<MainMenuScript> ()._webView);
+        //UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<MainMenuScript> ()._webView);
+        UniWebView mapWebView = _mainMenuScript._webView;
         mapWebView.Stop();
         mapWebView.url = UniWebViewHelper.streamingAssetURLForPath(MainMenuScript.MAP_ADDRESS);
         mapWebView.Load();

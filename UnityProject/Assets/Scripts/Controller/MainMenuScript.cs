@@ -28,12 +28,7 @@ public class MainMenuScript : MonoBehaviour
     const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
     //const string JS_CHECKIN_LOCATION = "addPointToPath";
 
-    private static Canvas errorCanvas;
-    public static Canvas ErrorCanvas
-    {
-        get { return errorCanvas; }
-        private set { errorCanvas = value; }
-    }
+    private static bool mapLoaded;
 
     // Displays all of the player's own eggs
     private static Canvas eggsCanvas;
@@ -52,45 +47,33 @@ public class MainMenuScript : MonoBehaviour
     }
 
     // Displays all the eggs from all the friends
-    private static Canvas friendsEggsCanvas;
-    public static Canvas FriendsEggsCanvas
-    {
-        get { return friendsEggsCanvas; }
-        private set { friendsEggsCanvas = value; }
-    }
+    //    private static Canvas friendsEggsCanvas;
+    //    public static Canvas FriendsEggsCanvas
+    //    {
+    //        get { return friendsEggsCanvas; }
+    //        private set { friendsEggsCanvas = value; }
+    //    }
+    //
+    //    private static Canvas checkedInCanvas;
+    //    public static Canvas CheckedInCanvas
+    //    {
+    //        get { return checkedInCanvas; }
+    //        private set { checkedInCanvas = value; }
+    //    }
 
-    private static Canvas checkedInCanvas;
-    public static Canvas CheckedInCanvas
+    private static Canvas loginCanvas;
+    public static Canvas LoginCanvas
     {
-        get { return checkedInCanvas; }
-        private set { checkedInCanvas = value; }
-    }
-
-    private static Canvas checkInErrorCanvas;
-    public static Canvas CheckInErrorCanvas
-    {
-        get { return checkInErrorCanvas; }
-        private set { checkInErrorCanvas = value; }
-    }
-
-    private static Text checkInErrorMessage;
-    public static Text CheckInErrorMessage
-    {
-        get { return checkInErrorMessage; }
-        private set { checkInErrorMessage = value; }
+        get { return loginCanvas; }
+        private set { loginCanvas = value; }
     }
 
     private static UniWebView webView;
-    public static UniWebView WebView
+    /*public static UniWebView WebView
     {
         get { return webView; }
         private set { webView = value; }
-    }
-
-    // the canvas that directed to the wait screen
-    private static Canvas previousCanvas;
-
-    private static Canvas pleaseWaitCanvas;
+    } */
 
     private static Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> idMarkers;
     public static void removeEntryFromIdMarkers(string id, OwnedEgg egg)
@@ -98,40 +81,34 @@ public class MainMenuScript : MonoBehaviour
         idMarkers[id].Remove(egg);
     }
 
-    private bool mapLoaded;
-
     private Path destroyPath;
 
     // Used to display the map
     [SerializeField]
     public UniWebView _webView;
 
-    [SerializeField]
-    private Canvas _mainMenuCanvas;
-    [SerializeField]
-    private Canvas _mapCanvas;
-    [SerializeField]
-    private Canvas _pleaseWaitCanvas;
-    [SerializeField]
-    private Canvas _checkedInCanvas;
-    [SerializeField]
-    private Canvas _checkInErrorCanvas;
-    [SerializeField]
-    private Canvas _locationStartErrorCanvas;
+//    [SerializeField]
+//    private Canvas _mainMenuCanvas;
+//    [SerializeField]
+//    private Canvas _mapCanvas;
+//    [SerializeField]
+//    private Canvas _checkedInCanvas;
 
     // Displays all of the player's own eggs
     [SerializeField]
     private Canvas _eggsCanvas;
 
     // Displays all the eggs from all the friends
-    [SerializeField]
-    private Canvas _friendsEggsCanvas;
+    //[SerializeField]
+    //private Canvas _friendsEggsCanvas;
 
     // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
+    [SerializeField]
+    private Canvas _kaijuCanvas;
     [SerializeField]
     private Text _wrongPasswordText;
     [SerializeField]
@@ -151,11 +128,9 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Transform _friendEggMenuContentPanel;
     [SerializeField]
-    private Text _checkInErrorMessage;
+    private InputField _userNameField;
     [SerializeField]
-    private InputField userNameField;
-    [SerializeField]
-    private InputField passwordField;
+    private InputField _passwordField;
 
     private Coroutine _locationUpdateCoroutine;
 
@@ -172,28 +147,24 @@ public class MainMenuScript : MonoBehaviour
     {
         _locationUpdateCoroutine = null;
         webView = _webView;
-        errorCanvas = _locationStartErrorCanvas;
         eggsCanvas = _eggsCanvas;
-        checkedInCanvas = _checkedInCanvas;
+        loginCanvas = _loginCanvas;
+        //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
-        friendsEggsCanvas = _friendsEggsCanvas;
-        checkInErrorCanvas = _checkInErrorCanvas;
-        checkInErrorMessage = _checkInErrorMessage;
-        pleaseWaitCanvas = _pleaseWaitCanvas;
+        //friendsEggsCanvas = _friendsEggsCanvas;
 
         _loginCanvas.enabled = true;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
-        _mainMenuCanvas.enabled = false;
-        _mapCanvas.enabled = false;
-        _pleaseWaitCanvas.enabled = false;
+        //_mainMenuCanvas.enabled = false;
+        //_mapCanvas.enabled = false;
+        
+        _kaijuCanvas.enabled = false;
         mapLoaded = false;
-        _checkedInCanvas.enabled = false;
-        _locationStartErrorCanvas.enabled = false;
+        //_checkedInCanvas.enabled = false;
         _eggsCanvas.enabled = false;
-        _friendsEggsCanvas.enabled = false;
+        //_friendsEggsCanvas.enabled = false;
         _friendsCanvas.enabled = false;
-        _checkInErrorCanvas.enabled = false;
 
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
@@ -207,6 +178,7 @@ public class MainMenuScript : MonoBehaviour
 
     public IEnumerator submit()
     {
+        MessageController.single.displayWaitScreen(_loginCanvas);
         // start location tracking
         Debug.Log("GPS ON: " + Input.location.isEnabledByUser);
         Input.location.Start();
@@ -214,33 +186,36 @@ public class MainMenuScript : MonoBehaviour
         yield return checkLocationService(response);
         if (response.Success != true)
         {
-            _pleaseWaitCanvas.enabled = false;
-            _locationStartErrorCanvas.enabled = true;
+            MessageController.single.displayError(_loginCanvas, "Please make sure you are allowing this app to access your location from your phone's settings.");
             yield break; // could not turn location service on
         }
 
         response.reset();
-        yield return SpatialClient2.single.LoginUser(response, userNameField.text, passwordField.text);
+        yield return SpatialClient2.single.LoginUser(response, _userNameField.text, _passwordField.text);
         switch (response.Success)
         {
             case true:
+                _connectionErrorText.enabled = false;
+                _wrongPasswordText.enabled = false;
+                MessageController.single.closeWaitScreen();
                 // initialize egg menu
                 addButtons();
                 initializeCheckinDataStructures();
                 // logged in, switch to main menu
-                _connectionErrorText.enabled = false;
-                _wrongPasswordText.enabled = false;
-                _loginCanvas.enabled = false;
-                _mainMenuCanvas.enabled = true;
+                //_pleaseWaitCanvas.enabled = false;
+                //_mainMenuCanvas.enabled = true;
+                _webView.Load();
                 break;
             case false:
                 // wrong credentials
+                MessageController.single.closeWaitScreen();
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
                 Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
+                MessageController.single.closeWaitScreen();
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
                 Debug.Log("Connection Error");
@@ -254,19 +229,19 @@ public class MainMenuScript : MonoBehaviour
 		StartCoroutine (submit());
 	}
 
-    public void onEggs()
+    /* public void onEggs()
     {
         _mainMenuCanvas.enabled = false;
         _eggsCanvas.enabled = true;
-    }
+    } */
 
-    public void onFriendsEggs()
+    /* public void onFriendsEggs()
     {
         _mainMenuCanvas.enabled = false;
         _friendsEggsCanvas.enabled = true;
-    }
+    } */
 
-    public void onCheckIn()
+    /* public void onCheckIn()
     {
         _pleaseWaitCanvas.enabled = true;
 
@@ -274,18 +249,18 @@ public class MainMenuScript : MonoBehaviour
 
         _pleaseWaitCanvas.enabled = false;
         _checkedInCanvas.enabled = true;
-    }
+    } */
 
-    public void onSeeWhatsAround()
+    /* public void onSeeWhatsAround()
     {
         _mainMenuCanvas.enabled = false;
         _pleaseWaitCanvas.enabled = true;
         checkLocationServiceIsOn();
         Debug.Log("OnSeeWhatsAround:" + _webView.url);
         _webView.Load();
-    }
+    } */
 
-    public void onBack()
+    /* public void onBack()
     {
         _checkedInCanvas.enabled = false;
         _checkInErrorCanvas.enabled = false;
@@ -295,6 +270,20 @@ public class MainMenuScript : MonoBehaviour
         _friendsEggsCanvas.enabled = false;
         _friendsCanvas.enabled = false;
         _mainMenuCanvas.enabled = true;
+    } */
+
+    public void onBackFromKaiju()
+    {
+        _kaijuCanvas.enabled = false;
+        MessageController.single.displayWaitScreen(_kaijuCanvas);
+        _webView.Load();
+    }
+
+    public void onBackFromEggs()
+    {
+        _eggsCanvas.enabled = false;
+        MessageController.single.displayWaitScreen(_eggsCanvas);
+        _webView.Load();
     }
 
     /** Called when uniwebview successfully loads the HTML page */
@@ -311,7 +300,7 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getTimer().ToString() + ',' +
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
-            _pleaseWaitCanvas.enabled = false;
+            MessageController.single.closeWaitScreen();
             _webView.Show();
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
@@ -355,13 +344,13 @@ public class MainMenuScript : MonoBehaviour
         Debug.Log(message.path);
         switch (message.path)
         {
-			case "back":
+			/* case "back":
 				StopCoroutine (_locationUpdateCoroutine);
 				_mainMenuCanvas.enabled = true;
 				_webView.Stop ();
 				mapLoaded = false;
                 _webView.Hide();
-                break;
+                break; */
             case "eggs":
                 /* StopCoroutine(_locationUpdateCoroutine);
                 _friendsEggsCanvas.enabled = false;
@@ -374,8 +363,8 @@ public class MainMenuScript : MonoBehaviour
                 mapLoaded = false;
                 _webView.Hide(); */
 
-                _webView.Stop();
                 StopCoroutine(_locationUpdateCoroutine);
+                _webView.Stop();
                 _eggsCanvas.enabled = true;
                 StartCoroutine(updateCheckinnables());
                 mapLoaded = false;
@@ -397,7 +386,11 @@ public class MainMenuScript : MonoBehaviour
                 // TODO transfer to camera
                 break;
             case "kaiju":
-
+                StopCoroutine(_locationUpdateCoroutine);
+                _webView.Stop();
+                _kaijuCanvas.enabled = true;
+                mapLoaded = false;
+                _webView.Hide();
                 break;
             default:
                 break;
@@ -456,16 +449,6 @@ public class MainMenuScript : MonoBehaviour
     {
         _friendsCanvas.enabled = false;
         _eggsCanvas.enabled = true;
-    }
-
-    public void onBackFromLocationStartError()
-    {
-        _locationStartErrorCanvas.enabled = false;
-        if (!SpatialClient2.single.isLoggedIn())
-            // the user has not yet logged in
-            _loginCanvas.enabled = true;
-        else
-            _mainMenuCanvas.enabled = true;
     }
 
     public void onBackFromFriendSelection()
@@ -589,46 +572,15 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
-    public static void displayWaitScreen()
+    public static void showWebView()
     {
-        foreach (Canvas c in FindObjectsOfType<Canvas>())
-        {
-            if (c.enabled && c != pleaseWaitCanvas)
-            {
-                previousCanvas = c;
-                c.enabled = false;
-                pleaseWaitCanvas.enabled = true;
-                return;
-            }
-        }
+        webView.Show();
     }
 
-    public static void displayError(string errorText)
+    public static void hideWebView()
     {
-        checkInErrorMessage.text = errorText;
-        foreach (Canvas c in FindObjectsOfType<Canvas>())
-        {
-            if (c.enabled)
-            {
-                c.enabled = false;
-                checkInErrorCanvas.enabled = true;
-                return;
-            }
-        }
-    }
-
-    public static void displayErrorFromWaitScreen(string errorText)
-    {
-        pleaseWaitCanvas.enabled = false;
-        displayError(errorText);
-    }
-
-    public static void closeWaitScreen()
-    {
-        if (pleaseWaitCanvas.enabled)
-        {
-            pleaseWaitCanvas.enabled = false;
-            previousCanvas.enabled = true;
-        }
+        webView.Stop();
+        mapLoaded = false;
+        webView.Hide();
     }
 }
