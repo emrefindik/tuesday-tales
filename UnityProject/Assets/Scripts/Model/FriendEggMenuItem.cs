@@ -1,13 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 public class FriendEggMenuItem : GenericEggMenuItem
 {
-    override public IEnumerator checkInEgg()
+    override protected IEnumerator updateServer()
     {
-        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
-        _egg.checkIn();
         yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(_egg);
-        MessageController.single.closeWaitScreen();
+    }
+
+    override protected void refreshView()
+    {
+        if (_egg.Hatchable) Destroy(gameObject);
     }
 
     /*protected IEnumerator checkInButtonHandler(Canvas openCanvas)

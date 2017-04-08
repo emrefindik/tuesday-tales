@@ -24,7 +24,15 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         private set { _checkInnableLocs = value; }
     }
 
+    [SerializeField]
+    private bool _hatchable;
+    public bool Hatchable
+    {
+        get { return _hatchable; } // NO SET!
+    }
+
     /** The user IDs (NOT FRIEND ID!) of the friend that helped you hatch this egg */
+    [SerializeField]
     private IdList _helpers;
     public IEnumerable<string> Helpers
     {
@@ -35,6 +43,7 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         }
     }
 
+    [SerializeField]
     /** The user IDs (NOT FRIEND ID!) of the friends you sent requests to */
     private IdList _requests;
     public IEnumerable<string> Requests
@@ -73,11 +82,15 @@ public class OwnedEgg// : ISerializationCallbackReceiver
 
     [SerializeField]
     private List<HatchLocationMarker> _markersToTake;
+    public IEnumerable<HatchLocationMarker> MarkersToTake
+    {
+        get { return _markersToTake; }
+    }
     [SerializeField]
     private List<GenericLocation> _genericLocationsToTake;
     public IEnumerable<GenericLocation> GenericLocationsToTake
     {
-        get { return _genericLocationsToTake.Cast<GenericLocation>(); }
+        get { return _genericLocationsToTake; }
     }
 
     // Locations that this egg can hatch.
@@ -103,6 +116,8 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         //_size = STARTING_EGG_SIZE;
         _checkInnableMarkers = new List<HatchLocationMarker>();
         _checkInnableLocs = new Dictionary<BasicMarker, HashSet<GenericLocation>>();
+        _hatchable = !(PlacesToTake.Count() > 0);
+        _kaiju = null; // TODO FIX THIS!! ADD A KAIJU GENERATOR FUNCTION!!!
     }
 
     /**  */
@@ -146,13 +161,23 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         _checkInnableMarkers.Clear();
         foreach (BasicMarker marker in _checkInnableLocs.Keys)
         {
+            bool unvisitedLocsUpdated = false;
             foreach (GenericLocation loc in _checkInnableLocs[marker])
             {
+                if (!unvisitedLocsUpdated)
+                {
+                    MainMenuScript.removeEntryFromPlaceTypes(loc.LocationType, this);
+                    unvisitedLocsUpdated = true;
+                }
                 loc.markVisited(marker);
-            }
-            _checkInnableLocs[marker].RemoveWhere(loc => !loc.needToBeVisited());
+            }            
         }
         _checkInnableLocs.Clear();
+        foreach (CheckInPlace place in PlacesToTake)
+        {
+            if (place.needToBeVisited()) return;
+        }
+        _hatchable = true;
     }
 
     public void initializeCheckInnables()

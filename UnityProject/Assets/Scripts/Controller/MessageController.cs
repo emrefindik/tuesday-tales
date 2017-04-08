@@ -44,9 +44,12 @@ public class MessageController : MonoBehaviour
 
     public void displayWaitScreen(Canvas sender)
     {
-        _previousCanvas = sender;
-        hidePreviousScreen();
-        _pleaseWaitCanvas.enabled = true;
+        if (!_pleaseWaitCanvas.enabled)
+        {
+            _previousCanvas = sender;
+            hidePreviousScreen();
+            _pleaseWaitCanvas.enabled = true;
+        }
     }
 
     public void displayError(Canvas sender, string errorText)

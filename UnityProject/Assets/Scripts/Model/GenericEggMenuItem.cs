@@ -46,21 +46,31 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
         }
     }
 
-    public void checkInButtonHandler()
+    public void onCheckIn()
     {
-        StartCoroutine(checkInEgg());
+        StartCoroutine(checkInButtonHandler());
     }
 
-    public abstract IEnumerator checkInEgg();
+    private IEnumerator checkInButtonHandler()
+    {
+        _egg.checkIn();
+        yield return updateServer();
+        refreshView();
+    }
+
+    protected abstract IEnumerator updateServer();
+
+    /** Called upon checking in to refresh how the egg menu item looks */
+    protected abstract void refreshView();
 
     public void enableCheckInButton()
     {
-        _checkInButton.enabled = true;
+        _checkInButton.gameObject.SetActive(true);
     }
 
     public void disableCheckInButton()
     {
-        _checkInButton.enabled = false;
+        _checkInButton.gameObject.SetActive(false);
     }
 
     // Use this for initialization

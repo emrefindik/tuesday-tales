@@ -131,6 +131,13 @@ public class SpatialClient2 : MonoBehaviour
         yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
     }
 
+    public IEnumerator hatchEgg(OwnedEgg egg)
+    {
+        userSession.User.Metadata.EggsOwned.remove(egg);
+        userSession.User.Metadata.Kaiju.hatchEgg(egg);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+    }
+
     public string getNameOfFriend(string friendUserID)
     {
         if (_friends.ContainsKey(friendUserID))
@@ -1400,6 +1407,11 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 {
     protected Dictionary<string, OwnedEgg> eggs;
 
+    public EggList() : base()
+    {
+        eggs = new Dictionary<string, OwnedEgg>();
+    }
+
     public void OnAfterDeserialize()
     {
         eggs = new Dictionary<string, OwnedEgg>();
@@ -1427,9 +1439,10 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
             eggs[egg.Id].updateCheckins(egg);
     }
 
-    public EggList() : base()
+    public void remove(OwnedEgg egg)
     {
-        eggs = new Dictionary<string, OwnedEgg>();
+        eggs.Remove(egg.Id);
+        list.Remove(egg);
     }
 }
 
@@ -1437,6 +1450,11 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 [System.Serializable]
 public class KaijuList : ImmutableList<Kaiju>
 {
+    public KaijuList() : base()
+    {
+        //list.Add(new RANDOM KAIJU)  TODO uncomment this. This is the starting kaiju.
+    }
+
     public void hatchEgg(OwnedEgg egg)
     {
         egg.KaijuEmbryo.hatch(egg);

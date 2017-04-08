@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -76,10 +77,8 @@ public class MainMenuScript : MonoBehaviour
     } */
 
     private static Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>> idMarkers;
-    public static void removeEntryFromIdMarkers(string id, OwnedEgg egg)
-    {
-        idMarkers[id].Remove(egg);
-    }
+    private static Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> placeTypes;
+    private static Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> googleMarkers;
 
     private Path destroyPath;
 
@@ -471,33 +470,56 @@ public class MainMenuScript : MonoBehaviour
             friendMenuItem.GetComponent<FriendMenuItem>().Friend = fd;
             foreach (OwnedEgg e in fd.Friend.Metadata.EggsOwned)
             {
-                GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
-                friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
-                friendEggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
+                if (!e.Hatchable)
+                {
+                    GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
+                    friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
+                    friendEggMenuItem.GetComponent<FriendEggMenuItem>().Egg = e; // also updates the egg menu item's view
+                }
             }
         }
     }
 
     public void initializeCheckinDataStructures()
     {
+        foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
+        {
+            if (!item.Egg.Hatchable)
+                item.Egg.initializeCheckInnables();
+        }
         _markersByDistance = new List<SpatialMarker>();
         _idMarkers = new Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>>();
         idMarkers = _idMarkers;
         _spatialResponse = new CoroutineResponse();
         _placeTypes = new Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>>();
+        placeTypes = _placeTypes;
         _googleResponses = new Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse>();
         _googleMarkers = new Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>>();
-        foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
+        foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
         {
-            foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
+            if (!item.Egg.Hatchable)
             {
-                if (loc.needToBeVisited())
+                foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
                 {
-                    if (!_placeTypes.ContainsKey(loc.LocationType))
-                        _placeTypes[loc.LocationType] = new Dictionary<OwnedEgg, HashSet<GenericLocation>>();
-                    if (!_placeTypes[loc.LocationType].ContainsKey(item.Egg))
-                        _placeTypes[loc.LocationType][item.Egg] = new HashSet<GenericLocation>();
-                    _placeTypes[loc.LocationType][item.Egg].Add(loc);
+                    if (loc.needToBeVisited())
+                    {
+                        if (!_placeTypes.ContainsKey(loc.LocationType))
+                            _placeTypes[loc.LocationType] = new Dictionary<OwnedEgg, HashSet<GenericLocation>>();
+                        if (!_placeTypes[loc.LocationType].ContainsKey(item.Egg))
+                        {
+                            _placeTypes[loc.LocationType][item.Egg] = new HashSet<GenericLocation>();
+                        }
+                        _placeTypes[loc.LocationType][item.Egg].Add(loc);
+                    }
+                }
+                foreach (HatchLocationMarker hlm in item.Egg.MarkersToTake)
+                {
+                    if (hlm.needToBeVisited())
+                    {
+                        if (!_idMarkers.ContainsKey(hlm.Id))
+                            _idMarkers[hlm.Id] = new Dictionary<OwnedEgg, HatchLocationMarker>();
+                        _idMarkers[hlm.Id][item.Egg] = hlm;
+                    }
                 }
             }
         }
@@ -505,10 +527,6 @@ public class MainMenuScript : MonoBehaviour
         {
             _googleResponses[type] = new CoroutineResponse();
             _googleMarkers[type] = new List<BasicMarker>();
-        }
-        foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
-        {
-            item.Egg.initializeCheckInnables();
         }
     }
 
@@ -544,32 +562,33 @@ public class MainMenuScript : MonoBehaviour
                 }
             }
 
-            foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
+            foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
             {
-                item.Egg.CheckInnableLocs.Clear();
-                item.Egg.CheckInnableMarkers.Clear();
+                if (!item.Egg.Hatchable)
+                {
+                    item.Egg.CheckInnableLocs.Clear();
+                    item.Egg.CheckInnableMarkers.Clear();
+                }
             }
             foreach (GenericLocation.GooglePlacesType type in _googleMarkers.Keys)
             {
                 if (_googleMarkers[type].Count > 0)
                 {
                     foreach (OwnedEgg egg in _placeTypes[type].Keys)
-                    {
                         egg.CheckInnableLocs[_googleMarkers[type][0]] = _placeTypes[type][egg];
-                    }
                 }
             }
             foreach (SpatialMarker marker in _markersByDistance)
             {
-                if (idMarkers.ContainsKey(marker.Id))
+                if (_idMarkers.ContainsKey(marker.Id))
                 {
-                    foreach (OwnedEgg egg in idMarkers[marker.Id].Keys)
+                    foreach (OwnedEgg egg in _idMarkers[marker.Id].Keys)
                     {
-                        egg.CheckInnableMarkers.Add(idMarkers[marker.Id][egg]);
+                        egg.CheckInnableMarkers.Add(_idMarkers[marker.Id][egg]);
                     }
                 }
             }
-            foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
+            foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
             {
                 if (item.Egg.CheckInnableLocs.Count > 0 || item.Egg.CheckInnableMarkers.Count > 0)
                     item.enableCheckInButton();
@@ -590,5 +609,21 @@ public class MainMenuScript : MonoBehaviour
         webView.Stop();
         mapLoaded = false;
         webView.Hide();
+    }
+
+    public static void removeEntryFromIdMarkers(string id, OwnedEgg egg)
+    {
+        idMarkers[id].Remove(egg);
+    }
+
+
+    public static void removeEntryFromPlaceTypes(GenericLocation.GooglePlacesType type, OwnedEgg egg)
+    {
+        placeTypes[type].Remove(egg);
+        if (placeTypes[type].Count == 0)
+        {
+            placeTypes.Remove(type);
+            googleMarkers.Remove(type);
+        }
     }
 }
