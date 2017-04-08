@@ -591,6 +591,7 @@ public class SpatialClient2 : MonoBehaviour
             foreach (FriendData fd in friendList.Friends)
             {
                 _friends[fd.Friend.Id] = fd;
+                if (fd.Friend.Metadata.EggsOwned == null) fd.Friend.Metadata.initializeEggsOwned();
                 // TODO request system for accepting eggs
 
                 /*foreach (OwnedEgg egg in fd.Friend.Metadata.EggsOwned)
