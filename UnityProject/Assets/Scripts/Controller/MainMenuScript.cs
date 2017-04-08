@@ -572,9 +572,9 @@ public class MainMenuScript : MonoBehaviour
             foreach (OwnEggMenuItem item in _eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>())
             {
                 if (item.Egg.CheckInnableLocs.Count > 0 || item.Egg.CheckInnableMarkers.Count > 0)
-                    item.disableCheckInButton();
-                else
                     item.enableCheckInButton();
+                else
+                    item.disableCheckInButton();
             }
             yield return new WaitForSeconds(CHECK_INNABLE_UPDATE_INTERVAL);
         }
