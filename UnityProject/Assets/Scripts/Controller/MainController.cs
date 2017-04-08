@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
+using System;
 
 public class MainController : MonoBehaviour
 {
@@ -20,6 +22,8 @@ public class MainController : MonoBehaviour
 	public Camera phoneCamera;
 	public GameObject phoneCameraScene;
     public string currentMarkerId;
+	public string markerIdAnalytics;
+	public float destructionTime;
 
     /*public int screams;
 	public float timer; */
@@ -29,6 +33,7 @@ public class MainController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+		markerIdAnalytics = null;
         single = this;
 		gameState = GameState.MainMenu;
 		//screams = 0;
@@ -39,6 +44,9 @@ public class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+		if (markerIdAnalytics != null) {
+			destructionTime += Time.deltaTime;
+		}
 		/* if (timer == 0.0) {
 			// TODO:Trigger some notification
 			timer = COUNT_DOWN_BASE;
@@ -126,6 +134,15 @@ public class MainController : MonoBehaviour
 
 	public void goToMapView()
 	{
+		if (markerIdAnalytics != null) {
+			Analytics.CustomEvent ("BuildingDestruction", new IDictionary<string,Object> {
+				{"BuildingId", markerIdAnalytics},
+				{"PlayerId", SpatialClient2.single.userId},
+				{"Time", DateTime.UtcNow.ToString()},
+				{"DestructionTime", destructionTime}
+			});
+			markerIdAnalytics = null;
+		}
 		lastGameState = gameState;
 		Debug.Log ("go to map");
 
@@ -145,6 +162,8 @@ public class MainController : MonoBehaviour
 
     public void goToDestroyCity(string markerId)
     {
+		markerIdAnalytics = markerId;
+		destructionTime = 0;
         currentMarkerId = markerId;
 		lastGameState = gameState;
 		Debug.Log ("go to destory city gameplay");
