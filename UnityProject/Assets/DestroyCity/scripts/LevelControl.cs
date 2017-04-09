@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System.Linq;
 
 public class LevelControl : MonoBehaviour {
+    private const float FIRST_SHAKE_WAIT = 2.0f;
 
     public CoroutineResponse winCoroutineEnded;    
 
@@ -294,12 +295,7 @@ public class LevelControl : MonoBehaviour {
 				shakeNow  = false;
 				shakeText.SetActive (false);
 				GameObject mainController = GameObject.Find ("MainController");
-				eggIndex = mainController.GetComponent<KaijuDatabase> ().generateEgg ();
-				if (eggIndex != -1) {
-					GameObject EggImage = findEggCanvas.transform.FindChild ("EggImage").gameObject;
-					EggImage.GetComponent<Image> ().sprite = mainController.GetComponent<KaijuDatabase> ().eggSprites [eggIndex];
-					//StartCoroutine (startShakeCountDown ());
-				}
+				eggIndex = KaijuDatabase.instance.generateEgg ();
 				StartCoroutine (showReward ());
 			}
 
@@ -315,8 +311,18 @@ public class LevelControl : MonoBehaviour {
 
 	IEnumerator showReward()
 	{
-		//TODO: shake according to the streak
-		yield return new WaitForSeconds(2.0f);
+        float offset = Time.time;
+        if (eggIndex != -1)
+        {
+            yield return KaijuDatabase.instance.checkAndDownloadEggSprite(eggIndex, new CoroutineResponse());
+            GameObject EggImage = findEggCanvas.transform.FindChild("EggImage").gameObject;
+            EggImage.GetComponent<Image>().sprite = KaijuDatabase.instance.eggSprites[eggIndex];
+            //StartCoroutine (startShakeCountDown ());
+            offset = Time.time - offset;
+        }
+        //TODO: shake according to the streak
+        if (offset < FIRST_SHAKE_WAIT)
+            yield return new WaitForSeconds(FIRST_SHAKE_WAIT - offset);
 		pA.punchGround(2);
 		yield return new WaitForSeconds (.3f);
 		if(eggIndex != -1)
@@ -331,6 +337,7 @@ public class LevelControl : MonoBehaviour {
 		GameObject inputName = editEggNameCanvas.transform.FindChild ("InputEggName").gameObject;
 		eggName = inputName.GetComponent<InputField> ().text;
 		Debug.Log (eggName);
+        // QUESTION FROM EMRE - IS THIS WHERE WE SHOULD CALL CREATEEGGFORSELF?
 	}
 
 	public void openEditEggNameCanvas()

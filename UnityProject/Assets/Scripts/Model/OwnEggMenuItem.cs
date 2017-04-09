@@ -35,11 +35,18 @@ public class OwnEggMenuItem : FriendEggMenuItem
 
     public void onHatch()
     {
-        SpatialClient2.single.hatchEgg(_egg);
+        StartCoroutine(hatchEgg());
+    }
+
+    private IEnumerator hatchEgg()
+    {
+        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
+        yield return SpatialClient2.single.hatchEgg(_egg);
         Destroy(gameObject);
         GameObject newKaijuMenuItem = GameObject.Instantiate(MainMenuScript.KaijuMenuItemPrefab);
         newKaijuMenuItem.transform.SetParent(MainMenuScript.KaijuMenuContentPanel, false);
         newKaijuMenuItem.GetComponent<KaijuMenuItem>().Kaiju = _egg.KaijuEmbryo;
+        MessageController.single.closeWaitScreen(true);
     }
 
     override protected void refreshView()

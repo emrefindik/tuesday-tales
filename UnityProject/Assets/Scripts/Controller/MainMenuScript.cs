@@ -568,26 +568,8 @@ public class MainMenuScript : MonoBehaviour
             {
                 StartCoroutine(SpatialClient2.single.GetGoogleLocationsByDistance(Input.location.lastData.latitude, Input.location.lastData.longitude, FriendEggMenuItem.MAX_CHECK_IN_DISTANCE, _googleMarkers[type], type, _googleResponses[type]));
             }
-
-            bool coroutinesGoing = true;
-            while (coroutinesGoing)
-            {
-                yield return null;
-                coroutinesGoing = false;
-                if (_spatialResponse.Success == null)
-                {
-                    coroutinesGoing = true;
-                    continue;
-                }
-                foreach (CoroutineResponse response in _googleResponses.Values)
-                {
-                    if (response.Success == null)
-                    {
-                        coroutinesGoing = true;
-                        continue;
-                    }
-                }
-            }
+            while (_spatialResponse.Success == null) yield return null;
+            yield return SpatialClient2.waitUntilCoroutinesReturn(_googleResponses.Values);
 
             foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
             {

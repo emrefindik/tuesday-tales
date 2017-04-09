@@ -57,6 +57,7 @@ public class SpatialClient2 : MonoBehaviour
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
+        //_kaijuDatabase = new KaijuDatabase();
     }
 
     private void Update()
@@ -153,7 +154,10 @@ public class SpatialClient2 : MonoBehaviour
     {
         userSession.User.Metadata.EggsOwned.remove(egg);
         userSession.User.Metadata.Kaiju.hatchEgg(egg);
+        CoroutineResponse spritesResponse = new CoroutineResponse();
+        StartCoroutine(egg.KaijuEmbryo.initializeSprites(spritesResponse));
         yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        while (spritesResponse.Success == null) yield return null;
     }
 
     public string getNameOfFriend(string friendUserID)
@@ -175,7 +179,7 @@ public class SpatialClient2 : MonoBehaviour
             userSession.User.Metadata.Kaiju == null)
         {
             Debug.Log("first login");
-            userSession.User.Metadata.initialize();
+            yield return userSession.User.Metadata.initialize();
             yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
         }
     }
@@ -264,8 +268,36 @@ public class SpatialClient2 : MonoBehaviour
         if (metadata != null)
             form.AddField("metadata", JsonUtility.ToJson(metadata));
         else
-            form.AddField("metadata", JsonUtility.ToJson(new MarkerMetadata(MarkerMetadata.MarkerType.GENERIC)));
+            form.AddField("metadata", JsonUtility.ToJson(MarkerMetadata.newGenericMetadata()));
 
+        WWW www = new WWW(url, form);
+        yield return www;
+
+        // Post Process
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error);
+        }
+        else
+        {
+            ready = true;
+            Debug.Log(www.text);
+        }
+    }
+
+    /** Emre says: Did not work when I checked. */
+    public IEnumerator GetMarkersByMetadataType(MarkerMetadata.MarkerType type, string projectID = PROJECT_ID)
+    {
+        ready = false;
+
+        string url = string.Format("{0}/v1/markers-by-metadata", baseURL);
+
+        WWWForm form = new WWWForm();
+        List<MarkersByMetadataRequestTerm> typeList = new List<MarkersByMetadataRequestTerm>();
+        typeList.Add(new MarkersByMetadataRequestTerm("type", MarkerMetadata.markerTypeToString(type), false));        
+        form.AddField("terms", JsonUtility.ToJson(typeList));
+        form.AddField("projectId", projectID);
+        
         WWW www = new WWW(url, form);
         yield return www;
 
@@ -516,11 +548,85 @@ public class SpatialClient2 : MonoBehaviour
             yield return checkFirstLogin();
             yield return checkIfStreakIsOutdated();
             streakInitialized = true;
+            CoroutineResponse kaijuImageResponse = new CoroutineResponse();
+            StartCoroutine(getKaijuImages(kaijuImageResponse));
+            CoroutineResponse eggImageResponse = new CoroutineResponse();
+            StartCoroutine(getEggImages(eggImageResponse));
             yield return GetFriends();
+            List<CoroutineResponse> friendImageResponses = new List<CoroutineResponse>();
+            foreach (FriendData fd in _friends.Values)
+            {
+                CoroutineResponse friendImageResponse = new CoroutineResponse();
+                friendImageResponses.Add(friendImageResponse);
+                StartCoroutine(getFriendEggImages(friendImageResponse, fd));
+            }
+            while (kaijuImageResponse.Success == null || eggImageResponse.Success == null)
+                yield return null;
+            yield return waitUntilCoroutinesReturn(friendImageResponses);
             ready = true;
             response.setSuccess(true);
         }
         // do not call displayError, since that error screen would direct to the main menu instead of the login screen
+    }
+
+    public static IEnumerator waitUntilCoroutinesReturn(IEnumerable<CoroutineResponse> responses)
+    {
+        bool coroutinesGoing = true;
+        while (coroutinesGoing)
+        {
+            yield return null;
+            coroutinesGoing = false;
+            foreach (CoroutineResponse response in responses)
+            {
+                if (response.Success == null)
+                {
+                    coroutinesGoing = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    public IEnumerator getKaijuImages(CoroutineResponse response)
+    {
+        response.reset();
+        List<CoroutineResponse> responses = new List<CoroutineResponse>();
+        foreach (Kaiju k in userSession.User.Metadata.Kaiju)
+        {
+            CoroutineResponse kaijuImageResponse = new CoroutineResponse();
+            responses.Add(kaijuImageResponse);
+            StartCoroutine(k.initializeSprites(kaijuImageResponse));
+        }
+        yield return waitUntilCoroutinesReturn(responses);
+        response.setSuccess(true);
+    }
+
+    public IEnumerator getEggImages(CoroutineResponse response)
+    {
+        response.reset();
+        List<CoroutineResponse> responses = new List<CoroutineResponse>();
+        foreach (OwnedEgg e in userSession.User.Metadata.EggsOwned)
+        {
+            CoroutineResponse eggImageResponse = new CoroutineResponse();
+            responses.Add(eggImageResponse);
+            StartCoroutine(e.initializeSprite(eggImageResponse));
+        }
+        yield return waitUntilCoroutinesReturn(responses);
+        response.setSuccess(true);
+    }
+
+    public IEnumerator getFriendEggImages(CoroutineResponse response, FriendData friend)
+    {
+        response.reset();
+        List<CoroutineResponse> responses = new List<CoroutineResponse>();
+        foreach (OwnedEgg e in friend.Friend.Metadata.EggsOwned)
+        {
+            CoroutineResponse friendEggImageResponse = new CoroutineResponse();
+            responses.Add(friendEggImageResponse);
+            StartCoroutine(e.initializeSprite(friendEggImageResponse));
+        }
+        yield return waitUntilCoroutinesReturn(responses);
+        response.setSuccess(true);
     }
 
     public IEnumerator checkIfStreakIsOutdated()
@@ -817,6 +923,8 @@ public class UserMetadata// : ISerializationCallbackReceiver
     public const int NO_STREAK = -1;
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
+    // the furthest distance to check for a kaiju spawn point, in meters
+    public const double KAIJU_MARKER_RADIUS = 1500.0;
 
     [SerializeField]
     private KaijuList kaiju;
@@ -926,7 +1034,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
         eggsOwned = new EggList(eggs);
     } */
 
-    public void initialize()
+    public IEnumerator initialize()
     {
         eggsOwned = new EggList();
         friendEggsCheckedIn = new EggList();
@@ -936,7 +1044,12 @@ public class UserMetadata// : ISerializationCallbackReceiver
         scoreMultiplier = 1;
         streakMarkers = new StreakPath();
         streakTimerStart = NO_STREAK;
-        kaiju = new KaijuList();
+
+        // initialize kaiju list
+        List<SpatialMarker> markersAround = new List<SpatialMarker>();
+        CoroutineResponse response = new CoroutineResponse();
+        yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, KAIJU_MARKER_RADIUS, true, markersAround, response);
+        kaiju = new KaijuList(KaijuWithFrequencyList.randomKaiju(markersAround));
     }
 
     public void initializeEggsOwned()
@@ -1279,12 +1392,14 @@ public class MarkerMetadata
     private const string MAP_OVERLAY = "overlay";
     private const string BUILDING_TO_DESTROY = "building";
     private const string CHECK_IN_LOCATION = "checkin";
+    private const string KAIJU = "kaiju";
 
     public enum MarkerType
     {
         GENERIC,
         MAP_OVERLAY,
         BUILDING_TO_DESTROY,
+        KAIJU,
         CHECK_IN_LOCATION
     }
 
@@ -1295,37 +1410,11 @@ public class MarkerMetadata
     {
         get
         {
-            switch (type)
-            {
-                case MAP_OVERLAY:
-                    return MarkerType.MAP_OVERLAY;
-                case BUILDING_TO_DESTROY:
-                    return MarkerType.BUILDING_TO_DESTROY;
-                case CHECK_IN_LOCATION:
-                    return MarkerType.CHECK_IN_LOCATION;
-                default:
-                    return MarkerType.GENERIC;
-            }
+            return stringToMarkerType(type);
         }
-        set
+        private set
         {
-            switch (value)
-            {
-                case MarkerType.MAP_OVERLAY:
-                    type = MAP_OVERLAY;
-                    break;
-                case MarkerType.BUILDING_TO_DESTROY:
-                    type = BUILDING_TO_DESTROY;
-                    break;
-                case MarkerType.CHECK_IN_LOCATION:
-                    type = CHECK_IN_LOCATION;
-                    break;
-                case MarkerType.GENERIC:
-                    type = "";
-                    break;
-                default:
-                    break;
-            }
+            type = markerTypeToString(value);
         }
     }
 
@@ -1335,12 +1424,86 @@ public class MarkerMetadata
     private string intactImagePath;
     [SerializeField]
     private ImageBounds imageBounds;
+    [SerializeField]
+    private KaijuWithFrequencyList kaiju;
+    public KaijuWithFrequencyList Kaiju
+    {
+        get { return kaiju; }
+        private set { kaiju = value; }
+    }
+
+    private MarkerMetadata(MarkerType t)
+    {
+        Type = t;
+    }
 
     // TODO figure the fields out
 
-    public MarkerMetadata(MarkerType t)
+    public static MarkerMetadata newMapOverlayMetadata(string imagePath, ImageBounds bounds)
     {
-        Type = t;
+        MarkerMetadata mm = new MarkerMetadata(MarkerType.MAP_OVERLAY);
+        mm.intactImagePath = imagePath;
+        mm.imageBounds = bounds;
+        return mm;
+    }
+
+    public static MarkerMetadata newBuildingMetadata(string intactImage, string destroyedImage, ImageBounds bounds)
+    {
+        MarkerMetadata mm = new MarkerMetadata(MarkerType.BUILDING_TO_DESTROY);
+        mm.intactImagePath = intactImage;
+        mm.imageBounds = bounds;
+        return mm;
+    }
+
+    public static MarkerMetadata newCheckInLocationMetadata()
+    {
+        return new MarkerMetadata(MarkerType.CHECK_IN_LOCATION);
+    }
+
+    public static MarkerMetadata newGenericMetadata()
+    {
+        return new MarkerMetadata(MarkerType.GENERIC);
+    }
+
+    public static MarkerMetadata newKaijuSpawnPointMetadata(KaijuWithFrequencyList kaijuList)
+    {
+        MarkerMetadata mm = new MarkerMetadata(MarkerType.KAIJU);
+        mm.kaiju = kaijuList;
+        return mm;
+    }
+
+    public static MarkerType stringToMarkerType(string t)
+    {
+        switch (t)
+        {
+            case MAP_OVERLAY:
+                return MarkerType.MAP_OVERLAY;
+            case BUILDING_TO_DESTROY:
+                return MarkerType.BUILDING_TO_DESTROY;
+            case CHECK_IN_LOCATION:
+                return MarkerType.CHECK_IN_LOCATION;
+            case KAIJU:
+                return MarkerType.KAIJU;
+            default:
+                return MarkerType.GENERIC;
+        }
+    }
+
+    public static string markerTypeToString(MarkerType t)
+    {
+        switch (t)
+        {
+            case MarkerType.MAP_OVERLAY:
+                return MAP_OVERLAY;
+            case MarkerType.BUILDING_TO_DESTROY:
+                return BUILDING_TO_DESTROY;
+            case MarkerType.CHECK_IN_LOCATION:
+                return CHECK_IN_LOCATION;
+            case MarkerType.KAIJU:
+                return KAIJU;
+            default:
+                return "";
+        }
     }
 }
 
@@ -1379,6 +1542,41 @@ public abstract class ImmutableList<T> : IEnumerable<T>
     {
         get { return list[index]; }
         // there should be no set!
+    }
+}
+
+[System.Serializable]
+public class MarkersByMetadataRequestTerm
+{
+    [SerializeField]
+    private string key;
+    public string Key
+    {
+        get { return key; }
+        private set { key = value; }
+    }
+
+    [SerializeField]
+    private string value;
+    public string Value
+    {
+        get { return value; }
+        private set { this.value = value; }
+    }
+
+    [SerializeField]
+    private bool strict;
+    public bool Strict
+    {
+        get { return strict; }
+        private set { strict = value; }
+    }
+
+    public MarkersByMetadataRequestTerm(string k, string v, bool s)
+    {
+        key = k;
+        value = v;
+        strict = s;
     }
 }
 
@@ -1468,9 +1666,9 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 [System.Serializable]
 public class KaijuList : ImmutableList<Kaiju>
 {
-    public KaijuList() : base()
+    public KaijuList(Kaiju firstKaiju) : base()
     {
-        //list.Add(new RANDOM KAIJU)  TODO uncomment this. This is the starting kaiju.
+        list.Add(firstKaiju);
     }
 
     public void hatchEgg(OwnedEgg egg)
@@ -1479,47 +1677,6 @@ public class KaijuList : ImmutableList<Kaiju>
         list.Add(egg.KaijuEmbryo);
     }
 }
-
-/*[System.Serializable]
-public class PathMarker
-{
-    [SerializeField]
-    private string markerId;
-    public string Id
-    {
-        get { return markerId; }
-        set { markerId = value; }
-    }
-        
-    private LocationCoord markerLocation;
-
-    [SerializeField]
-    public double Latitude
-    {
-        get { return markerLocation.lat; }
-        set { markerLocation.lat = value; }
-    }
-
-    [SerializeField]
-    public double Longitude
-    {
-        get { return markerLocation.lon; }
-        set { markerLocation.lon = value; }
-    }
-
-    public PathMarker(string id, double lat, double lon)
-    {
-        markerId = id;
-        markerLocation = new LocationCoord();
-        markerLocation.lat = lat;
-        markerLocation.lon = lon;
-    }
-
-    public PathMarker(Marker m)
-    {
-
-    }
-} */
 
 // the streak path, containing marker ids
 [System.Serializable]
@@ -1536,7 +1693,52 @@ public class StreakPath : ImmutableList<string>
     }
 }
 
+[System.Serializable]
+public class KaijuWithFrequencyList : ImmutableList<KaijuWithFrequency>
+{
+    public KaijuWithFrequencyList(IEnumerable<KaijuWithFrequency> items) : base(items) {}
 
+    private KaijuWithFrequencyList() : base() {}
+
+    public static Kaiju randomKaiju(List<SpatialMarker> markers)
+    {
+        KaijuWithFrequencyList kwfList = new KaijuWithFrequencyList();
+        Dictionary<SpatialMarker, float> distances = new Dictionary<SpatialMarker, float>();
+        foreach (SpatialMarker marker in markers)
+        {
+            if (marker.Metadata.Type == MarkerMetadata.MarkerType.KAIJU)
+                distances[marker] = 1.0f - (float)Math.Sqrt(Geography.getDistanceFromLatLonInM(Input.location.lastData.latitude, Input.location.lastData.longitude, marker.Loc.Latitude, marker.Loc.Longitude) / UserMetadata.KAIJU_MARKER_RADIUS);
+        }
+        if (distances.Count == 0)
+        {
+            // no kaiju markers around!
+            // return STANDARD_KAIJU; TODO uncomment this once we have a standard kaiju.
+        }
+        float index = 0.0f;
+        int i = 0;
+        int j;
+        foreach (SpatialMarker marker in markers)
+        {
+            if (marker.Metadata.Type == MarkerMetadata.MarkerType.KAIJU)
+            {
+                kwfList.list.AddRange(marker.Metadata.Kaiju.list);
+                for (j = i; j < kwfList.Count; j++)
+                {
+                    kwfList[i].Index = index;
+                    index += kwfList[i].Frequency * distances[marker];
+                }
+                i = j;
+            }
+        }
+        index = UnityEngine.Random.Range(0.0f, index);
+        for (i = 1; i < kwfList.Count; i++)
+        {
+            if (index < kwfList[i].Index) return kwfList[i - 1].Kaiju;
+        }
+        // return last element in the kaiju list
+        return kwfList[i - 1].Kaiju;
+    }
+}
 
 //[System.Serializable]
 //public class Markers

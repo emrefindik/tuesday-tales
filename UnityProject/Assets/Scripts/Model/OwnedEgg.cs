@@ -6,8 +6,9 @@ using UnityEngine;
 
 /** The egg class */
 [Serializable]
-public class OwnedEgg// : ISerializationCallbackReceiver
+public class OwnedEgg
 {
+    public const int NUMBER_OF_EGG_IMAGES = 4;
     public const double STARTING_EGG_SIZE = 1.0;
 
     // do not serialize. this is for internal use in game
@@ -22,6 +23,13 @@ public class OwnedEgg// : ISerializationCallbackReceiver
     {
         get { return _checkInnableLocs; }
         private set { _checkInnableLocs = value; }
+    }
+
+    [SerializeField]
+    private int _imageIndex;
+    public Sprite Sprite
+    {
+        get { return KaijuDatabase.instance.EggSprites[_imageIndex]; }
     }
 
     [SerializeField]
@@ -105,10 +113,11 @@ public class OwnedEgg// : ISerializationCallbackReceiver
 
     // TODO add other relevant fields
 
-    private OwnedEgg(string name, string id)
+    private OwnedEgg(string name, int imageIndex, string id)
     {
         _name = name;
         _id = id;
+        _imageIndex = imageIndex;
         _helpers = new IdList();
         _requests = new IdList();
         _markersToTake = new List<HatchLocationMarker>();
@@ -117,16 +126,34 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         _checkInnableMarkers = new List<HatchLocationMarker>();
         _checkInnableLocs = new Dictionary<BasicMarker, HashSet<GenericLocation>>();
         _hatchable = !(PlacesToTake.Count() > 0);
-        _kaiju = null; // TODO FIX THIS!! ADD A KAIJU GENERATOR FUNCTION!!!
+        _kaiju = null;
     }
 
-    /**  */
-    public static IEnumerator createEggForSelf(GameObject eggMenuItemPrefab, Transform eggMenuContentPanel, string eggName = "")
+    public IEnumerator initializeSprite(CoroutineResponse response)
+    {
+        yield return KaijuDatabase.instance.checkAndDownloadEggSprite(_imageIndex, response);
+    }
+
+    public IEnumerator initializeKaiju()
+    {
+        if (_kaiju == null)
+        {
+            List<SpatialMarker> markersAround = new List<SpatialMarker>();
+            CoroutineResponse markerResponse = new CoroutineResponse();
+            yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, UserMetadata.KAIJU_MARKER_RADIUS, true, markersAround, markerResponse);
+            _kaiju = KaijuWithFrequencyList.randomKaiju(markersAround);
+        }
+        else yield break;
+    }
+
+    public static IEnumerator createEggForSelf(GameObject eggMenuItemPrefab, Transform eggMenuContentPanel, int imageIndex, string eggName = "")
     {
         if (SpatialClient2.single.isLoggedIn())
         {
             // assign the hexadecimal representation of the egg creation number as custom part of id
-            OwnedEgg egg = new OwnedEgg(eggName, SpatialClient2.single.newEggIdForSelf());
+            OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForSelf());
+            yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
+            yield return egg.initializeKaiju();
             yield return SpatialClient2.single.addEggToSelf(egg);
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
@@ -138,11 +165,13 @@ public class OwnedEgg// : ISerializationCallbackReceiver
         }
     }
 
-    public static IEnumerator createEggForFriend(FriendData friend, string eggName = "")
+    public static IEnumerator createEggForFriend(FriendData friend, int imageIndex, string eggName = "")
     {
         if (SpatialClient2.single.isLoggedIn())
         {
-            OwnedEgg egg = new OwnedEgg(eggName, SpatialClient2.single.newEggIdForFriend(friend));
+            OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForFriend(friend));
+            yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
+            yield return egg.initializeKaiju();
             yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
         }
         else

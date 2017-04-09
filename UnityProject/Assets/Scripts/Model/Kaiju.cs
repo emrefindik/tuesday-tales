@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,27 +9,26 @@ public class Kaiju : ISerializationCallbackReceiver
     [SerializeField]
     private SerializableColor _color;
 
-    private Color _clr;
-    public Color MonsterColor
+    [SerializeField]
+    private int _handType;
+    public Sprite HandSprite
     {
-        get
-        {
-            return _clr;
-        }
-        private set
-        {
-            _clr = value;
-            _color.updateValues(value);
-        }
+        get { return KaijuDatabase.instance.HandSprites[_handType]; }
     }
 
     [SerializeField]
-    private int _handType;
-    [SerializeField]
     private int _headType;
+    public Sprite HeadSprite
+    {
+        get { return KaijuDatabase.instance.HeadSprites[_headType]; }
+    }
+
     [SerializeField]
     private int _bodyType;
-    // TODO make enums for hand, head and body types
+    public Sprite BodySprite
+    {
+        get { return KaijuDatabase.instance.BodySprites[_bodyType]; }
+    }    
 
     [SerializeField]
     private string _name;
@@ -46,6 +46,20 @@ public class Kaiju : ISerializationCallbackReceiver
         get {
             if (_helpers != null) return _helpers;
             return Enumerable.Empty<string>();
+        }
+    }
+
+    private Color _clr;
+    public Color MonsterColor
+    {
+        get
+        {
+            return _clr;
+        }
+        private set
+        {
+            _clr = value;
+            _color.updateValues(value);
         }
     }
 
@@ -68,6 +82,11 @@ public class Kaiju : ISerializationCallbackReceiver
     public bool isHatched()
     {
         return _helpers != null;
+    }
+
+    public IEnumerator initializeSprites(CoroutineResponse response)
+    {        
+        yield return KaijuDatabase.instance.initialize(_handType, _headType, _bodyType, response);
     }
 
     public void OnBeforeSerialize()
@@ -141,5 +160,38 @@ public class SerializableColor
         green = color.g;
         blue = color.b;
         alpha = color.a;
+    }
+}
+
+[System.Serializable]
+public class KaijuWithFrequency
+{
+    [SerializeField]
+    private int _frequency;
+    public int Frequency
+    {
+        get { return _frequency; }
+    }
+
+    [SerializeField]
+    private Kaiju _kaiju;
+    public Kaiju Kaiju
+    {
+        get { return _kaiju; }
+    }
+
+    /* Used when picking a random kaiju out of a list.
+     * Do not serialize. */
+    private float _index;
+    public float Index
+    {
+        get { return _index; }
+        set { _index = value; }
+    }
+
+    public KaijuWithFrequency(Kaiju kaiju, int frequency)
+    {
+        _kaiju = kaiju;
+        _frequency = frequency;
     }
 }

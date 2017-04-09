@@ -30,7 +30,7 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
         set
         {
             _egg = value;
-            // TODO uncomment this after figuring out how to store the images _eggImage.sprite = e.egg.image;
+            _eggImage.sprite = value.Sprite;
             _eggNameText.text = value.Name;
             // TODO show names of all helper friends
             _friendNameText.text = "";

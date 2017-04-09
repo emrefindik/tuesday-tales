@@ -30,7 +30,7 @@ public class Geography {
         return radius > getDistanceFromLatLonInM(loc1.lat, loc1.lng, loc2.lat, loc2.lng);
 	}
 
-	static double getDistanceFromLatLonInM(double lat1, double lon1, double lat2, double lon2){
+	static public double getDistanceFromLatLonInM(double lat1, double lon1, double lat2, double lon2){
 		double dLat = deg2rad(lat2-lat1);  // deg2rad below
 		double dLon = deg2rad(lon2-lon1);
 		double a = 
