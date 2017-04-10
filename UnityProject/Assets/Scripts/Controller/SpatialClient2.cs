@@ -505,8 +505,9 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     //Must login after creation
-    public IEnumerator CreateUser(string userName, string password, string projectID = PROJECT_ID)
+	public IEnumerator CreateUser(CoroutineResponse response, string userName, string password, string projectID = PROJECT_ID)
     {
+		response.reset();
         ready = false;
 
         string url = baseURL + "/v1/project-user/create-user";
@@ -521,11 +522,13 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+			if (www.error.StartsWith("400")) response.setSuccess(false);
         }
         else
         {
             ready = true;
             Debug.Log(www.text);
+			response.setSuccess (true);
         }
     }
 

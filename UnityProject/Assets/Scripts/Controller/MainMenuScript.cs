@@ -69,6 +69,13 @@ public class MainMenuScript : MonoBehaviour
         private set { loginCanvas = value; }
     }
 
+	private static Canvas registerCanvas;
+	public static Canvas RegisterCanvas
+	{
+		get { return registerCanvas; }
+		private set { registerCanvas = value; }
+	}
+
     private static UniWebView webView;
     /*public static UniWebView WebView
     {
@@ -120,6 +127,8 @@ public class MainMenuScript : MonoBehaviour
     private Canvas _friendsCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
+	[SerializeField]
+	private Canvas _registerCanvas;
     [SerializeField]
     private Canvas _kaijuCanvas;
     [SerializeField]
@@ -166,6 +175,7 @@ public class MainMenuScript : MonoBehaviour
         webView = _webView;
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
+		registerCanvas = _registerCanvas;
         //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
         //friendsEggsCanvas = _friendsEggsCanvas;
@@ -173,6 +183,7 @@ public class MainMenuScript : MonoBehaviour
         kaijuMenuContentPanel = _kaijuMenuContentPanel;
 
         _loginCanvas.enabled = true;
+		_registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
         //_mainMenuCanvas.enabled = false;
@@ -244,6 +255,7 @@ public class MainMenuScript : MonoBehaviour
 
 	public void onSubmit()
 	{
+		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		StartCoroutine (submit());
 	}
 
@@ -289,6 +301,12 @@ public class MainMenuScript : MonoBehaviour
         _friendsCanvas.enabled = false;
         _mainMenuCanvas.enabled = true;
     } */
+
+	public void openRegisterScreen()
+	{
+		_loginCanvas.enabled = false;
+		_registerCanvas.enabled = true;
+	}
 
     public void onBackFromKaiju()
     {
@@ -635,4 +653,49 @@ public class MainMenuScript : MonoBehaviour
             googleMarkers.Remove(type);
         }
     }
+
+	public void onRegister()
+	{
+		// Refresh
+		_registerCanvas.transform.Find ("PasswordNotMatchText").gameObject.SetActive (false);
+		_registerCanvas.transform.Find ("UserExistText").gameObject.SetActive (false);
+
+		string username = _registerCanvas.transform.FindChild ("UserNameField").GetComponent<InputField> ().text;
+		string password = _registerCanvas.transform.FindChild ("PasswordField").GetComponent<InputField> ().text;
+		string reenterPassword = _registerCanvas.transform.Find ("ReEnterPasswordField").GetComponent<InputField> ().text;
+		if (password != reenterPassword) {
+			_registerCanvas.transform.Find ("PasswordNotMatchText").gameObject.SetActive (true);
+		}
+		else{
+			StartCoroutine (register (username, password));
+		}
+	}
+
+	public IEnumerator register(string username, string password)
+	{
+		CoroutineResponse response = new CoroutineResponse();
+		response.reset();
+		yield return SpatialClient2.single.CreateUser(response, username, password);
+		switch (response.Success)
+		{
+		case true:
+			// initialize egg menu
+			_loginCanvas.enabled = true;
+			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
+			_registerCanvas.enabled = false;
+			break;
+		case false:
+			// wrong credentials
+			_registerCanvas.transform.Find ("UserExistText").gameObject.SetActive (true);
+			Debug.Log("User Exist");
+			break;
+		case null:
+			// connection error (possible timeout)
+			_connectionErrorText.enabled = true;
+			Debug.Log("Connection Error");
+			break;
+		}
+
+	}
+
 }
