@@ -158,7 +158,9 @@ public class MainMenuScript : MonoBehaviour
     private Canvas _friendsCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
-    [SerializeField]
+	[SerializeField]
+	private Canvas _registerCanvas;
+	[SerializeField]
     private Text _wrongPasswordText;
     [SerializeField]
     private Text _connectionErrorText;
@@ -201,6 +203,7 @@ public class MainMenuScript : MonoBehaviour
         pleaseWaitCanvas = _pleaseWaitCanvas;
 
         _loginCanvas.enabled = true;
+		_registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
         _mainMenuCanvas.enabled = false;
@@ -271,6 +274,7 @@ public class MainMenuScript : MonoBehaviour
 
 	public void onSubmit()
 	{
+		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		StartCoroutine (submit());
 	}
 
@@ -570,4 +574,55 @@ public class MainMenuScript : MonoBehaviour
         pleaseWaitCanvas.enabled = false;
         previousCanvas.enabled = true;
     }
+		
+	public void openRegisterScreen()
+	{
+		_loginCanvas.enabled = false;
+		_registerCanvas.enabled = true;
+	}
+
+	public void onRegister()
+	{
+		// Refresh
+		_registerCanvas.transform.Find ("PasswordNotMatchText").gameObject.SetActive (false);
+		_registerCanvas.transform.Find ("UserExistText").gameObject.SetActive (false);
+
+		string username = _registerCanvas.transform.FindChild ("UserNameField").GetComponent<InputField> ().text;
+		string password = _registerCanvas.transform.FindChild ("PasswordField").GetComponent<InputField> ().text;
+		string reenterPassword = _registerCanvas.transform.Find ("ReEnterPasswordField").GetComponent<InputField> ().text;
+		if (password != reenterPassword) {
+			_registerCanvas.transform.Find ("PasswordNotMatchText").gameObject.SetActive (true);
+		}
+		else{
+			StartCoroutine (register (username, password));
+		}
+	}
+
+	public IEnumerator register(string username, string password)
+	{
+		CoroutineResponse response = new CoroutineResponse();
+		response.reset();
+		yield return SpatialClient2.single.CreateUser(response, username, password);
+		switch (response.Success)
+		{
+		case true:
+			// initialize egg menu
+			_loginCanvas.enabled = true;
+			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
+			_registerCanvas.enabled = false;
+			break;
+		case false:
+			// wrong credentials
+			_registerCanvas.transform.Find ("UserExistText").gameObject.SetActive (true);
+			Debug.Log("User Exist");
+			break;
+		case null:
+			// connection error (possible timeout)
+			_connectionErrorText.enabled = true;
+			Debug.Log("Connection Error");
+			break;
+		}
+
+	}
+
 }
