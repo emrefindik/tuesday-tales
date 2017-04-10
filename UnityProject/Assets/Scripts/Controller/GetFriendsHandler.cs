@@ -17,7 +17,7 @@ public class GetFriendsHandler : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetKeyDown(KeyCode.C)) {
-			StartCoroutine (SpatialClient2.single.CreateUser (username, password));
+			StartCoroutine (SpatialClient2.single.CreateUser (new CoroutineResponse(), username, password));
 		}
 		if (Input.GetKeyDown(KeyCode.L)) {
 			StartCoroutine (SpatialClient2.single.LoginUser (new CoroutineResponse(), username, password));
