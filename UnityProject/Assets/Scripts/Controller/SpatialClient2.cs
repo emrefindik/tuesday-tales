@@ -152,6 +152,12 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator hatchEgg(OwnedEgg egg)
     {
+		Analytics.CustomEvent("EggHatched", new Dictionary<string, object> {
+			{"PlayerId", userId},
+			{"Time", DateTime.UtcNow.ToString()},
+			{"Location", new List<float>{Input.location.lastData.longitude, Input.location.lastData.latitude}},
+			{"HatchedEgg", egg}
+		});
         userSession.User.Metadata.EggsOwned.remove(egg);
         userSession.User.Metadata.Kaiju.hatchEgg(egg);
         CoroutineResponse spritesResponse = new CoroutineResponse();
