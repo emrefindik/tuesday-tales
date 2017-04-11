@@ -19,8 +19,8 @@ public class MainController : MonoBehaviour
     public GameObject menuScene;
     public GameObject destroyCityPrefab;
 	GameObject destroyCityScene;
-	public Camera phoneCamera;
-	public GameObject phoneCameraScene;
+	GameObject phoneCameraScene;
+	public GameObject phoneCameraPrefab;
     public string currentMarkerId;
 	public string markerIdAnalytics;
 	public float destructionTime;
@@ -127,16 +127,19 @@ public class MainController : MonoBehaviour
 
         mainMenuCamera.enabled = true;
         //menuScene.SetActive(true);
-		phoneCamera.enabled = false;
-		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
+		if (phoneCameraScene)
+			Destroy (phoneCameraScene);
 
 		gameState = GameState.MainMenu;
     }
 
 	public void goToMapView()
 	{
+		if (destroyCityScene)
+			Destroy (destroyCityScene);
+
 		if (markerIdAnalytics != null) {
 			Analytics.CustomEvent ("BuildingDestruction", new Dictionary<string,object> {
 				{"BuildingId", markerIdAnalytics},
@@ -151,8 +154,6 @@ public class MainController : MonoBehaviour
 
 		mainMenuCamera.enabled = true;
 		//menuScene.SetActive(true);
-		phoneCamera.enabled = false;
-		phoneCameraScene.SetActive (false);
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
         //UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<MainMenuScript> ()._webView);
@@ -175,7 +176,6 @@ public class MainController : MonoBehaviour
         mainMenuCamera.enabled = false;
         //menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
-		phoneCamera.enabled = false;
 		phoneCameraScene.SetActive (false);
 
 		gameState = GameState.DestroyCity;
@@ -187,10 +187,10 @@ public class MainController : MonoBehaviour
 
 		mainMenuCamera.enabled = false;
 		//menuScene.SetActive(false);
-		phoneCamera.enabled = true;
-		phoneCameraScene.SetActive (true);
-		if (destroyCityScene)
-			Destroy (destroyCityScene);
+		//phoneCamera.enabled = true;
+		//phoneCameraScene.SetActive (true);
+		phoneCameraScene = Instantiate (phoneCameraPrefab);
+
 		
 		gameState = GameState.PhoneCamera;
 	}

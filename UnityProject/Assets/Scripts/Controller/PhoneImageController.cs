@@ -8,11 +8,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PhoneImageController : MonoBehaviour {
 	
 	public WebCamTexture pCamera = null;
-	public GameObject camDisplayPlane;
+	public GameObject camDisplayCanvas;
+	public GameObject uiCanvas;
 
 	public GameObject KaijuSelfieModel;
 	public GameObject BuildingSelfieModel;
@@ -34,9 +36,16 @@ public class PhoneImageController : MonoBehaviour {
 		None
 	}
 
+	enum WHICHCAMERA{
+		None,
+		Front,
+		Back
+	}
+	WHICHCAMERA whichCamera = WHICHCAMERA.None;
+
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.Kaiju);
+		initCamera (CameraMode.None);
 	}
 
 	void initCamera(CameraMode mode)
@@ -77,9 +86,19 @@ public class PhoneImageController : MonoBehaviour {
 			// Means getting image
 			if (!CAMREADY) {
 				double ratio = (float)pCamera.height / (float)pCamera.width;
-				Debug.Log (Screen.width);
-				Debug.Log (Screen.height);
-				camDisplayPlane.transform.localScale += new Vector3 (0.0f, 0.0f, (float)(ratio-1.0));
+				double screenRatio = (float)Screen.height / (float)Screen.width;
+				//camDisplayPlane.transform.localScale += new Vector3 (0.0f, 0.0f, (float)(ratio-1.0));
+				GameObject cameraImage = camDisplayCanvas.transform.FindChild ("CameraImage").gameObject;
+				if (screenRatio > ratio) {
+					cameraImage.GetComponent<RectTransform> ().
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(Screen.height * ratio));
+				} else { 
+					cameraImage.GetComponent<RectTransform> ().
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, (float)(Screen.width / ratio));
+
+
+				}
+
 				CAMREADY = true;
 			}
 		}
@@ -149,14 +168,18 @@ public class PhoneImageController : MonoBehaviour {
 			}
 		}
 		pCamera = new WebCamTexture(frontCamName);
+		whichCamera = WHICHCAMERA.Front;
 		#endif
 
-		camDisplayPlane.GetComponent<Renderer>().material.mainTexture = pCamera;
+		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
 		pCamera.Play ();
 	}
 
 	void takePhoto()
 	{
+		camDisplayCanvas.SetActive (false);
+		uiCanvas.SetActive (false);
+
 		#if UNITY_IPHONE
 		if (Application.platform == RuntimePlatform.IPhonePlayer) {
 			StartCoroutine("CaptureScreen");
@@ -183,7 +206,27 @@ public class PhoneImageController : MonoBehaviour {
 		}
 		takingPhoto = false;
 		GUION = true;
+
+		camDisplayCanvas.SetActive (true);
+		uiCanvas.SetActive (true);
 	}
 	#endif
 
+	public void switchCam()
+	{	
+		pCamera.Stop ();
+		#if UNITY_IPHONE
+		if(whichCamera == WHICHCAMERA.Front)
+			pCamera = new WebCamTexture(backCamName);
+		else if(whichCamera == WHICHCAMERA.Back)
+			pCamera = new WebCamTexture(frontCamName);
+		else{
+			Debug.Log("NO Camera Loaded!");
+			return;
+		}
+		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
+		pCamera.Play ();
+		#endif
+	}
+		
 }
