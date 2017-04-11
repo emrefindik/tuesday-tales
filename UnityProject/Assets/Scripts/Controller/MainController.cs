@@ -24,6 +24,7 @@ public class MainController : MonoBehaviour
     public string currentMarkerId;
 	public string markerIdAnalytics;
 	public float destructionTime;
+    public OwnedEgg selectedEgg;
 
     [SerializeField]
     private MainMenuScript _mainMenuScript;
