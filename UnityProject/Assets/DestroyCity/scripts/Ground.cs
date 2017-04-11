@@ -33,7 +33,8 @@ public class Ground : MonoBehaviour {
 
 	public void startShake(float seconds){
 		shake = true;
-		buildingCollapse.Play ();
+		if(buildingCollapse)
+			buildingCollapse.Play ();
 		StartCoroutine(stopShake(seconds));
 		StartCoroutine(Shake());
 	}

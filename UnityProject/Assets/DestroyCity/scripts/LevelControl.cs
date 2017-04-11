@@ -70,11 +70,14 @@ public class LevelControl : MonoBehaviour {
 
 	GameObject shakeText;
 	GameObject ground;
+	GameObject progressBar;
 
 	// REWARD:
 	int eggIndex;
 	string eggName;
 
+	// FOR TEST
+	bool inited = false;
 
     public enum Movement
     {
@@ -138,6 +141,7 @@ public class LevelControl : MonoBehaviour {
 	void initLevel ()
 	{
 		winCanvas.SetActive(false);
+		gameCanvas.SetActive (true);
 		shareSucceedCanvas.SetActive(false);
 		findEggCanvas.SetActive (false);
 		editEggNameCanvas.SetActive (false);
@@ -160,6 +164,7 @@ public class LevelControl : MonoBehaviour {
 		shakeText = GameObject.Find ("ShakeText");
 		shakeText.SetActive (false);
 		ground = GameObject.Find ("Ground");
+		progressBar = GameObject.Find ("FullImage");
 	}
 		
     private void OnGUI()
@@ -184,12 +189,15 @@ public class LevelControl : MonoBehaviour {
 		}
 		
 		if (!win) {
+			/*
 			GUI.BeginGroup (new Rect (barPos.x, barPos.y, barSize.x, barSize.y));
 			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barEmpty);
 			GUI.BeginGroup (new Rect (0, 0, barSize.x * (((float)(progressCount [level]) / (totalProgress))), barSize.y));
 			GUI.Box (new Rect (0, 0, barSize.x, barSize.y), barFull);
 			GUI.EndGroup ();
 			GUI.EndGroup ();
+			*/
+			progressBar.transform.localScale = new Vector3 (0.53f * ((float)(progressCount [level]) / (totalProgress)), 0.53f, 0.53f);
 
 			//GUI.skin.label.fontSize = (int)(Screen.height * 0.05);
 			//GUI.Label (new Rect (20, (int)(Screen.height * 0.85), Screen.width / 3, (int)(Screen.height * 0.1)), score.ToString ());
@@ -261,6 +269,16 @@ public class LevelControl : MonoBehaviour {
 
     void Update()
     {
+		
+		if (!inited) {
+			GameObject city = GameObject.Find ("City");
+			Debug.Log (city);
+			if(city)
+				city.GetComponent<BuildingCreator> ().setUpBuilding (1);
+			inited = true;
+		}
+
+
         // Check win
 		// Test Win Status
         //if(buildingDestroyedCount == number_of_buildings)
@@ -270,6 +288,7 @@ public class LevelControl : MonoBehaviour {
 			shakeText.SetActive (true);
             buildingDestroyedCount = -1;
 			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			ground = GameObject.Find ("Ground");
 			ground.GetComponent<Ground>().startShake(0.5f);
         }
 
@@ -311,6 +330,8 @@ public class LevelControl : MonoBehaviour {
 
 	IEnumerator showReward()
 	{
+		// DISABLED FOR TEST
+		/*
         float offset = Time.time;
         if (eggIndex != -1)
         {
@@ -323,6 +344,7 @@ public class LevelControl : MonoBehaviour {
         //TODO: shake according to the streak
         if (offset < FIRST_SHAKE_WAIT)
             yield return new WaitForSeconds(FIRST_SHAKE_WAIT - offset);
+        */
 		pA.punchGround(2);
 		yield return new WaitForSeconds (.3f);
 		if(eggIndex != -1)
