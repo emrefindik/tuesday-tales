@@ -63,9 +63,18 @@ public class FacebookManager : MonoBehaviour {
 
 
 	/***************************************************/
+	/* Finish Everything From Screenshot To Share */
 	public void ShareScreenshotToFacebook()
 	{
 		screenshot ();
+	}
+
+	/* Share Prepared Image*/
+	public void ShareImageToFacebook(Texture2D image)
+	{
+		uploadImage = image;
+		string imageName = generateImageName ();
+		StartCoroutine (UploadImage (imageName));
 	}
 
 	void screenshot()
@@ -87,8 +96,13 @@ public class FacebookManager : MonoBehaviour {
 	}
 	#endif
 
+	string generateImageName()
+	{
+		return Time.time + ".png";
+	}
+
 	void OnFinishedSaveImage (string message) {
-		string imageName = Time.time + ".png";
+		string imageName = generateImageName ();
 		StartCoroutine (UploadImage(imageName));
 	}
 
@@ -124,8 +138,16 @@ public class FacebookManager : MonoBehaviour {
 			// Share succeeded without postID
 			Debug.Log("ShareLink success!");
 		}
-		if (MainController.single.gameState == MainController.GameState.DestroyCity) {
+
+		switch (MainController.single.gameState) {
+		case MainController.GameState.DestroyCity:
 			LevelControl.shareStatus = ShareStatus.Recieved;
+			break;
+		case MainController.GameState.PhoneCamera:
+			PhoneImageController.shareStatus = ShareStatus.Recieved;
+			break;
+		default:
+			break;
 		}
 	}
 

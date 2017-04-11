@@ -15,21 +15,23 @@ public class PhoneImageController : MonoBehaviour {
 	public WebCamTexture pCamera = null;
 	public GameObject camDisplayCanvas;
 	public GameObject uiCanvas;
+	public GameObject shareCanvas;
 
 	public GameObject KaijuSelfieModel;
 	public GameObject BuildingSelfieModel;
 	public GameObject EggSelfieModel;
 
+	public Texture2D screenShotCopy;
+	static public FacebookManager.ShareStatus shareStatus;
 
-	string frontCamName;
-	string backCamName;
+	string frontCamName = "";
+	string backCamName = "";
 
 	string lastMessage = "";
 	bool takingPhoto;
-	bool GUION;
 	bool CAMREADY;
 
-	enum CameraMode{
+	public enum CameraMode{
 		BuildingDestruction,
 		EggHatching,
 		Kaiju,
@@ -41,18 +43,24 @@ public class PhoneImageController : MonoBehaviour {
 		Front,
 		Back
 	}
+
 	WHICHCAMERA whichCamera = WHICHCAMERA.None;
 
 	// Use this for initialization
 	void Start () {
 		initCamera (CameraMode.None);
+		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
-	void initCamera(CameraMode mode)
+	void startCameraWithMode(CameraMode mode)
+	{
+		initCamera (mode);
+	}
+
+	public void initCamera(CameraMode mode)
 	{
 		startCamera ();
 		takingPhoto = false;
-		GUION = true;
 		CAMREADY = false;
 
 		KaijuSelfieModel.SetActive (false);
@@ -65,6 +73,7 @@ public class PhoneImageController : MonoBehaviour {
 			BuildingSelfieModel.SetActive (true);
 			break;
 		case CameraMode.EggHatching:
+			// TODO: get egg information from spatial
 			EggSelfieModel.SetActive (true);
 			break;
 		case CameraMode.Kaiju:
@@ -76,6 +85,10 @@ public class PhoneImageController : MonoBehaviour {
 			break;	
 		}
 
+		uiCanvas.SetActive (false);
+		camDisplayCanvas.SetActive (false);
+		shareCanvas.SetActive (false);
+
 	}
 
 	void Update()
@@ -86,8 +99,6 @@ public class PhoneImageController : MonoBehaviour {
 			// Means getting image
 			if (!CAMREADY) {
 				double ratio = (float)pCamera.height / (float)pCamera.width;
-				Debug.Log (pCamera.height);
-				Debug.Log (pCamera.width);
 				double screenRatio = (float)Screen.height / (float)Screen.width;
 				//camDisplayPlane.transform.localScale += new Vector3 (0.0f, 0.0f, (float)(ratio-1.0));
 				GameObject cameraImage = camDisplayCanvas.transform.FindChild ("CameraImage").gameObject;
@@ -97,58 +108,44 @@ public class PhoneImageController : MonoBehaviour {
 				} else { 
 					cameraImage.GetComponent<RectTransform> ().
 					SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, (float)(Screen.width / ratio));
-
-
 				}
 
 				CAMREADY = true;
+				camDisplayCanvas.SetActive (true);
+				uiCanvas.SetActive (true);
+			}
+
+			if (takingPhoto) {
+				// should just do it once
+				takePhoto ();
+				return;
 			}
 		}
 
+		switch (shareStatus) {
+		case FacebookManager.ShareStatus.Init:
+			{
+				SendScreenshotToFacebook ();
+				return;
+			}
+		case FacebookManager.ShareStatus.Sending:
+			return;
+		case FacebookManager.ShareStatus.Recieved:
+			{
+				shareStatus = FacebookManager.ShareStatus.None;
+				// Should show a dialog to show status
+				shareCanvas.SetActive(true);
+				shareCanvas.transform.Find ("ShareSucceedText").gameObject.SetActive (true);
+				return;
+			}
+		default:
+			break;
+		}
 	}
-
-
-	string GetButtonLabel(string label) {
-		if (Application.platform == RuntimePlatform.IPhonePlayer) return label;
-		return label+"\n\n(iOS ONLY)";
-	}
-
-	void OnGUI () {
 		
-		//GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), pCamera, ScaleMode.ScaleToFit, true, 0);
-		if(!CAMREADY) return;
-
-		if (!GUION) {
-			return;
-		}
-
-		if (takingPhoto) {
-			// should just do it once
-			takePhoto ();
-			return;
-		}
-
-		/*
-		float buttonWidth = Screen.width/3;
-		float buttonHeight = Screen.height/5;
-		float buttonMargine = buttonWidth/3;
-		Rect buttonRect = new Rect(0, Screen.height-buttonHeight, buttonWidth, buttonHeight);
-
-		// for Save Image
-		buttonRect.width = Screen.width/4;
-		buttonRect.height = Screen.height/6;
-		buttonMargine = 0;
-		buttonRect.y = 0;
-		buttonRect.x = buttonMargine + (buttonRect.width + buttonMargine) * 1;
-		if (GUI.Button(buttonRect, GetButtonLabel("Save JPG\nto PhotoLibrary"))) {
-			takingPhoto = true;
-		}
-		buttonRect.y = 0;
-		buttonRect.x = buttonMargine + (buttonRect.width + buttonMargine) * 2;
-		if (GUI.Button(buttonRect, GetButtonLabel("Back"))) {
-			MainController.single.goToMainMenu ();
-		}
-		*/
+	string GetButtonLabel(string label) {
+		if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android) return label;
+		return label+"\n\n(iOS / Android ONLY)";
 	}
 
 	public void initTakingPhoto()
@@ -160,7 +157,7 @@ public class PhoneImageController : MonoBehaviour {
 	{
 		pCamera = new WebCamTexture ();
 
-		#if UNITY_IPHONE
+		//#if UNITY_IPHONE
 		WebCamDevice[] devices = WebCamTexture.devices;
 		for(int i = 0; i < devices.Length; i++){
 			if (devices[i].isFrontFacing) {
@@ -169,9 +166,14 @@ public class PhoneImageController : MonoBehaviour {
 				backCamName = devices[i].name;
 			}
 		}
-		pCamera = new WebCamTexture(frontCamName, 1920, 1080);
-		whichCamera = WHICHCAMERA.Front;
-		#endif
+		if (frontCamName != "") {
+			pCamera = new WebCamTexture (frontCamName, 1920, 1080);
+			whichCamera = WHICHCAMERA.Front;
+		} else {
+			pCamera = new WebCamTexture (backCamName, 1920, 1080);
+			whichCamera = WHICHCAMERA.Back;
+		}
+		//#endif
 
 		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
 		pCamera.Play ();
@@ -179,56 +181,142 @@ public class PhoneImageController : MonoBehaviour {
 
 	void takePhoto()
 	{
-		camDisplayCanvas.SetActive (false);
 		uiCanvas.SetActive (false);
+		takingPhoto = false;
 
-		#if UNITY_IPHONE
-		if (Application.platform == RuntimePlatform.IPhonePlayer) {
-			StartCoroutine("CaptureScreen");
+		//#if UNITY_IPHONE
+		if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android) {
+			StartCoroutine ("CaptureScreen");
 		}
-		#endif
-		GUION = false;
+		// FOR TEST
+		/*
+		else {
+			StartCoroutine ("CaptureScreen");
+		}
+		*/
+		//#endif
 	}
 		
-	#if UNITY_IPHONE
 	// For Save
 	IEnumerator CaptureScreen() {
 		yield return new WaitForEndOfFrame();
 
-		Texture2D screenShot = ScreenCapture.Capture();
-		LoadTextureFromImagePicker.SaveAsJpgToPhotoLibrary(screenShot, gameObject.name, "OnFinishedSaveImage");
+		//Get another copy to show on share screen
+		Texture2D screenshot = ScreenCapture.Capture();
+
+		#if UNITY_IPHONE
+		if(Application.platform == RuntimePlatform.IPhonePlayer)
+		{
+			LoadTextureFromImagePicker.SaveAsJpgToPhotoLibrary(screenshot, gameObject.name, "OnFinishedSaveImage");
+		}
+		#endif
+
+		#if UNITY_ANDROID
+		if(Application.platform == RuntimePlatform.Android)
+			SaveImageToLibraryAndriod(screenShot);
+		#endif
+
+		Color32[] pix = screenshot.GetPixels32();
+		screenShotCopy = new Texture2D (screenshot.width, screenshot.height);
+		screenShotCopy.SetPixels32 (pix);
+		screenShotCopy.Apply ();
+
+		//FOR TEST 
+		//OnFinishedSaveImage("");
+
 	}
 
+	//#if UNITY_IPHONE
 	void OnFinishedSaveImage (string message) {
+		Debug.Log ("Save Image Finished.");
 		lastMessage = message;
 		if (message.Equals(LoadTextureFromImagePicker.strCallbackResultMessage_Saved)) {
 			// Save Succeed
 		} else {
 			// Failed
+			Debug.Log(" Save to library failed!");
+
 		}
-		takingPhoto = false;
-		GUION = true;
 
 		camDisplayCanvas.SetActive (true);
 		uiCanvas.SetActive (true);
+
+		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
+		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
+		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
+		photoRect.GetComponent<RectTransform> ().
+		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
+		shareCanvas.SetActive (true);
+	}
+	//#endif
+
+	#if UNITY_ANDROID
+	void SaveImageToLibraryAndriod(Texture2D Screenshot)
+	{
+		byte[] bytes = Screenshot.EncodeToJPG ();
+		string filename = ScreenShotName();
+		System.IO.File.WriteAllBytes(filename, bytes);
+		Debug.Log(string.Format("Took screenshot to: {0}", filename));
+		string path = Application.persistentDataPath + "/Snapshots/" + filename;
+		System.IO.File.WriteAllBytes(path, bytes);
+
+		camDisplayCanvas.SetActive (true);
+		uiCanvas.SetActive (true);
+		shareCanvas.SetActive (true);
 	}
 	#endif
+
+	string ScreenShotName()
+	{
+		return Time.time.ToString ();
+	}
 
 	public void switchCam()
 	{	
 		pCamera.Stop ();
-		#if UNITY_IPHONE
-		if(whichCamera == WHICHCAMERA.Front)
+		#if UNITY_IOS
+		if(whichCamera == WHICHCAMERA.Front){
 			pCamera = new WebCamTexture(backCamName, 1920, 1080);
-		else if(whichCamera == WHICHCAMERA.Back)
+			whichCamera = WHICHCAMERA.Back;
+		}
+		else if(whichCamera == WHICHCAMERA.Back){
 			pCamera = new WebCamTexture(frontCamName, 1920, 1080);
+			whichCamera = WHICHCAMERA.Front;
+		}
 		else{
 			Debug.Log("NO Camera Loaded!");
+			whichCamera = WHICHCAMERA.None;
 			return;
 		}
 		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
 		pCamera.Play ();
 		#endif
 	}
+
+	public void initShareToFacebook()
+	{
+		shareStatus = FacebookManager.ShareStatus.Init;
+
+		camDisplayCanvas.SetActive (false);
+		uiCanvas.SetActive (false);
+		shareCanvas.SetActive (false);
+	}
 		
+	public void backToCamera()
+	{
+		camDisplayCanvas.SetActive (true);
+		uiCanvas.SetActive (true);
+		shareCanvas.SetActive (false);
+	}
+		
+	void SendScreenshotToFacebook()
+	{
+		shareStatus = FacebookManager.ShareStatus.Sending;
+		Debug.Log (screenShotCopy);
+		Texture2D screenShotShareCopy = new Texture2D (screenShotCopy.width, screenShotCopy.height);
+		Color32[] pix = screenShotCopy.GetPixels32 ();
+		screenShotShareCopy.SetPixels32 (pix);
+		screenShotShareCopy.Apply ();
+		FacebookManager.single.ShareImageToFacebook (screenShotShareCopy);
+	}
 }
