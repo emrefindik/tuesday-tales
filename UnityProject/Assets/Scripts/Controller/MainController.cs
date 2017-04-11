@@ -111,11 +111,9 @@ public class MainController : MonoBehaviour
 		case GameState.MapView:
 			goToMapView ();
 			break;
-		/*
 		case GameState.PhoneCamera:
 			goToPhoneCamera ();
 			break;
-		*/
 		default:
 			Debug.Log ("No such game state.");
 			goToMainMenu ();
@@ -193,7 +191,7 @@ public class MainController : MonoBehaviour
 		//phoneCamera.enabled = true;
 		//phoneCameraScene.SetActive (true);
 		phoneCameraScene = Instantiate (phoneCameraPrefab);
-		phoneCameraScene.GetComponent<PhoneImageController>().initCamera (mode);
+		phoneCameraScene.GetComponent<PhoneImageController>().initCamera(mode);
 
 		
 		gameState = GameState.PhoneCamera;
