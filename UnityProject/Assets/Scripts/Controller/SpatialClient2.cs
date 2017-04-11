@@ -522,7 +522,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-			if (www.error.StartsWith("400")) response.setSuccess(false);
+			if (www.error.StartsWith("500")) response.setSuccess(false);
         }
         else
         {
