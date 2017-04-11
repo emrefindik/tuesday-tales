@@ -479,7 +479,7 @@ public class MainMenuScript : MonoBehaviour
     public void onTestCamera()
     {
         //SceneManager.LoadScene(DESTRUCTION_SCENE_INDEX);
-        MainController.single.goToPhoneCamera();
+		MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.Kaiju);
     }
 
     public void onBackToYourEggs()
