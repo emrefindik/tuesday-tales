@@ -86,6 +86,8 @@ public class PhoneImageController : MonoBehaviour {
 			// Means getting image
 			if (!CAMREADY) {
 				double ratio = (float)pCamera.height / (float)pCamera.width;
+				Debug.Log (pCamera.height);
+				Debug.Log (pCamera.width);
 				double screenRatio = (float)Screen.height / (float)Screen.width;
 				//camDisplayPlane.transform.localScale += new Vector3 (0.0f, 0.0f, (float)(ratio-1.0));
 				GameObject cameraImage = camDisplayCanvas.transform.FindChild ("CameraImage").gameObject;
@@ -167,7 +169,7 @@ public class PhoneImageController : MonoBehaviour {
 				backCamName = devices[i].name;
 			}
 		}
-		pCamera = new WebCamTexture(frontCamName);
+		pCamera = new WebCamTexture(frontCamName, 1920, 1080);
 		whichCamera = WHICHCAMERA.Front;
 		#endif
 
@@ -217,9 +219,9 @@ public class PhoneImageController : MonoBehaviour {
 		pCamera.Stop ();
 		#if UNITY_IPHONE
 		if(whichCamera == WHICHCAMERA.Front)
-			pCamera = new WebCamTexture(backCamName);
+			pCamera = new WebCamTexture(backCamName, 1920, 1080);
 		else if(whichCamera == WHICHCAMERA.Back)
-			pCamera = new WebCamTexture(frontCamName);
+			pCamera = new WebCamTexture(frontCamName, 1920, 1080);
 		else{
 			Debug.Log("NO Camera Loaded!");
 			return;
