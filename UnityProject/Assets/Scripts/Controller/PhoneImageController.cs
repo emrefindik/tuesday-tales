@@ -213,7 +213,7 @@ public class PhoneImageController : MonoBehaviour {
 
 		#if UNITY_ANDROID
 		if(Application.platform == RuntimePlatform.Android)
-			SaveImageToLibraryAndriod(screenShot);
+			SaveImageToLibraryAndriod(screenshot);
 		#endif
 
 		Color32[] pix = screenshot.GetPixels32();
@@ -241,12 +241,13 @@ public class PhoneImageController : MonoBehaviour {
 		camDisplayCanvas.SetActive (true);
 		uiCanvas.SetActive (true);
 
+		shareCanvas.SetActive (true);
 		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
 		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
 		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
 		photoRect.GetComponent<RectTransform> ().
 		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
-		shareCanvas.SetActive (true);
+
 	}
 	//#endif
 
@@ -263,6 +264,12 @@ public class PhoneImageController : MonoBehaviour {
 		camDisplayCanvas.SetActive (true);
 		uiCanvas.SetActive (true);
 		shareCanvas.SetActive (true);
+		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
+		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
+		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
+		photoRect.GetComponent<RectTransform> ().
+		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
+		shareCanvas.SetActive (true);
 	}
 	#endif
 
@@ -274,7 +281,7 @@ public class PhoneImageController : MonoBehaviour {
 	public void switchCam()
 	{	
 		pCamera.Stop ();
-		#if UNITY_IOS
+		//#if UNITY_IOS
 		if(whichCamera == WHICHCAMERA.Front){
 			pCamera = new WebCamTexture(backCamName, 1920, 1080);
 			whichCamera = WHICHCAMERA.Back;
@@ -290,7 +297,7 @@ public class PhoneImageController : MonoBehaviour {
 		}
 		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
 		pCamera.Play ();
-		#endif
+		//#endif
 	}
 
 	public void initShareToFacebook()
