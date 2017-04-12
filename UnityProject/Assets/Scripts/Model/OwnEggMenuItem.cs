@@ -44,9 +44,7 @@ public class OwnEggMenuItem : FriendEggMenuItem
         yield return SpatialClient2.single.hatchEgg(_egg);
         Destroy(gameObject);
         MainController.single.selectedEgg = _egg;
-        GameObject newKaijuMenuItem = GameObject.Instantiate(MainMenuScript.KaijuMenuItemPrefab);
-        newKaijuMenuItem.transform.SetParent(MainMenuScript.KaijuMenuContentPanel, false);
-        newKaijuMenuItem.GetComponent<KaijuMenuItem>().Kaiju = _egg.KaijuEmbryo;
+        MainMenuScript.addKaijuButton(_egg.KaijuEmbryo);
         MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.EggHatching);
         MessageController.single.closeWaitScreen(true);
     }

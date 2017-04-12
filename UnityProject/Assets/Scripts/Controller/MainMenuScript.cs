@@ -76,6 +76,8 @@ public class MainMenuScript : MonoBehaviour
 		private set { registerCanvas = value; }
 	}
 
+    private static Canvas kaijuCanvas;
+
     private static UniWebView webView;
     /*public static UniWebView WebView
     {
@@ -87,21 +89,7 @@ public class MainMenuScript : MonoBehaviour
     private static Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> placeTypes;
     private static Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> googleMarkers;
 
-    private static GameObject kaijuMenuItemPrefab;
-    public static GameObject KaijuMenuItemPrefab
-    {
-        get { return kaijuMenuItemPrefab; }
-        private set { kaijuMenuItemPrefab = value; }
-    }
-
-    private static Transform kaijuMenuContentPanel;
-    public static Transform KaijuMenuContentPanel
-    {
-        get { return kaijuMenuContentPanel; }
-        private set { kaijuMenuContentPanel = value; }
-    }
-
-    private Path destroyPath;
+    private Path destroyPath;    
 
     // Used to display the map
     [SerializeField]
@@ -150,10 +138,6 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Transform _friendEggMenuContentPanel;
     [SerializeField]
-    private Transform _kaijuMenuContentPanel;
-    [SerializeField]
-    private GameObject _kaijuMenuItemPrefab;
-    [SerializeField]
     private InputField _userNameField;
     [SerializeField]
     private InputField _passwordField;
@@ -167,6 +151,10 @@ public class MainMenuScript : MonoBehaviour
     private Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
     private Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
 
+    public Kaiju SelectedKaiju
+    {
+        get { return _kaijuCanvas.GetComponent<KaijuScreenController>().SelectedKaiju; }
+    }
 
     // Use this for initialization
     void Start()
@@ -176,11 +164,10 @@ public class MainMenuScript : MonoBehaviour
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
 		registerCanvas = _registerCanvas;
+        kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
-        //friendsEggsCanvas = _friendsEggsCanvas;
-        kaijuMenuItemPrefab = _kaijuMenuItemPrefab;
-        kaijuMenuContentPanel = _kaijuMenuContentPanel;
+        //friendsEggsCanvas = _friendsEggsCanvas;      
 
         _loginCanvas.enabled = true;
 		_registerCanvas.enabled = false;
@@ -336,6 +323,8 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getTimer().ToString() + ',' +
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
+                // TODO add selected kaiju information to loadMap in map.html
+
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
             Debug.Log("uniwebview is showing");
@@ -504,9 +493,7 @@ public class MainMenuScript : MonoBehaviour
         }
         foreach (Kaiju k in SpatialClient2.single.Kaiju)
         {
-            GameObject kaijuMenuItem = GameObject.Instantiate(MainMenuScript.KaijuMenuItemPrefab);
-            kaijuMenuItem.transform.SetParent(MainMenuScript.KaijuMenuContentPanel, false);
-            kaijuMenuItem.GetComponent<KaijuMenuItem>().Kaiju = k;
+            _kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
         }
         foreach (FriendData fd in SpatialClient2.single.Friends)
         {
@@ -697,5 +684,10 @@ public class MainMenuScript : MonoBehaviour
 		}
 
 	}
+
+    public static void addKaijuButton(Kaiju k)
+    {
+        kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
+    }
 
 }
