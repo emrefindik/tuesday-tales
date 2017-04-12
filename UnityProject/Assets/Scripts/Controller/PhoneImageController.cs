@@ -48,7 +48,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.None);
+		initCamera (CameraMode.BuildingDestruction);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
@@ -280,22 +280,27 @@ public class PhoneImageController : MonoBehaviour {
 
 	public void switchCam()
 	{	
+		RawImage displayImage = camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ();
 		pCamera.Stop ();
 		//#if UNITY_IOS
-		if(whichCamera == WHICHCAMERA.Front){
+		if(whichCamera == WHICHCAMERA.Front && backCamName != ""){
 			pCamera = new WebCamTexture(backCamName, 1920, 1080);
 			whichCamera = WHICHCAMERA.Back;
+			displayImage.transform.localScale = new Vector3(1, -1, 1);
 		}
-		else if(whichCamera == WHICHCAMERA.Back){
+		else if(whichCamera == WHICHCAMERA.Back && frontCamName != ""){
 			pCamera = new WebCamTexture(frontCamName, 1920, 1080);
 			whichCamera = WHICHCAMERA.Front;
+			displayImage.transform.localScale = new Vector3(1, 1, 1);
+
 		}
 		else{
-			Debug.Log("NO Camera Loaded!");
-			whichCamera = WHICHCAMERA.None;
+			Debug.Log("Can Not Switch.");
 			return;
 		}
-		camDisplayCanvas.transform.FindChild ("CameraImage").gameObject.GetComponent<RawImage> ().texture = pCamera;
+
+
+		displayImage.texture = pCamera;
 		pCamera.Play ();
 		//#endif
 	}
@@ -306,7 +311,7 @@ public class PhoneImageController : MonoBehaviour {
 
 		camDisplayCanvas.SetActive (false);
 		uiCanvas.SetActive (false);
-		shareCanvas.SetActive (false);
+		shareCanvas.SetActive (true);
 	}
 		
 	public void backToCamera()
@@ -325,5 +330,11 @@ public class PhoneImageController : MonoBehaviour {
 		screenShotShareCopy.SetPixels32 (pix);
 		screenShotShareCopy.Apply ();
 		FacebookManager.single.ShareImageToFacebook (screenShotShareCopy);
+	}
+
+	public void goBack()
+	{
+		GameObject mainController = GameObject.Find ("MainController");
+		mainController.GetComponent<MainController> ().goBack ();
 	}
 }
