@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
+
+/**********************************
+* 
+* 		NO LONGER USED
+* 
+*********************************/
 public class punchAction : MonoBehaviour {
 
     public GameObject leftFist;
@@ -316,49 +324,5 @@ public class punchAction : MonoBehaviour {
 		fist.transform.SetParent(monster.transform, true);
 		pD.smashCity(new Vector3(dest.x, dest.y, 10.0f));
     }
-
-	/*
-	void updateTimer()
-    {
-        // Update Left Fist
-        if (hitting_left)
-        {
-            HitTime_left = HitTime_left + startTimeL - Time.time;
-            //Debug.Log("HittingTime: " + HitTime_left);
-            if (HitTime_left <= 0)
-            {
-                hitting_left = false;
-                //punchNowL = false;
-                punchReturning_l = false;
-                HitTime_left = 10;
-                leftFist.transform.position = new Vector3(IDLE_L_X, leftFist.transform.position.y, leftFist.transform.position.z);
-                timeCountLX = 0;
-            }
-        }
-
-        // Update Right Fist
-        if(hitting_right)
-        {
-            HitTime_right = HitTime_right + startTimeR - Time.time;
-            if (HitTime_right > 0)
-            {
-                hitting_right = true;
-            }
-            else
-            {
-                hitting_right = false;
-                //punchNowR = false;
-                punchReturning_r = false;
-                HitTime_right = 10f;
-                rightFist.transform.position = new Vector3(-IDLE_L_X, rightFist.transform.position.y, rightFist.transform.position.z);
-                timeCountRX = 0;
-            }
-        }
-
-
-
-
-    }
-    */
-
+		
 }
