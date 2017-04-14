@@ -156,6 +156,8 @@ public class LevelControl : MonoBehaviour {
 		shakeText.SetActive (false);
 		ground = GameObject.FindGameObjectWithTag ("ground");
 		progressBar = gameCanvas.transform.FindChild ("FullImage").gameObject;
+
+		GetComponent<SpriteControl> ().deactivateColor ();
 	}
 
 	/**********************************
@@ -212,7 +214,7 @@ public class LevelControl : MonoBehaviour {
 			buildingDestroyedCount = -1;
 			// TODO: UNCOMMENT THIS
 			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
-			//ground = GameObject.FindGameObjectWithTag("ground");
+			ground = GameObject.FindGameObjectWithTag("ground");
 			ground.GetComponent<Ground>().startShake(0.5f);
 		}
 
