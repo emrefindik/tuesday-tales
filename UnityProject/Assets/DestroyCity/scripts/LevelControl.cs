@@ -159,12 +159,21 @@ public class LevelControl : MonoBehaviour {
 
 		GetComponent<SpriteControl> ().deactivateColor ();
 
-		MainMenuScript mainMenu = GameObject.Find ("MainMenu").GetComponent<MainMenuScript> ();
+		MainMenuScript mainMenu = mainController.GetComponent<MainMenuScript> ();
 		selectedKaiju = mainMenu.SelectedKaiju;
 		kaiju = transform.FindChild ("Kaiju").gameObject;
 		kaiju.GetComponent<MonsterCreator> ().
 			setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
 
+		StartCoroutine (closeDestroyText(2.0f));
+
+	}
+
+	IEnumerator closeDestroyText(float seconds)
+	{
+		yield return new WaitForSeconds (seconds);
+		GameObject destroyText = gameCanvas.transform.FindChild("DestroyText").gameObject;
+		destroyText.SetActive (false);
 	}
 
 	/**********************************
