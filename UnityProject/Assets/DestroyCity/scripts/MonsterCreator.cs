@@ -55,6 +55,38 @@ public class MonsterCreator : MonoBehaviour {
 		loadSprites ();
 	}
 
+	public void setUpMonster(Sprite headSprite, Sprite handSprite, Sprite bodySprite, Color mColor)
+	{
+		SpriteRenderer renderer;
+		renderer = head.GetComponent<SpriteRenderer> ();
+		renderer.sprite = headSprite;
+		renderer.material.color = mColor;
+
+		eyeType = Random.Range (0, KaijuDatabase.instance.eyeSprites.Length - 1);
+		renderer = leftEye.GetComponent<SpriteRenderer> ();
+		renderer.sprite = KaijuDatabase.instance.eyeSprites [eyeType];
+		//renderer.material.color = eyeColor;
+
+		renderer = body.GetComponent<SpriteRenderer> ();
+		renderer.sprite = bodySprite;
+		renderer.material.color = mColor;
+
+		renderer = leftHand.GetComponent<SpriteRenderer> ();
+		renderer.sprite = handSprite;
+		renderer.material.color = mColor;
+
+		renderer = rightHand.GetComponent<SpriteRenderer> ();
+		renderer.sprite = handSprite;
+		renderer.color = mColor;
+
+		head.SetActive (true);
+		leftEye.SetActive (true);
+		body.SetActive (true);
+		leftHand.SetActive (true);
+		rightHand.SetActive (true);
+	}
+
+
 	void loadSprites()
 	{
 		SpriteRenderer renderer;
