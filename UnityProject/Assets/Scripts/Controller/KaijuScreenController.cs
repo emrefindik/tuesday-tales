@@ -64,6 +64,16 @@ public class KaijuScreenController : MonoBehaviour {
         _menuData.addKaijuMenuItem(k);
     }
 
+	public void previousKaiju()
+	{
+		_menuData.previousKaiju ();
+	}
+
+	public void nextKaiju ()
+	{
+		_menuData.nextKaiju ();
+	}
+
 }
 
 public class KaijuMenuData
