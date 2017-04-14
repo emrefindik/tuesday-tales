@@ -164,7 +164,7 @@ public class SerializableColor
 }
 
 [System.Serializable]
-public class KaijuWithFrequency
+public class ItemWithFrequency<T>
 {
     [SerializeField]
     private int _frequency;
@@ -174,10 +174,10 @@ public class KaijuWithFrequency
     }
 
     [SerializeField]
-    private Kaiju _kaiju;
-    public Kaiju Kaiju
+    private T _item;
+    public T Item
     {
-        get { return _kaiju; }
+        get { return _item; }
     }
 
     /* Used when picking a random kaiju out of a list.
@@ -189,9 +189,9 @@ public class KaijuWithFrequency
         set { _index = value; }
     }
 
-    public KaijuWithFrequency(Kaiju kaiju, int frequency)
+    public ItemWithFrequency(T kaiju, int frequency)
     {
-        _kaiju = kaiju;
+        _item = kaiju;
         _frequency = frequency;
     }
 }

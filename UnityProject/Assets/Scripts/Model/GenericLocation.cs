@@ -413,10 +413,11 @@ public class GenericLocation : CheckInPlace
     [SerializeField]
     private int requiredVisitCount;
 
-    public GenericLocation(GooglePlacesType t, int visitCount)
+    public GenericLocation(LocationTypeCountTuple t)
     {
-        LocationType = t;
-        requiredVisitCount = visitCount;
+        LocationType = t.Type;
+        requiredVisitCount = t.RequiredVisitCount;
+        placesVisited = new List<BasicMarker>();
     }
 
     public bool needToBeVisited()
@@ -447,5 +448,28 @@ public class GenericLocation : CheckInPlace
     public string getDescriptor()
     {
         return descriptor;
+    }
+}
+
+public class LocationTypeCountTuple
+{
+    [SerializeField]
+    GenericLocation.GooglePlacesType _type;
+    public GenericLocation.GooglePlacesType Type
+    {
+        get { return _type; }
+    }
+
+    [SerializeField]
+    private int _requiredVisitCount;
+    public int RequiredVisitCount
+    {
+        get { return _requiredVisitCount; }
+    }
+
+    public LocationTypeCountTuple(GenericLocation.GooglePlacesType type, int count)
+    {
+        _type = type;
+        _requiredVisitCount = count;
     }
 }
