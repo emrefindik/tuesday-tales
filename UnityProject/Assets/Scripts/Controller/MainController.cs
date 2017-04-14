@@ -112,7 +112,7 @@ public class MainController : MonoBehaviour
 			goToMapView ();
 			break;
 		case GameState.PhoneCamera:
-			goToPhoneCamera ();
+			//goToPhoneCamera ();
 			break;
 		default:
 			Debug.Log ("No such game state.");
