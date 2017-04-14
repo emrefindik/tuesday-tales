@@ -14,13 +14,15 @@ public class AddMarkerController : MonoBehaviour {
 	void Start () {
 		ok = false;
 		//StartCoroutine (UploadImage("MyLocationImage"));
-		//StartCoroutine(SpatialClient2.single.CreateMarker(40.433445, -79.963945,"Second Avenue","Second Avenue"));
+		//
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (!ok) {
+			StartCoroutine(SpatialClient2.single.CreateMarker(40.432882, -79.964823, "Entertainment Technology Center","700 Technology Drive"));
+			ok = true;
 			/*
 			StartCoroutine(SpatialClient2.single.CreateUser("1", "1"));
 			StartCoroutine(SpatialClient2.single.CreateUser("2", "2"));

@@ -91,8 +91,6 @@ public class MainController : MonoBehaviour
         !!!!! */
     }
 
-
-
 	/*public void setTimer()
 	{
 		timer = COUNT_DOWN_BASE / multiplier;
@@ -111,9 +109,11 @@ public class MainController : MonoBehaviour
 		case GameState.MapView:
 			goToMapView ();
 			break;
+			/*
 		case GameState.PhoneCamera:
 			//goToPhoneCamera ();
 			break;
+			*/
 		default:
 			Debug.Log ("No such game state.");
 			goToMainMenu ();
