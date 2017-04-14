@@ -60,6 +60,59 @@ public class SpatialClient2 : MonoBehaviour
         single = this;
         userSession = null;
         //_kaijuDatabase = new KaijuDatabase();
+
+        // for marker setup. delete this
+        setUpMarkers();
+    }
+
+    private void setUpMarkers()
+    {
+        //StartCoroutine(DeleteMarkerById("58f11e8da30d230011f0f121"));
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
+
+        /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
+        StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
+        //StartCoroutine(DeleteMarkerById("58f145642b93da00112f9e04"));
+
+        /*List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 0, 3, 3, "Gelb"), 5));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
+
+        List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
+        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
+        List<string> str1 = new List<string>();
+        str1.Add("58f00e3f2aac62001128c2c1"); // cathedral of learning - right off campus
+        List<string> str2 = new List<string>();
+        str2.Add("58f00e3f2aac62001128c2c2"); // peace garden - on campus
+        List<string> str3 = new List<string>();
+        str3.Add("58f00e3f2aac62001128c2c3"); // phipps conservatory - right off campus
+        List<string> str4 = new List<string>();
+        str4.Add("58f00e3f2aac62001128c2c4"); // mattress factory
+        List<string> str5 = new List<string>();
+        str5.Add("58f00e3f2aac62001128c2c5"); // carnegie museum of art - right off campus
+        List<string> str6 = new List<string>();
+        str6.Add("58f00e3f2aac62001128c2c6"); // the fence - on campus
+        List<string> str7 = new List<string>();
+        str7.Add("58f00e3f2aac62001128c2c7"); // centerfield gesling stadium - on campus
+        List<string> str8 = new List<string>();
+        str8.Add("58f12cd1a30d230011f0f123"); // ETC
+        List<string> str9 = new List<string>();
+        str9.Add("58f00e3f2aac62001128c2c9"); // Dippy the Dinosaur - right off campus
+        List<string> str0 = new List<string>();
+        str0.Add("58f00e3f2aac62001128c2ca"); // Schell Games Studio
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str1), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str5), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str6), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str7), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
+
+        StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2)))); */
     }
 
     private void Update()
@@ -277,7 +330,7 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     // Longitude must be between -180 and 180. latitude must be between -90 and 90.
-    public IEnumerator CreateMarker(double latitude, double longitude, string name, string description, MarkerMetadata metadata = null, string projectID = PROJECT_ID)
+    public IEnumerator CreateMarker(double latitude, double longitude, string name, string description, MarkerMetadata metadata, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -977,7 +1030,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
     // the furthest distance to check for a kaiju spawn point, in meters
-    public const double KAIJU_MARKER_RADIUS = 1500.0;
+    public const double KAIJU_MARKER_RADIUS = 15000.0; // TODO make this smaller after you have more spawn locations around
 
     [SerializeField]
     private KaijuList kaiju;
@@ -1405,6 +1458,7 @@ public class FriendList
 [System.Serializable]
 public class ImageBounds
 {
+    [SerializeField]
     private double north;
     public double North
     {
@@ -1412,6 +1466,7 @@ public class ImageBounds
         private set { north = value; }
     }
 
+    [SerializeField]
     private double south;
     public double South
     {
@@ -1419,6 +1474,7 @@ public class ImageBounds
         private set { south = value; }
     }
 
+    [SerializeField]
     private double east;
     public double East
     {
@@ -1426,6 +1482,7 @@ public class ImageBounds
         private set { east = value; }
     }
 
+    [SerializeField]
     private double west;
     public double West
     {
@@ -1575,37 +1632,40 @@ public class MarkerMetadata
 [System.Serializable]
 public abstract class ImmutableList<T> : IEnumerable<T>
 {
-    [SerializeField]
-    protected List<T> list;
+    protected abstract List<T> getList();
+    protected abstract void createEmptyList();
+    protected abstract void createList(IEnumerable<T> items);
 
     public ImmutableList()
     {
-        list = new List<T>();
+        //list = new List<T>();
+        createEmptyList();
     }
 
     public ImmutableList(IEnumerable<T> items)
     {
-        list = new List<T>(items);
+        //list = new List<T>(items);
+        createList(items);
     }
 
     public IEnumerator<T> GetEnumerator()
     {
-        return list.GetEnumerator();
+        return getList().GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return list.GetEnumerator();
+        return getList().GetEnumerator();
     }
 
     public int Count
     {
-        get { return list.Count; }
+        get { return getList().Count; }
     }
 
     public T this[int index]
     {
-        get { return list[index]; }
+        get { return getList()[index]; }
         // there should be no set!
     }
 }
@@ -1648,6 +1708,23 @@ public class MarkersByMetadataRequestTerm
 [System.Serializable]
 public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
 {
+    [SerializeField]
+    private List<string> list;
+    protected override List<string> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<string>();
+    }
+
+    protected override void createList(IEnumerable<string> items)
+    {
+        list = new List<string>(items);
+    }
+
     private HashSet<string> ids;
 
     public IdList() : base()
@@ -1680,12 +1757,30 @@ public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
         ids.Add(id);
         list.Add(id);
     }
+
 }
 
 /** An immutable list of eggs. Use in the eggsOwned field. */
 [System.Serializable]
 public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 {
+    [SerializeField]
+    private List<OwnedEgg> list;
+    protected override List<OwnedEgg> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<OwnedEgg>();
+    }
+
+    protected override void createList(IEnumerable<OwnedEgg> items)
+    {
+        list = new List<OwnedEgg>(items);
+    }
+
     protected Dictionary<string, OwnedEgg> eggs;
 
     public EggList() : base()
@@ -1731,6 +1826,23 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 [System.Serializable]
 public class KaijuList : ImmutableList<Kaiju>
 {
+    [SerializeField]
+    private List<Kaiju> list;
+    protected override List<Kaiju> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<Kaiju>();
+    }
+
+    protected override void createList(IEnumerable<Kaiju> items)
+    {
+        list = new List<Kaiju>(items);
+    }
+
     public KaijuList(Kaiju firstKaiju) : base()
     {
         list.Add(firstKaiju);
@@ -1741,12 +1853,35 @@ public class KaijuList : ImmutableList<Kaiju>
         egg.KaijuEmbryo.hatch(egg);
         list.Add(egg.KaijuEmbryo);
     }
+
+    // TODO DELETE THIS AFTER SETUP
+    /*public void addToKaijuListForMarkerSetup(Kaiju k)
+    {
+        list.Add(k);
+    } */
 }
 
 // the streak path, containing marker ids
 [System.Serializable]
 public class StreakPath : ImmutableList<string>
 {
+    [SerializeField]
+    private List<string> list;
+    protected override List<string> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<string>();
+    }
+
+    protected override void createList(IEnumerable<string> items)
+    {
+        list = new List<string>(items);
+    }
+
     public void resetPath()
     {
         list.Clear();
@@ -1767,7 +1902,7 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
 
     public T randomKaiju(List<SpatialMarker> markers)
     {
-        list.Clear();
+        getList().Clear();
         Dictionary<SpatialMarker, float> distances = new Dictionary<SpatialMarker, float>();
         foreach (SpatialMarker marker in markers)
         {
@@ -1784,36 +1919,78 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         int j;
         foreach (SpatialMarker marker in distances.Keys)
         {
-                list.AddRange(itemsInMarker(marker));
-                for (j = i; j < list.Count; j++)
+                getList().AddRange(itemsInMarker(marker));
+                for (j = i; j < getList().Count; j++)
                 {
-                    list[i].Index = index;
-                    index += list[i].Frequency * distances[marker];
+                    getList()[i].Index = index;
+                    index += getList()[i].Frequency * distances[marker];
                 }
                 i = j;
         }
         index = UnityEngine.Random.Range(0.0f, index);
-        for (i = 1; i < list.Count; i++)
+        for (i = 1; i < getList().Count; i++)
         {
-            if (index < list[i].Index) return list[i - 1].Item;
+            if (index < getList()[i].Index) return getList()[i - 1].getItem();
         }
         // return last element in the kaiju list
-        return list[i - 1].Item;
+        return getList()[i - 1].getItem();
     }
 
     protected abstract IEnumerable<ItemWithFrequency<T>> itemsInMarker(SpatialMarker marker);
 }
 
+[System.Serializable]
 public class KaijuFrequencyList : FrequencyList<Kaiju>
 {
+    [SerializeField]
+    private List<KaijuWithFrequency> list;
+    protected override List<ItemWithFrequency<Kaiju>> getList()
+    {
+        return list.Cast<ItemWithFrequency<Kaiju>>().ToList();
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<KaijuWithFrequency>();
+    }
+
+    protected override void createList(IEnumerable<ItemWithFrequency<Kaiju>> items)
+    {
+        list = items.Cast<KaijuWithFrequency>().ToList();
+    }
+
+    public KaijuFrequencyList(IEnumerable<ItemWithFrequency<Kaiju>> items) : base(items) { }
+    public KaijuFrequencyList() : base() { }
+
     override protected IEnumerable<ItemWithFrequency<Kaiju>> itemsInMarker(SpatialMarker marker)
     {
         return marker.Metadata.Kaiju;
     }
 }
 
+[System.Serializable]
 public class LocationFrequencyList : FrequencyList<LocationCombinationData>
 {
+    [SerializeField]
+    private List<LocationWithFrequency> list;
+    protected override List<ItemWithFrequency<LocationCombinationData>> getList()
+    {
+        return list.Cast<ItemWithFrequency<LocationCombinationData>>().ToList();
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<LocationWithFrequency>();
+    }
+
+    protected override void createList(IEnumerable<ItemWithFrequency<LocationCombinationData>> items)
+    {
+        list = items.Cast<LocationWithFrequency>().ToList();
+    }
+
+    public LocationFrequencyList(IEnumerable<ItemWithFrequency<LocationCombinationData>> items) : base(items) { }
+    public LocationFrequencyList() : base() { }
+
     override protected IEnumerable<ItemWithFrequency<LocationCombinationData>> itemsInMarker(SpatialMarker marker)
     {
         return marker.Metadata.Locations;

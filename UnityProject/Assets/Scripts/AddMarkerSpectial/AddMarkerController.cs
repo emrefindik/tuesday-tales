@@ -21,7 +21,7 @@ public class AddMarkerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (!ok) {
-			StartCoroutine(SpatialClient2.single.CreateMarker(40.432882, -79.964823, "Entertainment Technology Center","700 Technology Drive"));
+			//StartCoroutine(SpatialClient2.single.CreateMarker(40.432882, -79.964823, "Entertainment Technology Center","700 Technology Drive"));
 			ok = true;
 			/*
 			StartCoroutine(SpatialClient2.single.CreateUser("1", "1"));
