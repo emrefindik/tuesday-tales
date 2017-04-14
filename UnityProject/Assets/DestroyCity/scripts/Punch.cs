@@ -2,34 +2,42 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Punch : MonoBehaviour {
+public class Punch : MonoBehaviour 
+{
 
-	// init is setup by isLeft
-	public bool isLeft;
+	public bool isLeft;	// Whether this is a left fist. Init is setup by isLeft
 
-	float startTime;
+	// Init State
+	private float startTime;
+	private Vector3 _inputPosition;
 
+	// TAPPING? MIGHT NOT NEED
+	//float tapCheckX;
+	//const float TAPTOLERENCE = 10000;
+
+	// Timer 
 	const float HIT_DURATION_BASE = 100.0f;
 	float hitDuration;
+
+	// Update Rate
 	const float TRANSITION_Y_TIMESTEP = 20.0f;
 
+	// Action Status
 	bool punchReturning;
-	Vector3 _inputPosition;
-	float tapCheckX;
-	const float TAPTOLERENCE = 10000;
-
+	bool sending = false;
 	Vector2 curPos;
 	Vector2 newPos;
 	Vector2 destPos;
+
+	// Position Consts
 	float IDLE_X = -5.0f;
 	float IDLE_Y = 10f;
 	const float BUILDING_CENTER_X = 0;
 
 	float timeCount;
-	const float STOP_PUNCHING_GAP = 0.02f;
+	const float STOP_PUNCHING_GAP = 0.02f;	//damping
 
-	float punchStrength;
-	bool sending = false;
+	//float punchStrength;
 
 	public enum PunchDirection
 	{
@@ -37,11 +45,6 @@ public class Punch : MonoBehaviour {
 		Y
 	}
 	PunchDirection punchDirection;
-
-	// Use this for initialization
-	void Start () {
-		//init ();
-	}
 
 	void init()
 	{
@@ -66,8 +69,8 @@ public class Punch : MonoBehaviour {
 		sending = true;
 		punchDirection = pd;
 	}
-	
-	// Update is called once per frame
+
+	/* Update Based on Punch Type */
 	void Update () {
 		if (punchDirection == PunchDirection.X)
 			updateNormal ();
