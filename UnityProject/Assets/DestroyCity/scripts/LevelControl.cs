@@ -59,7 +59,9 @@ public class LevelControl : MonoBehaviour {
 	GameObject shakeText;
 	GameObject ground;
 	GameObject progressBar;
-	GameObject mainController; 
+	MainController mainController;
+	GameObject kaiju;
+	Kaiju selectedKaiju;
 
 	// REWARD:
 	int eggIndex;
@@ -106,22 +108,20 @@ public class LevelControl : MonoBehaviour {
     void initSystem()
     {
 		GameObject city = GameObject.Find ("City");
-		mainController = GameObject.Find ("MainController");
+		mainController = GameObject.Find ("MainController").GetComponent<MainController>();
 
 		// Set up city first
 		if (city) {
 			// TODO: DELETE THIS this is for testing
-			city.GetComponent<BuildingCreator> ().setUpBuildingTest (3);
+			//city.GetComponent<BuildingCreator> ().setUpBuildingTest (3);
 			// TODO: UNCOMMENT THIS
-			//city.GetComponent<BuildingCreator> ().setUpBuilding (mainController.GetComponent<MainController>().currentMarkerId);
+			city.GetComponent<BuildingCreator> ().setUpBuilding (mainController.currentMarkerId);
 		}
 		
 		number_of_buildings = 1;
         progressCount = new int[1];
 		num_of_pieces = GameObject.FindGameObjectsWithTag("building").Length;
 		num_of_blocks = GameObject.FindGameObjectsWithTag ("block").Length;
-		Debug.Log ("Pieces " + num_of_pieces);
-		Debug.Log ("Blocks" + num_of_blocks);
 		totalProgress = num_of_pieces * (int)ProgressAmount.Building + num_of_blocks * (int)ProgressAmount.Block;
 		progressCount [0] = totalProgress;
     }
@@ -156,6 +156,15 @@ public class LevelControl : MonoBehaviour {
 		shakeText.SetActive (false);
 		ground = GameObject.FindGameObjectWithTag ("ground");
 		progressBar = gameCanvas.transform.FindChild ("FullImage").gameObject;
+
+		GetComponent<SpriteControl> ().deactivateColor ();
+
+		MainMenuScript mainMenu = GameObject.Find ("MainMenu").GetComponent<MainMenuScript> ();
+		selectedKaiju = mainMenu.SelectedKaiju;
+		kaiju = transform.FindChild ("Kaiju").gameObject;
+		kaiju.GetComponent<MonsterCreator> ().
+			setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
+
 	}
 
 	/**********************************
@@ -212,7 +221,7 @@ public class LevelControl : MonoBehaviour {
 			buildingDestroyedCount = -1;
 			// TODO: UNCOMMENT THIS
 			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
-			//ground = GameObject.FindGameObjectWithTag("ground");
+			ground = GameObject.FindGameObjectWithTag("ground");
 			ground.GetComponent<Ground>().startShake(0.5f);
 		}
 
