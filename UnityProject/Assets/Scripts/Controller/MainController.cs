@@ -41,8 +41,9 @@ public class MainController : MonoBehaviour
         single = this;
 		gameState = GameState.MainMenu;
 
-		// For Testing Nicky
-		Instantiate(destroyCityPrefab);
+		// FOR TEST: NICKY
+		//phoneCameraScene = Instantiate(phoneCameraPrefab);
+		//phoneCameraScene.GetComponent<PhoneImageController>().initCamera (PhoneImageController.CameraMode.EggHatching);
     }
 
     // Update is called once per frame
@@ -146,6 +147,8 @@ public class MainController : MonoBehaviour
 
     public void goToDestroyCity(string markerId)
     {
+		
+		
 		markerIdAnalytics = markerId;
 		destructionTime = 0;
         currentMarkerId = markerId;

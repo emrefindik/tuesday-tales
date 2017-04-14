@@ -45,10 +45,11 @@ public class PhoneImageController : MonoBehaviour {
 	}
 
 	WHICHCAMERA whichCamera = WHICHCAMERA.None;
+	MainController mainController;
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.BuildingDestruction);
+		initCamera (CameraMode.EggHatching);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
@@ -59,6 +60,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	public void initCamera(CameraMode mode)
 	{
+		mainController = GameObject.Find ("MainController").GetComponent<MainController>();
 		startCamera ();
 		takingPhoto = false;
 		CAMREADY = false;
@@ -67,19 +69,25 @@ public class PhoneImageController : MonoBehaviour {
 		BuildingSelfieModel.SetActive (false);
 		EggSelfieModel.SetActive (false);
 
+		MainMenuScript mainMenu = mainController.gameObject.GetComponent<MainMenuScript> ();
+
 		Debug.Log (mode);
 		switch (mode) {
 		case CameraMode.BuildingDestruction:
 			BuildingSelfieModel.SetActive (true);
+			Kaiju kaiju = mainMenu.SelectedKaiju;
+			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.BodySprite, kaiju.HandSprite, kaiju.MonsterColor);
 			break;
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
 			EggSelfieModel.SetActive (true);
+			GameObject Egg = GameObject.Find ("Egg");
+			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
-			// TODO: get monster information from spatial
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (2, 1, 1, Color.blue);
+			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
 			break;
 		default:
 			break;	
