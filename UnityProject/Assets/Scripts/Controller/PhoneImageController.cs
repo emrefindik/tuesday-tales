@@ -87,7 +87,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, kaiju.MonsterColor);
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
 			break;
 		default:
 			break;	
