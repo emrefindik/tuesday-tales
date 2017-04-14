@@ -41,8 +41,6 @@ public class MainController : MonoBehaviour
         single = this;
 		gameState = GameState.MainMenu;
 
-		// For Testing Nicky
-		Instantiate(destroyCityPrefab);
     }
 
     // Update is called once per frame
