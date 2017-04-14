@@ -42,7 +42,7 @@ public class MainController : MonoBehaviour
 		gameState = GameState.MainMenu;
 
 		// FOR TEST: NICKY
-		Instantiate(destroyCityPrefab);
+		//Instantiate(destroyCityPrefab);
 
     }
 
