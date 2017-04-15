@@ -7,11 +7,12 @@ public class KaijuDatabase : MonoBehaviour {
 
     private const int NO_DOWNLOAD = -1;
 
-    private const string HAND_SPRITE_PATH = "Xiao rocks"; // TODO CHANGE THIS
-    private const string HEAD_SPRITE_PATH = "Jin rocks"; // TODO CHANGE THIS
-    private const string EYE_SPRITE_PATH = "Nicky rocks"; // TODO CHANGE THIS
-    private const string BODY_SPRITE_PATH = "Matt rocks"; // TODO CHANGE THIS
-    private const string EGG_SPRITE_PATH = "Jonathan I guess you're OK"; // TODO CHANGE THIS
+    private const string PHOTO_SERVER_PATH = "http://tuesday-tales.etc.cmu.edu/Photos/";
+    private const string HAND_SPRITE_PATH = PHOTO_SERVER_PATH + "hand"; // TODO CHANGE THIS
+    private const string HEAD_SPRITE_PATH = PHOTO_SERVER_PATH + "head"; // TODO CHANGE THIS
+    //private const string EYE_SPRITE_PATH = PHOTO_SERVER_PATH + "eye"; // TODO CHANGE THIS
+    private const string BODY_SPRITE_PATH = PHOTO_SERVER_PATH + "body"; // TODO CHANGE THIS
+    private const string EGG_SPRITE_PATH = PHOTO_SERVER_PATH + "egg"; // TODO CHANGE THIS
 
     public static string handSpriteAtIndex(int index)
     {
@@ -28,10 +29,10 @@ public class KaijuDatabase : MonoBehaviour {
         return BODY_SPRITE_PATH + index.ToString();
     }
 
-    public static string eyeSpriteAtIndex(int index)
+    /*public static string eyeSpriteAtIndex(int index)
     {
         return EYE_SPRITE_PATH + index.ToString();
-    }
+    } */
 
     public static string eggSpriteAtIndex(int index)
     {

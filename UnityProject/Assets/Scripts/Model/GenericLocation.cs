@@ -451,6 +451,7 @@ public class GenericLocation : CheckInPlace
     }
 }
 
+[System.Serializable]
 public class LocationTypeCountTuple
 {
     [SerializeField]

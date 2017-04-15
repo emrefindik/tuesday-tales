@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Kaiju : ISerializationCallbackReceiver
 {
     [SerializeField]
@@ -58,13 +59,14 @@ public class Kaiju : ISerializationCallbackReceiver
         }
         private set
         {
-            _clr = value;
+            _clr = value;            
             _color.updateValues(value);
         }
     }
 
     public Kaiju(Color color, int handType, int headType, int bodyType, string name)
     {
+        _color = new SerializableColor();
         MonsterColor = color;
         _handType = handType;
         _headType = headType;
@@ -103,6 +105,7 @@ public class Kaiju : ISerializationCallbackReceiver
 [System.Serializable]
 public class SerializableColor
 {
+    [SerializeField]
     private double red;
     public double Red
     {
@@ -115,6 +118,7 @@ public class SerializableColor
         }
     }
 
+    [SerializeField]
     private double green;
     public double Green
     {
@@ -128,6 +132,7 @@ public class SerializableColor
         }
     }
 
+    [SerializeField]
     private double blue;
     public double Blue
     {
@@ -141,6 +146,7 @@ public class SerializableColor
         }
     }
 
+    [SerializeField]
     private double alpha;
     public double Alpha
     {
@@ -164,25 +170,21 @@ public class SerializableColor
 }
 
 [System.Serializable]
-public class ItemWithFrequency<T>
+public abstract class ItemWithFrequency<T>
 {
     [SerializeField]
-    private int _frequency;
+    protected int _frequency;
     public int Frequency
     {
         get { return _frequency; }
     }
 
-    [SerializeField]
-    private T _item;
-    public T Item
-    {
-        get { return _item; }
-    }
+    public abstract T getItem();
+    protected abstract void setItem(T item);
 
     /* Used when picking a random kaiju out of a list.
      * Do not serialize. */
-    private float _index;
+    protected float _index;
     public float Index
     {
         get { return _index; }
@@ -191,7 +193,45 @@ public class ItemWithFrequency<T>
 
     public ItemWithFrequency(T kaiju, int frequency)
     {
-        _item = kaiju;
+        setItem(kaiju);
         _frequency = frequency;
+    }
+}
+
+[System.Serializable]
+public class KaijuWithFrequency : ItemWithFrequency<Kaiju>
+{
+    [SerializeField]
+    protected Kaiju _item;
+
+    public KaijuWithFrequency(Kaiju kaiju, int frequency) : base(kaiju, frequency) { }
+
+    override public Kaiju getItem()
+    {
+        return _item;
+    }
+
+    override protected void setItem(Kaiju item)
+    {
+        _item = item;
+    }
+}
+
+[System.Serializable]
+public class LocationWithFrequency : ItemWithFrequency<LocationCombinationData>
+{
+    [SerializeField]
+    protected LocationCombinationData _item;
+
+    public LocationWithFrequency(LocationCombinationData locData, int frequency) : base(locData, frequency) { }
+
+    override public LocationCombinationData getItem()
+    {
+        return _item;
+    }
+
+    override protected void setItem(LocationCombinationData item)
+    {
+        _item = item;
     }
 }

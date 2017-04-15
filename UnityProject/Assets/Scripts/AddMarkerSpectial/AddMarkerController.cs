@@ -34,8 +34,7 @@ public class AddMarkerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (!ok) {
-			
+		if (!ok) {			
 			MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
 
 			/*
@@ -50,8 +49,6 @@ public class AddMarkerController : MonoBehaviour {
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.433727, -80.004363, "Schell Games Studio", "", 
 			*/
-			StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
-
 			ok = true;
 			/*
 			StartCoroutine(SpatialClient2.single.CreateUser("1", "1"));
