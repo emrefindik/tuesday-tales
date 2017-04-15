@@ -127,8 +127,17 @@ public class MainMenuScript : MonoBehaviour
 	private Text _checkedInText;
     [SerializeField]
     private GameObject _eggMenuItemPrefab;
+	public GameObject EggMenuItemPrefab {
+		get { return _eggMenuItemPrefab; }
+	}
+
+
     [SerializeField]
     private Transform _eggMenuContentPanel;
+	public Transform EggMenuContentPanel {
+		get { return _eggMenuContentPanel; }
+	}
+
     [SerializeField]
     private GameObject _friendMenuItemPrefab;
     [SerializeField]
@@ -314,6 +323,7 @@ public class MainMenuScript : MonoBehaviour
     {
         if (success && !mapLoaded)
         {
+			/* For DEBUG
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
                 Input.location.lastData.longitude.ToString() + ",\"" +
@@ -324,6 +334,17 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
                 // TODO add selected kaiju information to loadMap in map.html
+			*/
+			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
+				"40.432791" + ',' +
+				"-79.964793" + ",\"" +
+				SpatialClient2.baseURL + "\",\"" +
+				SpatialClient2.PROJECT_ID + "\"," +
+				SpatialClient2.single.getScore().ToString() + ',' +
+				SpatialClient2.single.getTimer().ToString() + ',' +
+				SpatialClient2.single.getMultiplier().ToString() + ',' +
+				SpatialClient2.single.getStreakPathAsJsonString() + ')');
+			// TODO add selected kaiju information to loadMap in map.html
 
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
@@ -366,7 +387,7 @@ public class MainMenuScript : MonoBehaviour
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
         Debug.Log("hi");
-        Debug.Log(message.path);
+		Debug.Log(message.rawMessage);
         switch (message.path)
         {
 			/* case "back":
@@ -402,6 +423,7 @@ public class MainMenuScript : MonoBehaviour
                 _webView.Stop();
                 mapLoaded = false;
                 _webView.Hide();
+				Debug.Log("Marker ID: " + message.args["id"]);
                 MainController.single.goToDestroyCity(message.args["id"]);
                 break;
             case "resetscore":

@@ -39,6 +39,7 @@
 // furthest distance to fetch markers from, in meters
 markerRadius = 6000;
 score = 0;
+maxCheckInDistance = 50;
 
 function toEggs() {
 	window.location.href = "uniwebview://eggs";
@@ -224,7 +225,7 @@ function initializeMap() {
 					title: spatialMarker.name
 				});
 				googleMarker.spatialId = spatialMarker._id;
-				googleMarker.addListener('click', function() { onMarkerClick(googleMarker.spatialId, googleMarker.getPosition()); });
+				googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, googleMarker.getPosition()); });
 				googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
 				googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
 				googleMarkers.push(googleMarker);
@@ -291,7 +292,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
+loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
 </script>
 </body>
 </html>
