@@ -160,11 +160,8 @@ function onMarkerClick(markerId, markerPosition) {
 function updatePath() {
 	var newPath = [];
 	googleMarkers.forEach(function(marker) {
-                          document.getElementById('scoretext').innerHTML = "thth";
 		for (var i = 0; i < pathMarkerSpatialIds.length; i++) {
-                          document.getElementById('timetext').innerHTML = "thtth";
 			if (pathMarkerSpatialIds[i] == marker.spatialId) {
-                          document.getElementById('multipliertext').innerHTML = "thgth";
 				newPath.push(marker.getPosition());
 				marker.setMap(null);
 				marker.intactOverlay.setMap(null);
@@ -262,7 +259,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
 	latitude = lat;
 	longitude = lon;
 	
-	pathMarkerSpatialIds = pathMarkerIds;
+	pathMarkerSpatialIds = pathMarkerIds.list;
 	
 	// get markers and store them into a global variable
 	var getReq = new XMLHttpRequest();

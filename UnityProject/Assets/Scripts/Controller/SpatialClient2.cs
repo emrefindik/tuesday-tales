@@ -129,7 +129,10 @@ public class SpatialClient2 : MonoBehaviour
 
     public string getStreakPathAsJsonString()
     {
-		return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers.ToList());
+		Debug.Log (userSession.User.Metadata.StreakMarkers.Count());
+		Debug.Log(JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers.ToList()));
+		Debug.Log (userSession.User.Metadata.StreakMarkers.ToList().Count());
+		return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers);
     }
 
     public int getScore()
@@ -1652,6 +1655,7 @@ public abstract class ImmutableList<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
+		Debug.Log ("enumerator count: " + getList ().Count.ToString());
         return getList().GetEnumerator();
     }
 
