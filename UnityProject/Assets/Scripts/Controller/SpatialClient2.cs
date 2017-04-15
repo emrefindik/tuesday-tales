@@ -556,7 +556,8 @@ public class SpatialClient2 : MonoBehaviour
             ResponseMarkersMessage rm = JsonUtility.FromJson<ResponseMarkersMessage>(www.text);
             if (rm.Success)
             {
-                markers = rm.Markers;
+				markers.Clear();
+				markers.AddRange(rm.Markers);
                 ready = true;
                 response.setSuccess(true);
                 Debug.Log(www.text);
@@ -1030,7 +1031,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
     // the furthest distance to check for a kaiju spawn point, in meters
-    public const double KAIJU_MARKER_RADIUS = 15000.0; // TODO make this smaller after you have more spawn locations around
+    public const double KAIJU_MARKER_RADIUS = 15000000000.0; // TODO make this smaller after you have more spawn locations around
 
     [SerializeField]
     private KaijuList kaiju;
@@ -1155,6 +1156,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
         List<SpatialMarker> markersAround = new List<SpatialMarker>();
         CoroutineResponse response = new CoroutineResponse();
         yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, KAIJU_MARKER_RADIUS, true, markersAround, response);
+		Debug.Log (markersAround.Count);
         kaiju = new KaijuList((new KaijuFrequencyList()).randomKaiju(markersAround));
     }
 
@@ -1911,6 +1913,7 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         }
         if (distances.Count == 0)
         {
+			Debug.Log ("gsdfg");
             // no kaiju markers around!
             // return STANDARD_KAIJU; TODO uncomment this once we have a standard kaiju.
         }
@@ -1919,7 +1922,10 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         int j;
         foreach (SpatialMarker marker in distances.Keys)
         {
-                getList().AddRange(itemsInMarker(marker));
+			Debug.Log (getList ().Count);
+			Debug.Log(JsonUtility.ToJson(marker.Metadata));
+                addItemsInMarker(marker);
+			Debug.Log (getList ().Count);
                 for (j = i; j < getList().Count; j++)
                 {
                     getList()[i].Index = index;
@@ -1936,7 +1942,7 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         return getList()[i - 1].getItem();
     }
 
-    protected abstract IEnumerable<ItemWithFrequency<T>> itemsInMarker(SpatialMarker marker);
+    protected abstract void addItemsInMarker(SpatialMarker marker);
 }
 
 [System.Serializable]
@@ -1946,6 +1952,8 @@ public class KaijuFrequencyList : FrequencyList<Kaiju>
     private List<KaijuWithFrequency> list;
     protected override List<ItemWithFrequency<Kaiju>> getList()
     {
+		Debug.Log (list.Count);
+		Debug.Log (list.Cast<ItemWithFrequency<Kaiju>> ().ToList ().Count);
         return list.Cast<ItemWithFrequency<Kaiju>>().ToList();
     }
 
@@ -1959,12 +1967,24 @@ public class KaijuFrequencyList : FrequencyList<Kaiju>
         list = items.Cast<KaijuWithFrequency>().ToList();
     }
 
+	/*override public IEnumerator<KaijuWithFrequency> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
+	override IEnumerator IEnumerable.GetEnumerator()
+	{
+		return list.GetEnumerator();
+	} */
+
     public KaijuFrequencyList(IEnumerable<ItemWithFrequency<Kaiju>> items) : base(items) { }
     public KaijuFrequencyList() : base() { }
 
-    override protected IEnumerable<ItemWithFrequency<Kaiju>> itemsInMarker(SpatialMarker marker)
+    override protected void addItemsInMarker(SpatialMarker marker)
     {
-        return marker.Metadata.Kaiju;
+		Debug.Log (list.Count);
+		list.AddRange(marker.Metadata.Kaiju.list);
+		Debug.Log (list.Count);
     }
 }
 
@@ -1988,12 +2008,22 @@ public class LocationFrequencyList : FrequencyList<LocationCombinationData>
         list = items.Cast<LocationWithFrequency>().ToList();
     }
 
+	/*override public IEnumerator<LocationWithFrequency> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
+	override IEnumerator IEnumerable.GetEnumerator()
+	{
+		return list.GetEnumerator();
+	} */
+
     public LocationFrequencyList(IEnumerable<ItemWithFrequency<LocationCombinationData>> items) : base(items) { }
     public LocationFrequencyList() : base() { }
 
-    override protected IEnumerable<ItemWithFrequency<LocationCombinationData>> itemsInMarker(SpatialMarker marker)
+    override protected void addItemsInMarker(SpatialMarker marker)
     {
-        return marker.Metadata.Locations;
+		list.AddRange(marker.Metadata.Locations.list);
     }
 }
 

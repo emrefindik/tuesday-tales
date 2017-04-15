@@ -174,4 +174,20 @@ public class MainController : MonoBehaviour
 		
 		gameState = GameState.PhoneCamera;
 	}
+
+	public void eggToPhotoCamera()
+	{
+		goToPhoneCamera (PhoneImageController.CameraMode.EggHatching);
+	}
+
+	public void kaijuToPhoneCamera()
+	{
+		goToPhoneCamera (PhoneImageController.CameraMode.Kaiju);
+	}
+
+	public void cityToPhoneCamera()
+	{
+		goToPhoneCamera (PhoneImageController.CameraMode.BuildingDestruction);
+	}
+
 }
