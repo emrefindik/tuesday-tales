@@ -156,6 +156,8 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to phone camera");
 
 		mainMenuCamera.enabled = false;
+		GetComponent<MainMenuScript> ().disableWebview ();
+
 		phoneCameraScene = Instantiate (phoneCameraPrefab);
 		phoneCameraScene.GetComponent<PhoneImageController>().initCamera(mode);
 
@@ -165,11 +167,13 @@ public class MainController : MonoBehaviour
 
 	public void eggToPhotoCamera()
 	{
+		MainMenuScript.EggsCanvas.enabled = false;
 		goToPhoneCamera (PhoneImageController.CameraMode.EggHatching);
 	}
 
 	public void kaijuToPhoneCamera()
 	{
+		MainMenuScript.KaijuCanvas.enabled = false;
 		goToPhoneCamera (PhoneImageController.CameraMode.Kaiju);
 	}
 

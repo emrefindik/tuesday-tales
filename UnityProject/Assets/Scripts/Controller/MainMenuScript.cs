@@ -76,7 +76,12 @@ public class MainMenuScript : MonoBehaviour
 		private set { registerCanvas = value; }
 	}
 
-    private static Canvas kaijuCanvas;
+	private static Canvas kaijuCanvas;
+	public static Canvas KaijuCanvas
+	{
+		get { return kaijuCanvas; }
+		private set { kaijuCanvas = value; }
+	}
 
     private static UniWebView webView;
     /*public static UniWebView WebView
@@ -388,7 +393,6 @@ public class MainMenuScript : MonoBehaviour
 //        _webView.EvaluatingJavaScript(
 //            JS_CHECKIN_LOCATION + '(' + SpatialClient2.single.getStreakPathAsJsonString() + ')');
 //    }
-
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
         Debug.Log("hi");
@@ -423,11 +427,14 @@ public class MainMenuScript : MonoBehaviour
 
                 // TODO update to actually check in
                 break;
-            case "destroy":
+		case "destroy":
+				/*
                 StopCoroutine(_locationUpdateCoroutine);
                 _webView.Stop();
                 mapLoaded = false;
                 _webView.Hide();
+                */
+				_disableWebview ();
 				Debug.Log("Marker ID: " + message.args["id"]);
                 MainController.single.goToDestroyCity(message.args["id"]);
                 break;
@@ -717,4 +724,16 @@ public class MainMenuScript : MonoBehaviour
         kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
     }
 
+	public void disableWebview()
+	{
+		_disableWebview ();
+	}
+
+	private void _disableWebview()
+	{
+		StopCoroutine(_locationUpdateCoroutine);
+		_webView.Stop();
+		mapLoaded = false;
+		_webView.Hide();
+	}
 }
