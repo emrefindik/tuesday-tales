@@ -159,7 +159,7 @@ public class MainController : MonoBehaviour
 		GetComponent<MainMenuScript> ().disableWebview ();
 
 		phoneCameraScene = Instantiate (phoneCameraPrefab);
-		phoneCameraScene.GetComponent<PhoneImageController>().initCamera(mode);
+		phoneCameraScene.GetComponent<PhoneImageController>().startCameraWithMode(mode);
 
 		
 		gameState = GameState.PhoneCamera;

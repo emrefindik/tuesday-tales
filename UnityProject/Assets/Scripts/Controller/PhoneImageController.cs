@@ -49,16 +49,16 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.EggHatching);
+		//initCamera (CameraMode.EggHatching);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
-	void startCameraWithMode(CameraMode mode)
+	public void startCameraWithMode(CameraMode mode)
 	{
 		initCamera (mode);
 	}
 
-	public void initCamera(CameraMode mode)
+	void initCamera(CameraMode mode)
 	{
 		mainController = GameObject.Find ("MainController").GetComponent<MainController>();
 		startCamera ();
@@ -76,7 +76,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.BuildingDestruction:
 			BuildingSelfieModel.SetActive (true);
 			Kaiju kaiju = mainMenu.SelectedKaiju;
-			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.BodySprite, kaiju.HandSprite, kaiju.MonsterColor);
+			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.HandSprite, kaiju.BodySprite, kaiju.MonsterColor);
 			break;
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
@@ -87,7 +87,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
 			break;
 		default:
 			break;	
@@ -101,6 +101,8 @@ public class PhoneImageController : MonoBehaviour {
 
 	void Update()
 	{
+		if (!pCamera)
+			return;
         if (pCamera.width < 100 && !CAMREADY) {
 			return;
 		} else {
@@ -347,6 +349,6 @@ public class PhoneImageController : MonoBehaviour {
 	public void goBack()
 	{
 		GameObject mainController = GameObject.Find ("MainController");
-		mainController.GetComponent<MainController> ().goBack ();
+		mainController.GetComponent<MainController> ().goToMapView ();
 	}
 }
