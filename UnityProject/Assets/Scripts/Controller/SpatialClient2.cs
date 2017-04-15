@@ -129,7 +129,7 @@ public class SpatialClient2 : MonoBehaviour
 
     public string getStreakPathAsJsonString()
     {
-        return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers);
+		return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers.ToList());
     }
 
     public int getScore()
@@ -925,7 +925,7 @@ public class SpatialClient2 : MonoBehaviour
             ready = true;
 			Debug.Log(www.text);
             Debug.Log("user metadata updated");
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
 		}
 	}
 }
@@ -1803,6 +1803,7 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 
     public void OnBeforeSerialize()
     {
+		Debug.Log ("serializing eggs");
         list = new List<OwnedEgg>(eggs.Values);
     }
 

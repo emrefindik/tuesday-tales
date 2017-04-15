@@ -101,7 +101,7 @@ public class KaijuDatabase : MonoBehaviour {
         yield return www;
         if (string.IsNullOrEmpty(www.error))
         {
-            _handSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_handSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
@@ -127,7 +127,7 @@ public class KaijuDatabase : MonoBehaviour {
         yield return www;
         if (string.IsNullOrEmpty(www.error))
         {
-            _headSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_headSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
@@ -153,7 +153,7 @@ public class KaijuDatabase : MonoBehaviour {
         yield return www;
         if (string.IsNullOrEmpty(www.error))
         {
-            _bodySprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_bodySprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
@@ -179,7 +179,7 @@ public class KaijuDatabase : MonoBehaviour {
         yield return www;
         if (string.IsNullOrEmpty(www.error))
         {
-            _eggSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_eggSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else

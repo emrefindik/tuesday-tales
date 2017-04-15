@@ -63,23 +63,6 @@ public class MainController : MonoBehaviour
         winCoroutineEnded.setSuccess(true);
         // END OF EMRE'S CODE
 
-        /*
-        
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
-		pcl.addCheckedLocation (); 
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        !!!!! */
     }
 		
 	public void goBack()

@@ -11,9 +11,15 @@
     #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 30%; }
     #timervalue { position: absolute; bottom: 35%; right: 5%; width: 40%; height: 30%; }
     #multipliervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 30%; }
-	#eggsButton { position: absolute; right: 4%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
-	#kaijuButton { position: absolute; left: 37%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
-	#cameraButton { position: absolute; left: 4%; bottom: 5%; height: 7%; width: 26%; z-index: 99; border-size: 2px; border-style: solid; border-color: #333333; border-radius: 3px}
+    #eggsDiv { position: absolute; right: 14%; bottom: 5%; width: 30%; z-index: 99 }
+    #eggsDummy { height: 0; margin-top: 60%; }
+    #eggsButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+    #kaijuDiv { position: absolute; left: 14%; bottom: 5%; width: 30%; z-index: 99 }
+    #kaijuDummy { height: 0; margin-top: 60%; }
+	#kaijuButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+    #cameraDiv { position: absolute; bottom: 5%; margin-left: auto; margin-right: auto; left: 0; right: 0; width: 20%; z-index: 99 }
+    #cameraDummy { height: 0; margin-top: 100%; }
+	#cameraButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
     h1 { font-size: 20px; }
 </style>
 <div id="wrapper">
@@ -26,9 +32,9 @@
 		<div id="timervalue"><h1 id="time"></h1></div>
 		<div id="multipliervalue"><h1 id="multiplier"></h1></div>
     </div>
-    <img src="Kaiju_button.png" onclick="toKaiju()"></img>
-    <img src="Minus_button.png" onclick="toEggs()"></img>
-    <img src="Egg_button.png" onclick="toEggs()"></img>
+    <div id="kaijuDiv"><div id="kaijuDummy"></div><img id="kaijuButton" src="Kaiju_button.png" onclick="toKaiju()"></img></div>
+    <div id="cameraDiv"><div id="cameraDummy"></div><img id="cameraButton" src="Minus_button.png"></img></div>
+    <div id="eggsDiv"><div id="eggsDummy"></div><img id="eggsButton" src="Egg_button.png" onclick="toEggs()"></img></div>
 	<!--
     <button id="eggsButton" onclick="toEggs()">Look at Your Eggs</button>
 	<button id="kaijuButton" onclick="toKaiju()">Select Your Kaiju</button>
@@ -154,8 +160,11 @@ function onMarkerClick(markerId, markerPosition) {
 function updatePath() {
 	var newPath = [];
 	googleMarkers.forEach(function(marker) {
+                          document.getElementById('scoretext').innerHTML = "thth";
 		for (var i = 0; i < pathMarkerSpatialIds.length; i++) {
+                          document.getElementById('timetext').innerHTML = "thtth";
 			if (pathMarkerSpatialIds[i] == marker.spatialId) {
+                          document.getElementById('multipliertext').innerHTML = "thgth";
 				newPath.push(marker.getPosition());
 				marker.setMap(null);
 				marker.intactOverlay.setMap(null);
@@ -292,7 +301,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
 </script>
 </body>
 </html>

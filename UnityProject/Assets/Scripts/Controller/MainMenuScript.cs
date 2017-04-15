@@ -323,7 +323,7 @@ public class MainMenuScript : MonoBehaviour
     {
         if (success && !mapLoaded)
         {
-			/* For DEBUG
+			/*
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
                 Input.location.lastData.longitude.ToString() + ",\"" +
@@ -334,7 +334,8 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
                 // TODO add selected kaiju information to loadMap in map.html
-			*/
+                */
+
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
 				"40.432791" + ',' +
 				"-79.964793" + ",\"" +
@@ -344,6 +345,8 @@ public class MainMenuScript : MonoBehaviour
 				SpatialClient2.single.getTimer().ToString() + ',' +
 				SpatialClient2.single.getMultiplier().ToString() + ',' +
 				SpatialClient2.single.getStreakPathAsJsonString() + ')');
+
+
 			// TODO add selected kaiju information to loadMap in map.html
 
             _webView.Show();

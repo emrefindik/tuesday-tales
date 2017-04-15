@@ -158,6 +158,7 @@ public class OwnedEgg
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = egg; // also updates the egg menu item's view
+			Debug.Log("egg created");
         }
         else
         {
