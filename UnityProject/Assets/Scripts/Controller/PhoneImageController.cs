@@ -218,6 +218,12 @@ public class PhoneImageController : MonoBehaviour {
 		//Get another copy to show on share screen
 		Texture2D screenshot = ScreenCapture.Capture();
 
+		Color32[] pix = screenshot.GetPixels32();
+		screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
+		screenShotCopy.SetPixels32(pix);
+		screenShotCopy.Apply();
+
+		Debug.Log ("Capture one frame");
         #if UNITY_IPHONE
 		if(Application.platform == RuntimePlatform.IPhonePlayer)
 		{
@@ -225,15 +231,9 @@ public class PhoneImageController : MonoBehaviour {
 		}
         #endif
 
-        //if (Application.platform == RuntimePlatform.Android)
+        if (Application.platform == RuntimePlatform.Android)
 			SaveImageToLibraryAndriod(screenshot);
-
-
-        Color32[] pix = screenshot.GetPixels32();
-        screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
-        screenShotCopy.SetPixels32(pix);
-        screenShotCopy.Apply();
-
+        
         //FOR TEST 
         //OnFinishedSaveImage("");
 
@@ -258,6 +258,7 @@ public class PhoneImageController : MonoBehaviour {
 		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
 		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
 		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
+		Debug.Log ("Screenshot Width" + screenShotCopy.width);
 		photoRect.GetComponent<RectTransform> ().
 		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
 
