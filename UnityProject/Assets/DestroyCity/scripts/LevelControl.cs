@@ -171,7 +171,7 @@ public class LevelControl : MonoBehaviour {
 		Debug.Log ("Kaiju: " + kaiju);
 		Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
 		kaiju.GetComponent<MonsterCreator> ().
-			setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
+		setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
 
 		Debug.Log ("Setup Kaiju");
 
@@ -221,8 +221,8 @@ public class LevelControl : MonoBehaviour {
 			if (findEggCanvas.activeSelf)
 				return;
 			// TODO: Change this back
-			//if (winCanvas && (winCoroutineEnded.Success == true)) {
-			if (winCanvas) {
+			if (winCanvas && (winCoroutineEnded.Success == true)) {
+			//if (winCanvas) {
 				GameObject scoreText = winCanvas.transform.FindChild ("ScoreText").gameObject;
 				scoreText.GetComponent<Text> ().text = "x " + score.ToString ();
 				winCanvas.SetActive (true);
@@ -239,8 +239,7 @@ public class LevelControl : MonoBehaviour {
 			shakeNow = true;
 			shakeText.SetActive (true);
 			buildingDestroyedCount = -1;
-			// TODO: UNCOMMENT THIS
-			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
 			ground = GameObject.FindGameObjectWithTag("ground");
 			ground.GetComponent<Ground>().startShake(0.5f);
 		}
@@ -367,8 +366,8 @@ public class LevelControl : MonoBehaviour {
 		GameObject inputName = editEggNameCanvas.transform.FindChild ("InputEggName").gameObject;
 		eggName = inputName.GetComponent<InputField> ().text;
 		Debug.Log (eggName);
-		OwnedEgg.createEggForSelf (mainController.GetComponent<MainMenuScript> ().EggMenuItemPrefab, 
-			mainController.GetComponent<MainMenuScript> ().EggMenuContentPanel, eggIndex, eggName);
+		StartCoroutine(OwnedEgg.createEggForSelf (mainController.GetComponent<MainMenuScript> ().EggMenuItemPrefab, 
+			mainController.GetComponent<MainMenuScript> ().EggMenuContentPanel, eggIndex, eggName));
 	}
 
 	public void BackToMainMenu()
