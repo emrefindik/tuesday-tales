@@ -10,14 +10,22 @@ public class BuildingCreator : MonoBehaviour {
 	private Dictionary <string, int> buildingDict;
 	private int index;
 
+	void initDict()
+	{
+		buildingDict = new Dictionary<string, int> ();
+		buildingDict ["58f18c776ad13600117881d1"] = 1;
+	}
+
 	public void setUpBuildingTest(int _idx)
 	{
+		initDict ();
 		index = _idx;
 		loadScene ();
 	}
 
 	public void setUpBuilding(string markerId)
 	{
+		initDict ();
 		index = buildingDict [markerId];
 		loadScene();
 	}

@@ -89,6 +89,7 @@ public class KaijuMenuData
         get
         {
             if (_state.KaijuIndex > _kaijuMenuItems.Count - 1) _state.KaijuIndex = _kaijuMenuItems.Count - 1;
+			Debug.Log ("Kaiju Index " + _state.KaijuIndex);
             if (_state.KaijuIndex < 0) return null;
             return _kaijuMenuItems[_state.KaijuIndex].Kaiju;
         }

@@ -13,20 +13,21 @@ public class KaijuDatabase : MonoBehaviour {
     //private const string EYE_SPRITE_PATH = PHOTO_SERVER_PATH + "eye"; // TODO CHANGE THIS
     private const string BODY_SPRITE_PATH = PHOTO_SERVER_PATH + "body"; // TODO CHANGE THIS
     private const string EGG_SPRITE_PATH = PHOTO_SERVER_PATH + "egg"; // TODO CHANGE THIS
+	private const string PNG = ".png";
 
     public static string handSpriteAtIndex(int index)
     {
-        return HAND_SPRITE_PATH + index.ToString();
+        return HAND_SPRITE_PATH + index.ToString() + PNG;
     }
 
     public static string headSpriteAtIndex(int index)
     {
-        return HEAD_SPRITE_PATH + index.ToString();
+        return HEAD_SPRITE_PATH + index.ToString() + PNG;
     }
 
     public static string bodySpriteAtIndex(int index)
     {
-        return BODY_SPRITE_PATH + index.ToString();
+        return BODY_SPRITE_PATH + index.ToString() + PNG;
     }
 
     /*public static string eyeSpriteAtIndex(int index)
@@ -36,7 +37,7 @@ public class KaijuDatabase : MonoBehaviour {
 
     public static string eggSpriteAtIndex(int index)
     {
-        return EGG_SPRITE_PATH + index.ToString();
+        return EGG_SPRITE_PATH + index.ToString() + PNG;
     }
 
     private Dictionary<int, Sprite> _handSprites;
@@ -83,6 +84,7 @@ public class KaijuDatabase : MonoBehaviour {
         _bodySprites = new Dictionary<int, Sprite>();
         _headSprites = new Dictionary<int, Sprite>();
         _handSprites = new Dictionary<int, Sprite>();
+
     }
 
     private IEnumerator checkAndDownloadHandSprite(int index, CoroutineResponse response)
@@ -97,7 +99,7 @@ public class KaijuDatabase : MonoBehaviour {
         _handDownloadingIndex = index;
         WWW www = new WWW(handSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
             _handSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
             response.setSuccess(true);
@@ -123,7 +125,7 @@ public class KaijuDatabase : MonoBehaviour {
         _headDownloadingIndex = index;
         WWW www = new WWW(headSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
             _headSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
             response.setSuccess(true);
@@ -149,7 +151,7 @@ public class KaijuDatabase : MonoBehaviour {
         _bodyDownloadingIndex = index;
         WWW www = new WWW(bodySpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
             _bodySprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
             response.setSuccess(true);
@@ -175,7 +177,7 @@ public class KaijuDatabase : MonoBehaviour {
         _eggDownloadingIndex = index;
         WWW www = new WWW(eggSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
             _eggSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
             response.setSuccess(true);
@@ -190,22 +192,17 @@ public class KaijuDatabase : MonoBehaviour {
     }
 
 
-    // for eggs
-    public Sprite []eggSprites;
+
 	// TODO: store the links to the 
 	string [] imageLinks;
 
-	// for kaiju
-	public Sprite [] handSprites;
-	public Sprite [] headSprites;
 	public Sprite [] eyeSprites;
-	public Sprite [] bodySprites;
 
 	public int generateEgg()
 	{
         // Randomly Generate an egg
         //int index = (int)(Random.Range(0, eggSprites.Length-1));
-        return Random.Range(0, OwnedEgg.NUMBER_OF_EGG_IMAGES);
+        return Random.Range(1, OwnedEgg.NUMBER_OF_EGG_IMAGES+1);
 		// TODO: pop out a ui to input name of the Egg, then call createEggForSelf
 	}
 

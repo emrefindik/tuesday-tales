@@ -35,8 +35,12 @@ public class AddMarkerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (!ok) {			
-			MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
+			//MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
+			MarkerMetadata mMete = MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.png", 
+				"http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png", new ImageBounds (40.4329, 40.4325, -79.9646, -79.9650));
 
+			StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
+			StartCoroutine (SpatialClient2.single.DeleteMarkerById ("58f18bdb6ad13600117881d0"));
 			/*
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.442199, -79.943468, "The Fence", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.443992, -79.949329, "Carnegie Museum of Art", "", mMete));
