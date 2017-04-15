@@ -337,6 +337,8 @@ public class MainMenuScript : MonoBehaviour
                 */
 
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
+				//Input.location.lastData.latitude.ToString() + ',' +
+				//Input.location.lastData.longitude.ToString() + ",\"" +
 				"40.432791" + ',' +
 				"-79.964793" + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
