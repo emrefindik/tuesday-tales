@@ -234,18 +234,22 @@ public class SpatialClient2 : MonoBehaviour
             return "";
     }
 
-    public LocationCombination getLocationsForEgg(LocationCombinationData combo)
-    {
-        List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
-        List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
+	public IEnumerator getLocationsForEgg(LocationCombinationData combo, List<HatchLocationMarker> markersToTake, List<GenericLocation> genericLocationsToTake)
+	{
+		markersToTake.Clear ();
+		genericLocationsToTake.Clear ();
+		Debug.Log (_locationDatabase.SpecificMarkers.Values.Count);
         foreach (LocationTypeCountTuple locationIndex in combo.GenericLocations)
             genericLocationsToTake.Add(new GenericLocation(locationIndex));
+		Debug.Log ("pirates are we");
         foreach (string markerIndex in combo.SpecificMarkers)
         {
-            SpatialMarker marker = _locationDatabase.getSpecificMarkerWithId(markerIndex);
+			Debug.Log ("marker: " + markerIndex);
+            SpatialMarker marker = _locationDatabase.getSpecificMarkerWithId(markerIndex); // TODO replace by get marker by ID
             markersToTake.Add(new HatchLocationMarker(marker.Name, marker.Loc, marker.Id));
+			Debug.Log ("ouokl");
         }
-        return new LocationCombination(markersToTake, genericLocationsToTake);
+		yield return null;
     }
 
     private IEnumerator checkFirstLogin()
@@ -432,6 +436,7 @@ public class SpatialClient2 : MonoBehaviour
             {
                 markers.Clear();
                 markers.AddRange(rm.Markers);
+						Debug.Log ("markercount: " + markers.Count.ToString());
                 ready = true;
                 Debug.Log(www.text);
                 response.setSuccess(true);
@@ -448,7 +453,7 @@ public class SpatialClient2 : MonoBehaviour
     {
         response.reset();
         basicMarkers.Clear();
-        string url = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={0},{1}&radius={2}&type={3}&key={4}", latitude, longitude, radius, GenericLocation.googlePlacesTypeToString(type), GOOGLE_API_KEY);
+		string url = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={0},{1}&radius={2}&type={3}&rankby=distance&key={4}", latitude, longitude, radius, GenericLocation.googlePlacesTypeToString(type), GOOGLE_API_KEY);
         WWW www = new WWW(url);
         yield return www;
 
@@ -654,7 +659,9 @@ public class SpatialClient2 : MonoBehaviour
 
             // TODO download the location and kaiju database
             CoroutineResponse markersResponse = new CoroutineResponse();
-            StartCoroutine(GetMarkersByMetadataType(_locationDatabase.SpecificMarkers, MarkerMetadata.MarkerType.CHECK_IN_LOCATION, markersResponse));
+            //StartCoroutine(GetMarkersByMetadataType(_locationDatabase.SpecificMarkers, MarkerMetadata.MarkerType.CHECK_IN_LOCATION, markersResponse)); TODO uncomment this once this works, or delete it when you can get marker by ID
+			StartCoroutine(getCheckInMarkers(markersResponse));
+
             yield return checkFirstLogin();
             yield return checkIfStreakIsOutdated();
             streakInitialized = true;
@@ -678,6 +685,19 @@ public class SpatialClient2 : MonoBehaviour
         }
         // do not call displayError, since that error screen would direct to the main menu instead of the login screen
     }
+
+	public IEnumerator getCheckInMarkers(CoroutineResponse response)
+	{
+		List<SpatialMarker> allMarkers = new List<SpatialMarker> ();
+		yield return GetMarkersByProject(allMarkers, new CoroutineResponse());
+		foreach (SpatialMarker marker in allMarkers) {
+					Debug.Log ("markertype: " + marker.Metadata.Type.ToString());
+			if (marker.Metadata.Type == MarkerMetadata.MarkerType.CHECK_IN_LOCATION)
+				_locationDatabase.SpecificMarkers [marker.Id] = marker;
+		}
+		Debug.Log ("locdatacount" + _locationDatabase.SpecificMarkers.Count.ToString ());
+		response.setSuccess (true);
+	}
 
     public static IEnumerator waitUntilCoroutinesReturn(IEnumerable<CoroutineResponse> responses)
     {
@@ -1637,7 +1657,7 @@ public class MarkerMetadata
 [System.Serializable]
 public abstract class ImmutableList<T> : IEnumerable<T>
 {
-    protected abstract List<T> getList();
+    protected abstract IEnumerable<T> getList();
     protected abstract void createEmptyList();
     protected abstract void createList(IEnumerable<T> items);
 
@@ -1653,26 +1673,16 @@ public abstract class ImmutableList<T> : IEnumerable<T>
         createList(items);
     }
 
-    public IEnumerator<T> GetEnumerator()
-    {
-		Debug.Log ("enumerator count: " + getList ().Count.ToString());
-        return getList().GetEnumerator();
-    }
+	abstract public IEnumerator<T> GetEnumerator ();
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return getList().GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator ()
+	{
+        return GetEnumerator();
     }
 
     public int Count
     {
-        get { return getList().Count; }
-    }
-
-    public T this[int index]
-    {
-        get { return getList()[index]; }
-        // there should be no set!
+		get { return getList().Count(); }
     }
 }
 
@@ -1716,7 +1726,7 @@ public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
 {
     [SerializeField]
     private List<string> list;
-    protected override List<string> getList()
+	protected override IEnumerable<string> getList()
     {
         return list;
     }
@@ -1730,6 +1740,11 @@ public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
     {
         list = new List<string>(items);
     }
+
+	override public IEnumerator<string> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
 
     private HashSet<string> ids;
 
@@ -1772,7 +1787,7 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 {
     [SerializeField]
     private List<OwnedEgg> list;
-    protected override List<OwnedEgg> getList()
+	protected override IEnumerable<OwnedEgg> getList()
     {
         return list;
     }
@@ -1786,6 +1801,11 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
     {
         list = new List<OwnedEgg>(items);
     }
+
+	override public IEnumerator<OwnedEgg> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
 
     protected Dictionary<string, OwnedEgg> eggs;
 
@@ -1835,7 +1855,7 @@ public class KaijuList : ImmutableList<Kaiju>
 {
     [SerializeField]
     private List<Kaiju> list;
-    protected override List<Kaiju> getList()
+	protected override IEnumerable<Kaiju> getList()
     {
         return list;
     }
@@ -1849,6 +1869,11 @@ public class KaijuList : ImmutableList<Kaiju>
     {
         list = new List<Kaiju>(items);
     }
+
+	override public IEnumerator<Kaiju> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
 
     public KaijuList(Kaiju firstKaiju) : base()
     {
@@ -1874,7 +1899,7 @@ public class StreakPath : ImmutableList<string>
 {
     [SerializeField]
     private List<string> list;
-    protected override List<string> getList()
+	protected override IEnumerable<string> getList()
     {
         return list;
     }
@@ -1889,6 +1914,11 @@ public class StreakPath : ImmutableList<string>
         list = new List<string>(items);
     }
 
+	override public IEnumerator<string> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
     public void resetPath()
     {
         list.Clear();
@@ -1898,6 +1928,11 @@ public class StreakPath : ImmutableList<string>
     {
         list.Add(markerId);
     }
+
+	public string this[int index]
+	{
+		get { return list[index]; }
+	}
 }
 
 [System.Serializable]
@@ -1909,7 +1944,6 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
 
     public T randomKaiju(List<SpatialMarker> markers)
     {
-        getList().Clear();
         Dictionary<SpatialMarker, float> distances = new Dictionary<SpatialMarker, float>();
         foreach (SpatialMarker marker in markers)
         {
@@ -1927,27 +1961,39 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         int j;
         foreach (SpatialMarker marker in distances.Keys)
         {
-			Debug.Log (getList ().Count);
-			Debug.Log(JsonUtility.ToJson(marker.Metadata));
                 addItemsInMarker(marker);
-			Debug.Log (getList ().Count);
-                for (j = i; j < getList().Count; j++)
+			for (j = i; j < getList().Count(); j++)
                 {
-                    getList()[i].Index = index;
-                    index += getList()[i].Frequency * distances[marker];
+				Debug.Log ("index 0: " + getElementAtIndex (0).Index.ToString());
+				Debug.Log ("index 1: " + getElementAtIndex (1).Index.ToString());
+				Debug.Log ("index 2: " + getElementAtIndex (2).Index.ToString());
+					getElementAtIndex(j).Index = index;
+					index += getElementAtIndex(j).Frequency * distances[marker];
                 }
                 i = j;
         }
+		Debug.Log ("Nindex 0: " + getElementAtIndex (0).Index.ToString());
+		Debug.Log ("Nindex 1: " + getElementAtIndex (1).Index.ToString());
+		Debug.Log ("Nindex 2: " + getElementAtIndex (2).Index.ToString());
         index = UnityEngine.Random.Range(0.0f, index);
-        for (i = 1; i < getList().Count; i++)
+		Debug.Log ("Rindex 0: " + getElementAtIndex (0).Index.ToString());
+		Debug.Log ("Rindex 1: " + getElementAtIndex (1).Index.ToString());
+		Debug.Log ("Rindex 2: " + getElementAtIndex (2).Index.ToString());
+		Debug.Log ("new index = " + index.ToString());
+		for (i = 1; i < getList().Count(); i++)
         {
-            if (index < getList()[i].Index) return getList()[i - 1].getItem();
+			Debug.Log ("Eindex 0: " + getElementAtIndex (0).Index.ToString());
+			Debug.Log ("Eindex 1: " + getElementAtIndex (1).Index.ToString());
+			Debug.Log ("Eindex 2: " + getElementAtIndex (2).Index.ToString());
+			Debug.Log ("item index: " + getElementAtIndex (i).Index.ToString ());
+			if (index < getElementAtIndex(i).Index) return getElementAtIndex(i-1).getItem();
         }
         // return last element in the kaiju list
-        return getList()[i - 1].getItem();
+		return getElementAtIndex(i-1).getItem();
     }
 
     protected abstract void addItemsInMarker(SpatialMarker marker);
+	protected abstract ItemWithFrequency<T> getElementAtIndex (int index);
 }
 
 [System.Serializable]
@@ -1955,11 +2001,9 @@ public class KaijuFrequencyList : FrequencyList<Kaiju>
 {
     [SerializeField]
     private List<KaijuWithFrequency> list;
-    protected override List<ItemWithFrequency<Kaiju>> getList()
+	protected override IEnumerable<ItemWithFrequency<Kaiju>> getList()
     {
-		Debug.Log (list.Count);
-		Debug.Log (list.Cast<ItemWithFrequency<Kaiju>> ().ToList ().Count);
-        return list.Cast<ItemWithFrequency<Kaiju>>().ToList();
+        return list.Cast<ItemWithFrequency<Kaiju>>();
     }
 
     protected override void createEmptyList()
@@ -1971,6 +2015,11 @@ public class KaijuFrequencyList : FrequencyList<Kaiju>
     {
         list = items.Cast<KaijuWithFrequency>().ToList();
     }
+
+	override public IEnumerator<ItemWithFrequency<Kaiju>> GetEnumerator()
+	{
+		return list.Cast<ItemWithFrequency<Kaiju>>().GetEnumerator();
+	}
 
 	/*override public IEnumerator<KaijuWithFrequency> GetEnumerator()
 	{
@@ -1987,10 +2036,13 @@ public class KaijuFrequencyList : FrequencyList<Kaiju>
 
     override protected void addItemsInMarker(SpatialMarker marker)
     {
-		Debug.Log (list.Count);
 		list.AddRange(marker.Metadata.Kaiju.list);
-		Debug.Log (list.Count);
     }
+
+	override protected ItemWithFrequency<Kaiju> getElementAtIndex(int index)
+	{
+		return list[index];
+	}
 }
 
 [System.Serializable]
@@ -1998,9 +2050,9 @@ public class LocationFrequencyList : FrequencyList<LocationCombinationData>
 {
     [SerializeField]
     private List<LocationWithFrequency> list;
-    protected override List<ItemWithFrequency<LocationCombinationData>> getList()
+	protected override IEnumerable<ItemWithFrequency<LocationCombinationData>> getList()
     {
-        return list.Cast<ItemWithFrequency<LocationCombinationData>>().ToList();
+        return list.Cast<ItemWithFrequency<LocationCombinationData>>();
     }
 
     protected override void createEmptyList()
@@ -2012,6 +2064,11 @@ public class LocationFrequencyList : FrequencyList<LocationCombinationData>
     {
         list = items.Cast<LocationWithFrequency>().ToList();
     }
+
+	override public IEnumerator<ItemWithFrequency<LocationCombinationData>> GetEnumerator()
+	{
+		return list.Cast<ItemWithFrequency<LocationCombinationData>>().GetEnumerator();
+	}
 
 	/*override public IEnumerator<LocationWithFrequency> GetEnumerator()
 	{
@@ -2030,6 +2087,11 @@ public class LocationFrequencyList : FrequencyList<LocationCombinationData>
     {
 		list.AddRange(marker.Metadata.Locations.list);
     }
+
+	override protected ItemWithFrequency<LocationCombinationData> getElementAtIndex(int index)
+	{
+		return list[index];
+	}
 }
 
 //[System.Serializable]

@@ -326,7 +326,7 @@ public class MainMenuScript : MonoBehaviour
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
     {
-        if (success && !mapLoaded)
+		if (success && !mapLoaded && !MessageController.single.Error)
         {
 			/*
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
@@ -519,16 +519,26 @@ public class MainMenuScript : MonoBehaviour
 
     public void addButtons()
     {
+		int pos = 111;
+		Debug.Log(pos);
         foreach (OwnedEgg e in SpatialClient2.single.EggsOwned)
         {
+			pos++;
+			Debug.Log(pos);
             GameObject eggMenuItem = GameObject.Instantiate(_eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(_eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
         }
+		pos = 211;
+		Debug.Log(pos);
         foreach (Kaiju k in SpatialClient2.single.Kaiju)
         {
+			pos++;
+			Debug.Log(pos);
             _kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
         }
+		pos = 311;
+		Debug.Log(pos);
         foreach (FriendData fd in SpatialClient2.single.Friends)
         {
             GameObject friendMenuItem = GameObject.Instantiate(_friendMenuItemPrefab);
@@ -548,11 +558,17 @@ public class MainMenuScript : MonoBehaviour
 
     public void initializeCheckinDataStructures()
     {
+		int pos = 111;
+		Debug.Log (pos);
         foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
         {
+			pos++;
+			Debug.Log (pos);
             if (!item.Egg.Hatchable)
                 item.Egg.initializeCheckInnables();
         }
+		pos = 211;
+		Debug.Log (pos);
         _markersByDistance = new List<SpatialMarker>();
         _idMarkers = new Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>>();
         idMarkers = _idMarkers;
@@ -563,6 +579,8 @@ public class MainMenuScript : MonoBehaviour
         _googleMarkers = new Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>>();
         foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
         {
+			pos++;
+			Debug.Log (pos);
             if (!item.Egg.Hatchable)
             {
                 foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
@@ -589,6 +607,8 @@ public class MainMenuScript : MonoBehaviour
                 }
             }
         }
+		pos = 311;
+		Debug.Log (pos);
         foreach (GenericLocation.GooglePlacesType type in _placeTypes.Keys)
         {
             _googleResponses[type] = new CoroutineResponse();

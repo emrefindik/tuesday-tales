@@ -151,7 +151,11 @@ public class OwnedEgg
             CoroutineResponse markerResponse = new CoroutineResponse();
             yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, UserMetadata.KAIJU_MARKER_RADIUS, true, markersAround, markerResponse);
             // assign the hexadecimal representation of the egg creation number as custom part of id
-            OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForSelf(), SpatialClient2.single.getLocationsForEgg((new LocationFrequencyList()).randomKaiju(markersAround)));
+			Debug.Log("hell yeah");
+			List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
+			List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
+			yield return SpatialClient2.single.getLocationsForEgg ((new LocationFrequencyList ()).randomKaiju (markersAround), markersToTake, genericLocationsToTake);
+			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForSelf(), new LocationCombination(markersToTake, genericLocationsToTake));
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
             yield return egg.initializeKaiju();
             yield return SpatialClient2.single.addEggToSelf(egg);
@@ -173,7 +177,10 @@ public class OwnedEgg
             List<SpatialMarker> markersAround = new List<SpatialMarker>();
             CoroutineResponse markerResponse = new CoroutineResponse();
             yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, UserMetadata.KAIJU_MARKER_RADIUS, true, markersAround, markerResponse);
-            OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForFriend(friend), SpatialClient2.single.getLocationsForEgg((new LocationFrequencyList()).randomKaiju(markersAround)));
+			List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
+			List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
+			yield return SpatialClient2.single.getLocationsForEgg ((new LocationFrequencyList ()).randomKaiju (markersAround), markersToTake, genericLocationsToTake);
+			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForFriend(friend), new LocationCombination(markersToTake, genericLocationsToTake));
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
             yield return egg.initializeKaiju();
             yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);

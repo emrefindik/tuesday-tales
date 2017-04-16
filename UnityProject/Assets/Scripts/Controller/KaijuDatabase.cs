@@ -106,8 +106,8 @@ public class KaijuDatabase : MonoBehaviour {
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("hand error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _handDownloadingIndex = NO_DOWNLOAD;
@@ -132,8 +132,8 @@ public class KaijuDatabase : MonoBehaviour {
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("head error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _headDownloadingIndex = NO_DOWNLOAD;
@@ -158,8 +158,8 @@ public class KaijuDatabase : MonoBehaviour {
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("body error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _bodyDownloadingIndex = NO_DOWNLOAD;
@@ -184,8 +184,8 @@ public class KaijuDatabase : MonoBehaviour {
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load egg image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("egg error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load egg image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _eggDownloadingIndex = NO_DOWNLOAD;

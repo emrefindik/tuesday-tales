@@ -21,6 +21,10 @@ public class MessageController : MonoBehaviour
     [SerializeField]
     private Text _errorMessage;
 
+	public bool Error {
+		get { return _errorCanvas.enabled; }
+	}
+
     void Start()
     {
         single = this;
@@ -58,6 +62,7 @@ public class MessageController : MonoBehaviour
 
     public void displayError(Canvas sender, string errorText)
     {
+		StopAllCoroutines ();
         _canvasesWaiting = 0;
         _errorMessage.text = errorText;
         if (_pleaseWaitCanvas.enabled)
