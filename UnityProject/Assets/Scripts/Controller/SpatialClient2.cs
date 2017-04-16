@@ -72,10 +72,10 @@ public class SpatialClient2 : MonoBehaviour
 
         /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
         StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
-        //StartCoroutine(DeleteMarkerById("58f145642b93da00112f9e04"));
+        //StartCoroutine(DeleteMarkerById("58f2df8699807700111ae95d"));
 
         /*List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
-        lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 0, 3, 3, "Gelb"), 5));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 1, 3, 3, "Gelb"), 5));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
 
@@ -94,13 +94,13 @@ public class SpatialClient2 : MonoBehaviour
         List<string> str6 = new List<string>();
         str6.Add("58f00e3f2aac62001128c2c6"); // the fence - on campus
         List<string> str7 = new List<string>();
-        str7.Add("58f00e3f2aac62001128c2c7"); // centerfield gesling stadium - on campus
+        str7.Add("58f00e402aac62001128c2c7"); // centerfield gesling stadium - on campus
         List<string> str8 = new List<string>();
         str8.Add("58f12cd1a30d230011f0f123"); // ETC
         List<string> str9 = new List<string>();
-        str9.Add("58f00e3f2aac62001128c2c9"); // Dippy the Dinosaur - right off campus
+        str9.Add("58f00e402aac62001128c2c9"); // Dippy the Dinosaur - right off campus
         List<string> str0 = new List<string>();
-        str0.Add("58f00e3f2aac62001128c2ca"); // Schell Games Studio
+        str0.Add("58f00e402aac62001128c2ca"); // Schell Games Studio
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str1), 3));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 4));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 3));
@@ -112,7 +112,8 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
 
-        StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2)))); */
+        StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2))));
+        */
     }
 
     private void Update()
