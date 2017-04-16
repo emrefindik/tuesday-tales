@@ -353,7 +353,9 @@ public class MainMenuScript : MonoBehaviour
 
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
-			_loginCanvas.enabled = false;
+			foreach (Canvas c in GetComponents<Canvas>()) {
+				c.enabled = false;
+			}
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
 

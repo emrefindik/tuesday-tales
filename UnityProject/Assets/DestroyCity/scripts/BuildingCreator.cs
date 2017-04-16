@@ -12,8 +12,13 @@ public class BuildingCreator : MonoBehaviour {
 
 	void initDict()
 	{
+		
 		buildingDict = new Dictionary<string, int> ();
-		buildingDict ["58f18c776ad13600117881d1"] = 1;
+		buildingDict ["58f3eb594e973b0011f5f6b6"] = 0;
+		buildingDict ["58f3eb594e973b0011f5f6b0"] = 1;
+		buildingDict ["58f3eb594e973b0011f5f6b4"] = 2;
+		buildingDict ["58f3eb594e973b0011f5f6b7"] = 3;
+
 	}
 
 	public void setUpBuildingTest(int _idx)
@@ -26,7 +31,12 @@ public class BuildingCreator : MonoBehaviour {
 	public void setUpBuilding(string markerId)
 	{
 		initDict ();
-		index = buildingDict [markerId];
+		if(buildingDict.ContainsKey(markerId)){
+			index = buildingDict [markerId];
+		}
+		else{
+			index = (int)Random.Range (0, 3);
+		}
 		loadScene();
 	}
 
