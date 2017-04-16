@@ -33,26 +33,39 @@ public class KaijuScreenController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (GetComponent<Canvas> ().enabled) {
+			if (Input.touches.Length > 0) {
+				Touch touch = Input.GetTouch (0);
+				if (touch.phase == TouchPhase.Began)
+					touchStarted (touch.position.x);
+				else if (touch.phase == TouchPhase.Ended)
+					touchEnded (touch.position.x);
+			} else if (Input.GetMouseButtonDown (0))
+				touchStarted (Input.mousePosition.x);
+			else if (Input.GetMouseButtonUp (0))
+				touchEnded (Input.mousePosition.x);
+		}
 	}
 
-    private void OnMouseDown()
+	private void touchStarted(float swipeStartPosition)
     {
         // record start position and time of swipe
-        _swipeStartPosition = Input.mousePosition.x;
-        _swipeStartTime = Time.time;
+		Debug.Log("mouse down");
+		_swipeStartPosition = swipeStartPosition;
+		_swipeStartTime = Time.time;
     }
 
-    private void OnMouseUp()
+	private void touchEnded(float swipeEndPosition)
     {
+		Debug.Log("mouse up " + (Time.time - _swipeStartTime).ToString() + ", " + (swipeEndPosition - _swipeStartPosition).ToString());
         if (Time.time - _swipeStartTime <= MAX_SWIPE_TIME)
         {
             float minimumSwipeLength = Screen.width * SWIPE_LENGTH_RATIO;
-            if (Input.mousePosition.x - _swipeStartPosition >= minimumSwipeLength)
+			if (swipeEndPosition - _swipeStartPosition >= minimumSwipeLength)
             {
                 _menuData.previousKaiju();
             }
-            else if (Input.mousePosition.x - _swipeStartPosition <= -minimumSwipeLength)
+			else if (swipeEndPosition - _swipeStartPosition <= -minimumSwipeLength)
             {
                 _menuData.nextKaiju();
             }
@@ -104,8 +117,8 @@ public class KaijuMenuData
         _kaijuMenuItems = new List<KaijuMenuItem>();
 
         GameObject firstPadding = GameObject.Instantiate(paddingPanel);
-        _firstPaddingKaijuMenuItem = firstPadding.GetComponent<KaijuMenuItem>();
-        firstPadding.GetComponent<RectTransform>().sizeDelta = new Vector2((viewport.sizeDelta.x - kaijuMenuItemWidth * 0.5f), _kaijuMenuItemPrefab.GetComponent<RectTransform>().sizeDelta.y);
+		_firstPaddingKaijuMenuItem = firstPadding.transform.GetChild(0).GetComponent<KaijuMenuItem>();
+		firstPadding.GetComponent<RectTransform>().sizeDelta = new Vector2(((viewport.sizeDelta.x - kaijuMenuItemWidth) * 0.5f), _kaijuMenuItemPrefab.GetComponent<RectTransform>().sizeDelta.y);
         Vector2 endCorner = new Vector2(1.0f, 1.0f);
         firstPadding.transform.GetChild(0).GetComponent<RectTransform>().pivot = endCorner;
         firstPadding.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = endCorner;
@@ -145,7 +158,12 @@ public class KaijuMenuData
         _state.KaijuIndex = _kaijuMenuItems.Count - 1;
         if (_kaijuMenuItems.Count >= 2)
         {
-            if (_kaijuMenuItems.Count == 2) _lastPadding.GetComponent<KaijuMenuItem>().Kaiju = _kaijuMenuItems[0].Kaiju;
+			if (_kaijuMenuItems.Count == 2) {
+				Debug.Log (_lastPadding);
+				Debug.Log (_lastPadding.transform.GetChild(0).GetComponent<KaijuMenuItem> ());
+				Debug.Log (_kaijuMenuItems [0].Kaiju);
+				_lastPadding.transform.GetChild(0).GetComponent<KaijuMenuItem> ().Kaiju = _kaijuMenuItems [0].Kaiju;
+			}
             _firstPaddingKaijuMenuItem.Kaiju = _kaijuMenuItems[1].Kaiju;
         }
         _lastPadding.transform.SetParent(_kaijuMenuContentPanel, false);

@@ -162,6 +162,7 @@ public class OwnedEgg
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = egg; // also updates the egg menu item's view
+			MainMenuScript.addNewEggToCheckinnables(egg);
 			Debug.Log("egg created");
         }
         else
@@ -184,6 +185,7 @@ public class OwnedEgg
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
             yield return egg.initializeKaiju();
             yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
+			MainMenuScript.addNewEggToCheckinnables(egg);
         }
         else
         {

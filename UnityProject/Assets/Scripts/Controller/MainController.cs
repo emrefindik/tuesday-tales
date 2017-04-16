@@ -145,7 +145,13 @@ public class MainController : MonoBehaviour
         //menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
 		if (phoneCameraScene) {
-			phoneCameraScene.SetActive (false);
+			Destroy (phoneCameraScene);
+		}
+
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
 		}
 
 		gameState = GameState.DestroyCity;
@@ -161,6 +167,14 @@ public class MainController : MonoBehaviour
 		phoneCameraScene = Instantiate (phoneCameraPrefab);
 		phoneCameraScene.GetComponent<PhoneImageController>().startCameraWithMode(mode);
 
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
+		}
+		if (destroyCityScene) {
+			Destroy (destroyCityScene);
+		}
 		
 		gameState = GameState.PhoneCamera;
 	}

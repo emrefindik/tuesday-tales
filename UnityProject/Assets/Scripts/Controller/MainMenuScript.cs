@@ -38,7 +38,7 @@ public class MainMenuScript : MonoBehaviour
         get { return eggsCanvas; }
         private set { eggsCanvas = value; }
     }
-
+		
     // Temporary. May get rid of it if we decided to get rid of sending eggs completely
     private static Canvas friendsCanvas;
     public static Canvas FriendsCanvas
@@ -46,14 +46,6 @@ public class MainMenuScript : MonoBehaviour
         get { return friendsCanvas; }
         private set { friendsCanvas = value; }
     }
-
-    // Displays all the eggs from all the friends
-    //    private static Canvas friendsEggsCanvas;
-    //    public static Canvas FriendsEggsCanvas
-    //    {
-    //        get { return friendsEggsCanvas; }
-    //        private set { friendsEggsCanvas = value; }
-    //    }
     //
     //    private static Canvas checkedInCanvas;
     //    public static Canvas CheckedInCanvas
@@ -111,10 +103,6 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Canvas _eggsCanvas;
 
-    // Displays all the eggs from all the friends
-    //[SerializeField]
-    //private Canvas _friendsEggsCanvas;
-
     // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
@@ -155,6 +143,12 @@ public class MainMenuScript : MonoBehaviour
     private InputField _userNameField;
     [SerializeField]
     private InputField _passwordField;
+	[SerializeField]
+	private ScrollRect _ownEggsScrollView;
+	[SerializeField]
+	private ScrollRect _friendsEggsScrollView;
+	[SerializeField]
+	private Text _eggsCanvasTitle;
 
     private Coroutine _locationUpdateCoroutine;
 
@@ -180,8 +174,7 @@ public class MainMenuScript : MonoBehaviour
 		registerCanvas = _registerCanvas;
         kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
-        friendsCanvas = _friendsCanvas;
-        //friendsEggsCanvas = _friendsEggsCanvas;      
+        friendsCanvas = _friendsCanvas;  
 
         _loginCanvas.enabled = true;
 		_registerCanvas.enabled = false;
@@ -200,6 +193,8 @@ public class MainMenuScript : MonoBehaviour
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
         _webView.OnReceivedMessage += onReceivedMessage;
+
+		friendEggToegg ();
     }
 
     public void Update()
@@ -342,10 +337,10 @@ public class MainMenuScript : MonoBehaviour
                 */
 
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
-				//Input.location.lastData.latitude.ToString() + ',' +
-				//Input.location.lastData.longitude.ToString() + ",\"" +
-				"40.432791" + ',' +
-				"-79.964793" + ",\"" +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ",\"" +
+				//"40.432791" + ',' +
+				//"-79.964793" + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
 				SpatialClient2.PROJECT_ID + "\"," +
 				SpatialClient2.single.getScore().ToString() + ',' +
@@ -358,6 +353,7 @@ public class MainMenuScript : MonoBehaviour
 
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
+			_loginCanvas.enabled = false;
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
 
@@ -551,6 +547,7 @@ public class MainMenuScript : MonoBehaviour
                     GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
                     friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
                     friendEggMenuItem.GetComponent<FriendEggMenuItem>().Egg = e; // also updates the egg menu item's view
+					friendEggMenuItem.GetComponent<FriendEggMenuItem>().Friend = fd;
                 }
             }
         }
@@ -646,6 +643,9 @@ public class MainMenuScript : MonoBehaviour
                         egg.CheckInnableLocs[_googleMarkers[type][0]] = _placeTypes[type][egg];
                 }
             }
+			Debug.Log ("markers by distance count: " + _markersByDistance.Count.ToString());
+			foreach (string id in _idMarkers.Keys)
+				Debug.Log (id);
             foreach (SpatialMarker marker in _markersByDistance)
             {
                 if (_idMarkers.ContainsKey(marker.Id))
@@ -694,6 +694,32 @@ public class MainMenuScript : MonoBehaviour
             googleMarkers.Remove(type);
         }
     }
+
+	public static void addNewEggToCheckinnables(OwnedEgg egg)
+	{
+		foreach (GenericLocation loc in egg.GenericLocationsToTake)
+		{
+			if (loc.needToBeVisited())
+			{
+				if (!placeTypes.ContainsKey(loc.LocationType))
+					placeTypes[loc.LocationType] = new Dictionary<OwnedEgg, HashSet<GenericLocation>>();
+				if (!placeTypes[loc.LocationType].ContainsKey(egg))
+				{
+					placeTypes[loc.LocationType][egg] = new HashSet<GenericLocation>();
+				}
+				placeTypes[loc.LocationType][egg].Add(loc);
+			}
+		}
+		foreach (HatchLocationMarker hlm in egg.MarkersToTake)
+		{
+			if (hlm.needToBeVisited())
+			{
+				if (!idMarkers.ContainsKey(hlm.Id))
+					idMarkers[hlm.Id] = new Dictionary<OwnedEgg, HatchLocationMarker>();
+				idMarkers[hlm.Id][egg] = hlm;
+			}
+		}
+	}
 
 	public void onRegister()
 	{
@@ -756,4 +782,23 @@ public class MainMenuScript : MonoBehaviour
 		mapLoaded = false;
 		_webView.Hide();
 	}
+
+	public void eggToFriendsEgg()
+	{
+		/*_eggsCanvas.enabled = false;
+		_friendsEggsCanvas.enabled = true; */
+		_ownEggsScrollView.gameObject.SetActive (false);
+		_eggsCanvasTitle.text = "Your Friends' Eggs";
+		_friendsEggsScrollView.gameObject.SetActive (true);
+	}
+
+	public void friendEggToegg()
+	{
+		/*_eggsCanvas.enabled = true;
+		_friendsEggsCanvas.enabled = false;*/
+		_friendsEggsScrollView.gameObject.SetActive (false);
+		_eggsCanvasTitle.text = "Your Eggs";
+		_ownEggsScrollView.gameObject.SetActive (true);
+	}
+
 }
