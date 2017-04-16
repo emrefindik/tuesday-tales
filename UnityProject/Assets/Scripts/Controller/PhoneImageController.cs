@@ -92,7 +92,7 @@ public class PhoneImageController : MonoBehaviour {
 		default:
 			break;	
 		}
-
+			
 		uiCanvas.SetActive (false);
 		camDisplayCanvas.SetActive (false);
 		shareCanvas.SetActive (false);
@@ -261,7 +261,7 @@ public class PhoneImageController : MonoBehaviour {
 		Debug.Log ("Screenshot Width" + screenShotCopy.width);
 		photoRect.GetComponent<RectTransform> ().
 		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
-
+		Canvas.ForceUpdateCanvases ();
 	}
 	#endif
 

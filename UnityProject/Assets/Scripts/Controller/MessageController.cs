@@ -51,12 +51,11 @@ public class MessageController : MonoBehaviour
 
     public void displayWaitScreen(Canvas sender)
     {
-        if (!_pleaseWaitCanvas.enabled)
-        {
-            _previousCanvas = sender;
-            hidePreviousScreen();
-            _pleaseWaitCanvas.enabled = true;
-        }
+		if (!_pleaseWaitCanvas.enabled || _previousCanvas == null) {
+			_previousCanvas = sender;
+			hidePreviousScreen ();
+			_pleaseWaitCanvas.enabled = true;
+		}
         _canvasesWaiting++;
     }
 
@@ -77,13 +76,16 @@ public class MessageController : MonoBehaviour
         _errorCanvas.enabled = true;
     }
 
-    public void closeWaitScreen(bool showPrevious)
+    public void closeWaitScreen(bool showMapView)
     {
         if (_canvasesWaiting > 0) _canvasesWaiting--;
         if (_pleaseWaitCanvas.enabled && _canvasesWaiting == 0)
         {
             _pleaseWaitCanvas.enabled = false;
-            if (showPrevious) showPreviousScreen();
+            if (showMapView)
+				MainMenuScript.showWebView();
+			else
+				showPreviousScreen();
         }
     }
 

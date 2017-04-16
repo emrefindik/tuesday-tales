@@ -1,8 +1,23 @@
 ﻿using System;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class FriendEggMenuItem : GenericEggMenuItem
 {
+	[SerializeField]
+	private Text _friendNameText;
+
+	private FriendData _friend;
+	public FriendData Friend
+	{
+		get { return _friend; }
+		set {
+			_friend = value;
+			_friendNameText.text = "Owner: " + _friend.Friend.getName();
+		}
+	}
+
     override protected IEnumerator updateServer()
     {
         yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(_egg);
@@ -12,6 +27,11 @@ public class FriendEggMenuItem : GenericEggMenuItem
     {
         if (_egg.Hatchable) Destroy(gameObject);
     }
+
+	override protected void initializeOtherText()
+	{
+
+	}
 
     /*protected IEnumerator checkInButtonHandler(Canvas openCanvas)
     {

@@ -164,7 +164,7 @@ public class SpatialClient2 : MonoBehaviour
 			});
 		}
         userSession.User.Metadata.resetStreak();
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
         Debug.Log("reset streak");
     }
 
@@ -172,13 +172,13 @@ public class SpatialClient2 : MonoBehaviour
     public IEnumerator updateLastRampage(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement, markerId);
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
 
     public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier, markerId);
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
     // END OF EMRE'S CODE
 
@@ -201,28 +201,33 @@ public class SpatialClient2 : MonoBehaviour
     public IEnumerator addEggToSelf(OwnedEgg egg)
     {
         userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
-        yield return UpdateMetadata(null, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+		yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
 
     public IEnumerator addOrUpdateEggInFriendsEggs(OwnedEgg egg)
     {
         userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg);
-        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
     }
+
+	public IEnumerator updateMetadataAfterOwnEggCheckedIn(string eggName)
+	{
+		yield return SpatialClient2.single.UpdateMetadata(MainMenuScript.EggsCanvas, "Could not check in egg " + eggName + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION, true);
+	}
 
     public IEnumerator hatchEgg(OwnedEgg egg)
     {
 		Analytics.CustomEvent("EggHatched", new Dictionary<string, object> {
 			{"PlayerId", userId},
 			{"Time", DateTime.UtcNow.ToString()},
-			{"Location", new List<float>{Input.location.lastData.longitude, Input.location.lastData.latitude}},
-			{"HatchedEgg", egg}
+			{"Location", Input.location.lastData.latitude.ToString() + ", " + Input.location.lastData.longitude.ToString()},
+			{"HatchedEgg", egg.Id}
 		});
         userSession.User.Metadata.EggsOwned.remove(egg);
         userSession.User.Metadata.Kaiju.hatchEgg(egg);
         CoroutineResponse spritesResponse = new CoroutineResponse();
         StartCoroutine(egg.KaijuEmbryo.initializeSprites(spritesResponse));
-        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION, true);
         while (spritesResponse.Success == null) yield return null;
     }
 
@@ -264,7 +269,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             Debug.Log("first login");
             yield return userSession.User.Metadata.initialize();
-            yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
+            yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION, true);
         }
     }
 
@@ -884,8 +889,8 @@ public class SpatialClient2 : MonoBehaviour
                     }
                 }
             }
-            if (ownEggsUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION);
-            else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+            if (ownEggsUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION, true);
+            else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
             ready = true;
             Debug.Log(www.text);
             MessageController.single.closeWaitScreen(true);
@@ -913,6 +918,14 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
+	public void sendRequestToFriend(FriendData friend)
+	{
+		if (OwnEggMenuItem.eggToSend.addRequest(friend.Friend.Id))
+			StartCoroutine(SpatialClient2.single.UpdateMetadata(MainMenuScript.FriendsCanvas, "Could not send request to " + friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION, true));
+		else
+			MessageController.single.displayError(MainMenuScript.FriendsCanvas, "You already sent a request to " + friend.Friend.getName() + '!');
+	}
+
     /* public IEnumerator UpdateMetadataWithEggs(string errorText)
     {
         // update the actual eggsOwned list on the metadata
@@ -920,9 +933,9 @@ public class SpatialClient2 : MonoBehaviour
         yield return UpdateMetadata(errorText);
     } */
 
-	public IEnumerator UpdateMetadata(Canvas sender, string errorText)
+	private IEnumerator UpdateMetadata(Canvas sender, string errorText, bool displayWaitScreen)
 	{
-        MessageController.single.displayWaitScreen(sender);
+		if (displayWaitScreen) MessageController.single.displayWaitScreen(sender);
         metadataUpdatedSuccessfully = false;
         ready = false;
         Debug.Log("updating user metadata");
@@ -948,7 +961,7 @@ public class SpatialClient2 : MonoBehaviour
             ready = true;
 			Debug.Log(www.text);
             Debug.Log("user metadata updated");
-            MessageController.single.closeWaitScreen(false);
+			if (displayWaitScreen) MessageController.single.closeWaitScreen(false);
 		}
 	}
 }
