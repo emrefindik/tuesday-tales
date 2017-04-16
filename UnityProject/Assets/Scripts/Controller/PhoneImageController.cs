@@ -49,16 +49,16 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.EggHatching);
+		//initCamera (CameraMode.EggHatching);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
-	void startCameraWithMode(CameraMode mode)
+	public void startCameraWithMode(CameraMode mode)
 	{
 		initCamera (mode);
 	}
 
-	public void initCamera(CameraMode mode)
+	void initCamera(CameraMode mode)
 	{
 		mainController = GameObject.Find ("MainController").GetComponent<MainController>();
 		startCamera ();
@@ -76,7 +76,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.BuildingDestruction:
 			BuildingSelfieModel.SetActive (true);
 			Kaiju kaiju = mainMenu.SelectedKaiju;
-			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.BodySprite, kaiju.HandSprite, kaiju.MonsterColor);
+			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.HandSprite, kaiju.BodySprite, kaiju.MonsterColor);
 			break;
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
@@ -87,12 +87,12 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
 			break;
 		default:
 			break;	
 		}
-
+			
 		uiCanvas.SetActive (false);
 		camDisplayCanvas.SetActive (false);
 		shareCanvas.SetActive (false);
@@ -101,6 +101,8 @@ public class PhoneImageController : MonoBehaviour {
 
 	void Update()
 	{
+		if (!pCamera)
+			return;
         if (pCamera.width < 100 && !CAMREADY) {
 			return;
 		} else {
@@ -216,6 +218,12 @@ public class PhoneImageController : MonoBehaviour {
 		//Get another copy to show on share screen
 		Texture2D screenshot = ScreenCapture.Capture();
 
+		Color32[] pix = screenshot.GetPixels32();
+		screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
+		screenShotCopy.SetPixels32(pix);
+		screenShotCopy.Apply();
+
+		Debug.Log ("Capture one frame");
         #if UNITY_IPHONE
 		if(Application.platform == RuntimePlatform.IPhonePlayer)
 		{
@@ -223,15 +231,9 @@ public class PhoneImageController : MonoBehaviour {
 		}
         #endif
 
-        //if (Application.platform == RuntimePlatform.Android)
+        if (Application.platform == RuntimePlatform.Android)
 			SaveImageToLibraryAndriod(screenshot);
-
-
-        Color32[] pix = screenshot.GetPixels32();
-        screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
-        screenShotCopy.SetPixels32(pix);
-        screenShotCopy.Apply();
-
+        
         //FOR TEST 
         //OnFinishedSaveImage("");
 
@@ -256,9 +258,10 @@ public class PhoneImageController : MonoBehaviour {
 		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
 		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
 		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
+		Debug.Log ("Screenshot Width" + screenShotCopy.width);
 		photoRect.GetComponent<RectTransform> ().
 		SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(photoRect.GetComponent<RectTransform> ().rect.width / ratio));
-
+		Canvas.ForceUpdateCanvases ();
 	}
 	#endif
 
@@ -347,6 +350,6 @@ public class PhoneImageController : MonoBehaviour {
 	public void goBack()
 	{
 		GameObject mainController = GameObject.Find ("MainController");
-		mainController.GetComponent<MainController> ().goBack ();
+		mainController.GetComponent<MainController> ().goToMapView ();
 	}
 }

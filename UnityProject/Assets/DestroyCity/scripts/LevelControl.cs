@@ -254,6 +254,7 @@ public class LevelControl : MonoBehaviour {
 				shakeNow  = false;
 				shakeText.SetActive (false);
 				eggIndex = KaijuDatabase.instance.generateEgg ();
+				Debug.Log ("egg index start: " + eggIndex.ToString ());
 				StartCoroutine (showReward ());
 			}
 		}
@@ -338,6 +339,7 @@ public class LevelControl : MonoBehaviour {
             yield return KaijuDatabase.instance.checkAndDownloadEggSprite(eggIndex, new CoroutineResponse());
 			Debug.Log ("Coroutine Finished");
             GameObject EggImage = findEggCanvas.transform.FindChild("EggImage").gameObject;
+			Debug.Log ("egg index start: " + eggIndex.ToString ());
             EggImage.GetComponent<Image>().sprite = KaijuDatabase.instance.EggSprites[eggIndex];
             //StartCoroutine (startShakeCountDown ());
             offset = Time.time - offset;

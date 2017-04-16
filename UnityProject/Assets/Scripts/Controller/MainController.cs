@@ -145,7 +145,13 @@ public class MainController : MonoBehaviour
         //menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
 		if (phoneCameraScene) {
-			phoneCameraScene.SetActive (false);
+			Destroy (phoneCameraScene);
+		}
+
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
 		}
 
 		gameState = GameState.DestroyCity;
@@ -156,20 +162,32 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to phone camera");
 
 		mainMenuCamera.enabled = false;
-		phoneCameraScene = Instantiate (phoneCameraPrefab);
-		phoneCameraScene.GetComponent<PhoneImageController>().initCamera(mode);
+		GetComponent<MainMenuScript> ().disableWebview ();
 
+		phoneCameraScene = Instantiate (phoneCameraPrefab);
+		phoneCameraScene.GetComponent<PhoneImageController>().startCameraWithMode(mode);
+
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
+		}
+		if (destroyCityScene) {
+			Destroy (destroyCityScene);
+		}
 		
 		gameState = GameState.PhoneCamera;
 	}
 
 	public void eggToPhotoCamera()
 	{
+		MainMenuScript.EggsCanvas.enabled = false;
 		goToPhoneCamera (PhoneImageController.CameraMode.EggHatching);
 	}
 
 	public void kaijuToPhoneCamera()
 	{
+		MainMenuScript.KaijuCanvas.enabled = false;
 		goToPhoneCamera (PhoneImageController.CameraMode.Kaiju);
 	}
 
