@@ -60,7 +60,6 @@ public class SpatialClient2 : MonoBehaviour
         single = this;
         userSession = null;
         //_kaijuDatabase = new KaijuDatabase();
-
         // for marker setup. delete this
         setUpMarkers();
     }

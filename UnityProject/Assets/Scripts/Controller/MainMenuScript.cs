@@ -229,6 +229,7 @@ public class MainMenuScript : MonoBehaviour
                 // logged in, switch to main menu
                 //_pleaseWaitCanvas.enabled = false;
                 //_mainMenuCanvas.enabled = true;
+                Debug.Log("loading webpage");
                 _webView.Load();
                 break;
             case false:
@@ -321,6 +322,7 @@ public class MainMenuScript : MonoBehaviour
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
     {
+        Debug.Log("load complete");
 		if (success && !mapLoaded && !MessageController.single.Error)
         {
 			/*
