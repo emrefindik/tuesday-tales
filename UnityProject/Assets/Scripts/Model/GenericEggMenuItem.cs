@@ -32,8 +32,9 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
             _egg = value;
             _eggImage.sprite = _egg.Sprite;
             _eggNameText.text = _egg.Name;
-			resetCheckInLocationText ();
-			initializeOtherText ();
+			resetCheckInLocationText();
+			initializeOtherText();
+            disableCheckInButton();
         }
     }
 

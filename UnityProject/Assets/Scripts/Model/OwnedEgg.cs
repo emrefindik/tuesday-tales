@@ -250,6 +250,13 @@ public class OwnedEgg
         {
             typeGlDict[location.LocationType].updateVisits(location);
         }
+        foreach (string friendUserId in egg._helpers)
+            addHelper(friendUserId);
+        foreach (CheckInPlace place in PlacesToTake)
+        {
+            if (place.needToBeVisited()) return;
+        }
+        _hatchable = true;
     }
 
     /** Returns true if request already sent to friend, false otherwise.
@@ -265,6 +272,7 @@ public class OwnedEgg
       * if that friend does not already exist in that list. */
     public void addHelper(string friendUserId)
     {
-        if (!_requests.Contains(friendUserId)) _requests.add(friendUserId);
+        Debug.Log(_helpers.containsId(friendUserId));
+        if (!_helpers.containsId(friendUserId)) _helpers.add(friendUserId);
     }
 }

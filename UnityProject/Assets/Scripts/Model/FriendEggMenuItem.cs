@@ -20,6 +20,7 @@ public class FriendEggMenuItem : GenericEggMenuItem
 
     override protected IEnumerator updateServer()
     {
+        _egg.addHelper(SpatialClient2.single.userId);
         yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(_egg);
     }
 

@@ -60,9 +60,17 @@ public class SpatialClient2 : MonoBehaviour
         single = this;
         userSession = null;
         //_kaijuDatabase = new KaijuDatabase();
-
         // for marker setup. delete this
         setUpMarkers();
+        StartCoroutine(addFriends());
+    }
+
+    private IEnumerator addFriends()
+    {
+        /*yield return LoginUser(new CoroutineResponse(), "Z", "Z");
+        yield return AddFriend("58f3a9f42a07420011c19e0f");
+        Debug.Log("yo! friend added"); */
+        yield return null;
     }
 
     private void setUpMarkers()
@@ -201,13 +209,13 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator addEggToSelf(OwnedEgg egg)
     {
-        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
+        userSession.User.Metadata.EggsOwned.checkAndAdd(egg, true);
 		yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
 
     public IEnumerator addOrUpdateEggInFriendsEggs(OwnedEgg egg)
     {
-        userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg);
+        userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg, false);
         yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
     }
 
@@ -808,7 +816,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
 
@@ -836,13 +844,13 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
 
     public IEnumerator GetFriends(string projectID = PROJECT_ID)
     {
-        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
+        MessageController.single.displayWaitScreen(null);
         ready = false;
         
         /*WWWForm form = new WWWForm();
@@ -858,7 +866,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MessageController.single.displayError(MainMenuScript.EggsCanvas, "Could not get friends. Check your internet connection.");
+            MessageController.single.displayError(null, "Could not get friends. Check your internet connection.");
         }
         else
         {
@@ -885,7 +893,7 @@ public class SpatialClient2 : MonoBehaviour
                 {
                     if (egg.Id.StartsWith(userSession.User.Id))
                     {
-                        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
+                        userSession.User.Metadata.EggsOwned.checkAndAdd(egg, true);
                         ownEggsUpdated = true;
                     }
                 }
@@ -894,7 +902,7 @@ public class SpatialClient2 : MonoBehaviour
             else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
     
@@ -1845,12 +1853,15 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
         list = new List<OwnedEgg>(eggs.Values);
     }
 
-    public void checkAndAdd(OwnedEgg egg)
+    public void checkAndAdd(OwnedEgg egg, bool ownEgg)
     {
         if (!eggs.ContainsKey(egg.Id))
         {
-            list.Add(egg);
-            eggs[egg.Id] = egg;
+            if (!(egg.Hatchable && ownEgg)) // if the egg is hatchable and the user doesn't have it, that means the user already hatched the egg themselves
+            {
+                list.Add(egg);
+                eggs[egg.Id] = egg;
+            }
         }
         else
             eggs[egg.Id].updateCheckins(egg);

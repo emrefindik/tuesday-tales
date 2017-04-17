@@ -229,18 +229,19 @@ public class MainMenuScript : MonoBehaviour
                 // logged in, switch to main menu
                 //_pleaseWaitCanvas.enabled = false;
                 //_mainMenuCanvas.enabled = true;
+                Debug.Log("loading webpage");
                 _webView.Load();
                 break;
             case false:
                 // wrong credentials
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
                 Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
                 Debug.Log("Connection Error");
@@ -321,6 +322,7 @@ public class MainMenuScript : MonoBehaviour
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
     {
+        Debug.Log("load complete");
 		if (success && !mapLoaded && !MessageController.single.Error)
         {
 			/*
@@ -767,6 +769,12 @@ public class MainMenuScript : MonoBehaviour
 		}
 
 	}
+
+    public void onBackFromRegister()
+    {
+        _registerCanvas.enabled = false;
+        _loginCanvas.enabled = true;
+    }
 
     public static void addKaijuButton(Kaiju k)
     {
