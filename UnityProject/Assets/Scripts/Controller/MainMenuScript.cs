@@ -234,14 +234,14 @@ public class MainMenuScript : MonoBehaviour
                 break;
             case false:
                 // wrong credentials
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
                 Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
                 Debug.Log("Connection Error");
@@ -769,6 +769,12 @@ public class MainMenuScript : MonoBehaviour
 		}
 
 	}
+
+    public void onBackFromRegister()
+    {
+        _registerCanvas.enabled = false;
+        _loginCanvas.enabled = true;
+    }
 
     public static void addKaijuButton(Kaiju k)
     {
