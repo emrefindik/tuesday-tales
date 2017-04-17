@@ -14,8 +14,6 @@ public class KaijuScreenController : MonoBehaviour {
     private GameObject _kaijuMenuItemPrefab;
     [SerializeField]
     private RectTransform _kaijuMenuViewport;
-    //[SerializeField]
-    //private GameObject _paddingPanel;
 
     // swipe detection parameters
     private float _swipeStartPosition;
