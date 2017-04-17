@@ -21,6 +21,7 @@ public class KaijuMenuItem : MonoBehaviour
             _kaiju = value;
             _kaijuNameText.text = value.Name;
             _kaijuImage.sprite = value.HeadSprite;
+			_kaijuImage.color = value.MonsterColor;
             // TODO SET KAIJUIMAGE!!
             // TODO SET KAIJU DESCRIPTION TEXT!
         }
