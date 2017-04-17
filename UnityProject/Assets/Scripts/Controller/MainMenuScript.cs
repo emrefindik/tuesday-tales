@@ -355,9 +355,8 @@ public class MainMenuScript : MonoBehaviour
 
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
-			foreach (Canvas c in GetComponents<Canvas>()) {
+			foreach (Canvas c in FindObjectsOfType<Canvas>())
 				c.enabled = false;
-			}
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
 
@@ -673,6 +672,8 @@ public class MainMenuScript : MonoBehaviour
 
     public static void showWebView()
     {
+		foreach (Canvas c in FindObjectsOfType<Canvas>())
+			c.enabled = false;
         webView.Show();
     }
 
