@@ -53,6 +53,12 @@ public class MainMenuScript : MonoBehaviour
     //        get { return checkedInCanvas; }
     //        private set { checkedInCanvas = value; }
     //    }
+    private static Canvas logoCanvas;
+    public static Canvas LogoCanvas
+    {
+        get { return logoCanvas; }
+        private set { logoCanvas = value; }
+    }
 
     private static Canvas loginCanvas;
     public static Canvas LoginCanvas
@@ -106,6 +112,8 @@ public class MainMenuScript : MonoBehaviour
     // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
+    [SerializeField]
+    private Canvas _logoCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
 	[SerializeField]
@@ -171,12 +179,14 @@ public class MainMenuScript : MonoBehaviour
         webView = _webView;
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
+        logoCanvas = _logoCanvas;
 		registerCanvas = _registerCanvas;
         kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
-        friendsCanvas = _friendsCanvas;  
+        friendsCanvas = _friendsCanvas;
 
-        _loginCanvas.enabled = true;
+        _logoCanvas.enabled = true;
+        _loginCanvas.enabled = false;
 		_registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
@@ -811,5 +821,11 @@ public class MainMenuScript : MonoBehaviour
 		_eggsCanvasTitle.text = "Your Eggs";
 		_ownEggsScrollView.gameObject.SetActive (true);
 	}
+
+    public void tapLogo()
+    {
+        _loginCanvas.enabled = true;
+        _logoCanvas.enabled = false;
+    }
 
 }
