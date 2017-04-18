@@ -28,12 +28,15 @@ public class LocationCombinationData
 [System.Serializable]
 public class LocationCombination
 {
+
+	[SerializeField]
     List<HatchLocationMarker> _markersToTake;
     public List<HatchLocationMarker> MarkersToTake
     {
         get { return _markersToTake; }
     }
 
+	[SerializeField]
     List<GenericLocation> _genericLocationsToTake;
     public List<GenericLocation> GenericLocationsToTake
     {

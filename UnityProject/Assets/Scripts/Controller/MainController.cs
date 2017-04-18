@@ -8,7 +8,7 @@ public class MainController : MonoBehaviour
 {
     public static MainController single;
 	public enum GameState{
-		MainMenu,
+		//MainMenu,
 		DestroyCity,
 		PhoneCamera,
 		MapView
@@ -39,7 +39,7 @@ public class MainController : MonoBehaviour
     {
 		markerIdAnalytics = null;
         single = this;
-		gameState = GameState.MainMenu;
+		gameState = GameState.MapView;
 
 		// FOR TEST: NICKY
 		//phoneCameraScene = Instantiate(phoneCameraPrefab);
@@ -63,23 +63,6 @@ public class MainController : MonoBehaviour
         winCoroutineEnded.setSuccess(true);
         // END OF EMRE'S CODE
 
-        /*
-        
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        PlaytestController pcl = (PlaytestController)(mainMenuCamera.GetComponent<PlaytestController>());
-		pcl.addCheckedLocation (); 
-        !!!!!
-
-        UNCOMMENT THESE!!!
-
-        !!!!!
-
-        !!!!! */
     }
 		
 	public void goBack()
@@ -89,19 +72,21 @@ public class MainController : MonoBehaviour
 		case GameState.DestroyCity:
 			goToDestroyCity (currentMarkerId);
 			break;
-		case GameState.MainMenu:
-			goToMainMenu ();
+		//case GameState.MainMenu:
+		//	goToMainMenu ();
 			break;
 		case GameState.MapView:
 			goToMapView ();
 			break;
 		default:
 			Debug.Log ("No such game state.");
-			goToMainMenu ();
+		//	goToMainMenu ();
+			goToMapView();
 			break;
 		}
 	}
-		
+
+	/*
     public void goToMainMenu()
 	{
 		lastGameState = gameState;
@@ -115,11 +100,15 @@ public class MainController : MonoBehaviour
 
 		gameState = GameState.MainMenu;
     }
+    */
 
 	public void goToMapView()
 	{
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
+
+		if (phoneCameraScene)
+			Destroy (phoneCameraScene);
 
 		if (markerIdAnalytics != null) {
 			Analytics.CustomEvent ("BuildingDestruction", new Dictionary<string,object> {
@@ -134,10 +123,9 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to map");
 
 		mainMenuCamera.enabled = true;
-		if (destroyCityScene)
-			Destroy (destroyCityScene);
         //UniWebView mapWebView = (UniWebView)(mainMenuCamera.GetComponent<MainMenuScript> ()._webView);
-        UniWebView mapWebView = _mainMenuScript._webView;
+		MessageController.single.displayWaitScreen(null);
+		UniWebView mapWebView = GetComponent<MainMenuScript>()._webView;
         mapWebView.Stop();
         mapWebView.url = UniWebViewHelper.streamingAssetURLForPath(MainMenuScript.MAP_ADDRESS);
         mapWebView.Load();
@@ -147,8 +135,6 @@ public class MainController : MonoBehaviour
 
     public void goToDestroyCity(string markerId)
     {
-		
-		
 		markerIdAnalytics = markerId;
 		destructionTime = 0;
         currentMarkerId = markerId;
@@ -158,7 +144,15 @@ public class MainController : MonoBehaviour
         mainMenuCamera.enabled = false;
         //menuScene.SetActive(false);
 		destroyCityScene = Instantiate (destroyCityPrefab);
-		phoneCameraScene.SetActive (false);
+		if (phoneCameraScene) {
+			Destroy (phoneCameraScene);
+		}
+
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
+		}
 
 		gameState = GameState.DestroyCity;
     }
@@ -168,10 +162,38 @@ public class MainController : MonoBehaviour
 		Debug.Log ("go to phone camera");
 
 		mainMenuCamera.enabled = false;
-		phoneCameraScene = Instantiate (phoneCameraPrefab);
-		phoneCameraScene.GetComponent<PhoneImageController>().initCamera(mode);
+		GetComponent<MainMenuScript> ().disableWebview ();
 
+		phoneCameraScene = Instantiate (phoneCameraPrefab);
+		phoneCameraScene.GetComponent<PhoneImageController>().startCameraWithMode(mode);
+
+		// close all main scene canvas
+		Canvas [] canvases = menuScene.transform.GetComponentsInChildren<Canvas>();
+		foreach (Canvas canvas in canvases) {
+			canvas.enabled = false;
+		}
+		if (destroyCityScene) {
+			Destroy (destroyCityScene);
+		}
 		
 		gameState = GameState.PhoneCamera;
 	}
+
+	public void eggToPhotoCamera()
+	{
+		MainMenuScript.EggsCanvas.enabled = false;
+		goToPhoneCamera (PhoneImageController.CameraMode.EggHatching);
+	}
+
+	public void kaijuToPhoneCamera()
+	{
+		MainMenuScript.KaijuCanvas.enabled = false;
+		goToPhoneCamera (PhoneImageController.CameraMode.Kaiju);
+	}
+
+	public void cityToPhoneCamera()
+	{
+		goToPhoneCamera (PhoneImageController.CameraMode.BuildingDestruction);
+	}
+
 }

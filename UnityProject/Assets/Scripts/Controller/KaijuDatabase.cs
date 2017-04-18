@@ -7,35 +7,37 @@ public class KaijuDatabase : MonoBehaviour {
 
     private const int NO_DOWNLOAD = -1;
 
-    private const string HAND_SPRITE_PATH = "Xiao rocks"; // TODO CHANGE THIS
-    private const string HEAD_SPRITE_PATH = "Jin rocks"; // TODO CHANGE THIS
-    private const string EYE_SPRITE_PATH = "Nicky rocks"; // TODO CHANGE THIS
-    private const string BODY_SPRITE_PATH = "Matt rocks"; // TODO CHANGE THIS
-    private const string EGG_SPRITE_PATH = "Jonathan I guess you're OK"; // TODO CHANGE THIS
+    private const string PHOTO_SERVER_PATH = "http://tuesday-tales.etc.cmu.edu/Photos/";
+    private const string HAND_SPRITE_PATH = PHOTO_SERVER_PATH + "hand"; // TODO CHANGE THIS
+    private const string HEAD_SPRITE_PATH = PHOTO_SERVER_PATH + "head"; // TODO CHANGE THIS
+    //private const string EYE_SPRITE_PATH = PHOTO_SERVER_PATH + "eye"; // TODO CHANGE THIS
+    private const string BODY_SPRITE_PATH = PHOTO_SERVER_PATH + "body"; // TODO CHANGE THIS
+    private const string EGG_SPRITE_PATH = PHOTO_SERVER_PATH + "egg"; // TODO CHANGE THIS
+	private const string PNG = ".png";
 
     public static string handSpriteAtIndex(int index)
     {
-        return HAND_SPRITE_PATH + index.ToString();
+        return HAND_SPRITE_PATH + index.ToString() + PNG;
     }
 
     public static string headSpriteAtIndex(int index)
     {
-        return HEAD_SPRITE_PATH + index.ToString();
+        return HEAD_SPRITE_PATH + index.ToString() + PNG;
     }
 
     public static string bodySpriteAtIndex(int index)
     {
-        return BODY_SPRITE_PATH + index.ToString();
+        return BODY_SPRITE_PATH + index.ToString() + PNG;
     }
 
-    public static string eyeSpriteAtIndex(int index)
+    /*public static string eyeSpriteAtIndex(int index)
     {
         return EYE_SPRITE_PATH + index.ToString();
-    }
+    } */
 
     public static string eggSpriteAtIndex(int index)
     {
-        return EGG_SPRITE_PATH + index.ToString();
+        return EGG_SPRITE_PATH + index.ToString() + PNG;
     }
 
     private Dictionary<int, Sprite> _handSprites;
@@ -82,6 +84,7 @@ public class KaijuDatabase : MonoBehaviour {
         _bodySprites = new Dictionary<int, Sprite>();
         _headSprites = new Dictionary<int, Sprite>();
         _handSprites = new Dictionary<int, Sprite>();
+
     }
 
     private IEnumerator checkAndDownloadHandSprite(int index, CoroutineResponse response)
@@ -96,15 +99,15 @@ public class KaijuDatabase : MonoBehaviour {
         _handDownloadingIndex = index;
         WWW www = new WWW(handSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
-            _handSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_handSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("hand error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _handDownloadingIndex = NO_DOWNLOAD;
@@ -122,15 +125,15 @@ public class KaijuDatabase : MonoBehaviour {
         _headDownloadingIndex = index;
         WWW www = new WWW(headSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
-            _headSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_headSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("head error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _headDownloadingIndex = NO_DOWNLOAD;
@@ -148,15 +151,15 @@ public class KaijuDatabase : MonoBehaviour {
         _bodyDownloadingIndex = index;
         WWW www = new WWW(bodySpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
-            _bodySprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_bodySprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load kaiju image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("body error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load kaiju image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _bodyDownloadingIndex = NO_DOWNLOAD;
@@ -174,37 +177,32 @@ public class KaijuDatabase : MonoBehaviour {
         _eggDownloadingIndex = index;
         WWW www = new WWW(eggSpriteAtIndex(index));
         yield return www;
-        if (!string.IsNullOrEmpty(www.error))
+        if (string.IsNullOrEmpty(www.error))
         {
-            _eggSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(www.texture.width / 2, www.texture.height / 2));
+			_eggSprites[index] = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
             response.setSuccess(true);
         }
         else
         {
-            Debug.Log(www.error);
-            MessageController.single.displayError(null, "Failed to load egg image. " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+			Debug.Log("egg error: " + www.error + "index: " + index.ToString());
+			MessageController.single.displayError(null, "Failed to load egg image.\n" + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
             response.setSuccess(false);
         }
         _eggDownloadingIndex = NO_DOWNLOAD;
     }
 
 
-    // for eggs
-    public Sprite []eggSprites;
+
 	// TODO: store the links to the 
 	string [] imageLinks;
 
-	// for kaiju
-	public Sprite [] handSprites;
-	public Sprite [] headSprites;
 	public Sprite [] eyeSprites;
-	public Sprite [] bodySprites;
 
 	public int generateEgg()
 	{
         // Randomly Generate an egg
         //int index = (int)(Random.Range(0, eggSprites.Length-1));
-        return Random.Range(0, OwnedEgg.NUMBER_OF_EGG_IMAGES);
+        return Random.Range(1, OwnedEgg.NUMBER_OF_EGG_IMAGES+1);
 		// TODO: pop out a ui to input name of the Egg, then call createEggForSelf
 	}
 

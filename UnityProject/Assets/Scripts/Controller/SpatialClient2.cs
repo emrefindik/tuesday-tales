@@ -60,6 +60,68 @@ public class SpatialClient2 : MonoBehaviour
         single = this;
         userSession = null;
         //_kaijuDatabase = new KaijuDatabase();
+        // for marker setup. delete this
+        setUpMarkers();
+        StartCoroutine(addFriends());
+    }
+
+    private IEnumerator addFriends()
+    {
+        /*yield return LoginUser(new CoroutineResponse(), "Z", "Z");
+        yield return AddFriend("58f3a9f42a07420011c19e0f");
+        Debug.Log("yo! friend added"); */
+        yield return null;
+    }
+
+    private void setUpMarkers()
+    {
+        //StartCoroutine(DeleteMarkerById("58f11e8da30d230011f0f121"));
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
+
+        /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
+        StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
+        //StartCoroutine(DeleteMarkerById("58f2df8699807700111ae95d"));
+
+        /*List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 1, 3, 3, "Gelb"), 5));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
+
+        List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
+        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
+        List<string> str1 = new List<string>();
+        str1.Add("58f00e3f2aac62001128c2c1"); // cathedral of learning - right off campus
+        List<string> str2 = new List<string>();
+        str2.Add("58f00e3f2aac62001128c2c2"); // peace garden - on campus
+        List<string> str3 = new List<string>();
+        str3.Add("58f00e3f2aac62001128c2c3"); // phipps conservatory - right off campus
+        List<string> str4 = new List<string>();
+        str4.Add("58f00e3f2aac62001128c2c4"); // mattress factory
+        List<string> str5 = new List<string>();
+        str5.Add("58f00e3f2aac62001128c2c5"); // carnegie museum of art - right off campus
+        List<string> str6 = new List<string>();
+        str6.Add("58f00e3f2aac62001128c2c6"); // the fence - on campus
+        List<string> str7 = new List<string>();
+        str7.Add("58f00e402aac62001128c2c7"); // centerfield gesling stadium - on campus
+        List<string> str8 = new List<string>();
+        str8.Add("58f12cd1a30d230011f0f123"); // ETC
+        List<string> str9 = new List<string>();
+        str9.Add("58f00e402aac62001128c2c9"); // Dippy the Dinosaur - right off campus
+        List<string> str0 = new List<string>();
+        str0.Add("58f00e402aac62001128c2ca"); // Schell Games Studio
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str1), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str5), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str6), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str7), 4));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
+
+        StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2))));
+        */
     }
 
     private void Update()
@@ -76,7 +138,10 @@ public class SpatialClient2 : MonoBehaviour
 
     public string getStreakPathAsJsonString()
     {
-        return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers);
+		Debug.Log (userSession.User.Metadata.StreakMarkers.Count());
+		Debug.Log(JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers.ToList()));
+		Debug.Log (userSession.User.Metadata.StreakMarkers.ToList().Count());
+		return JsonUtility.ToJson(userSession.User.Metadata.StreakMarkers);
     }
 
     public int getScore()
@@ -108,7 +173,7 @@ public class SpatialClient2 : MonoBehaviour
 			});
 		}
         userSession.User.Metadata.resetStreak();
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
         Debug.Log("reset streak");
     }
 
@@ -116,13 +181,13 @@ public class SpatialClient2 : MonoBehaviour
     public IEnumerator updateLastRampage(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement, markerId);
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
 
     public IEnumerator updateLastRampageWithMultiplier(int scoreIncrement, string markerId)
     {
         userSession.User.Metadata.updateLastRampage(scoreIncrement * userSession.User.Metadata.ScoreMultiplier, markerId);
-        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
     // END OF EMRE'S CODE
 
@@ -144,29 +209,34 @@ public class SpatialClient2 : MonoBehaviour
 
     public IEnumerator addEggToSelf(OwnedEgg egg)
     {
-        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
-        yield return UpdateMetadata(null, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        userSession.User.Metadata.EggsOwned.checkAndAdd(egg, true);
+		yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION, false);
     }
 
     public IEnumerator addOrUpdateEggInFriendsEggs(OwnedEgg egg)
     {
-        userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg);
-        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+        userSession.User.Metadata.FriendEggsCheckedIn.checkAndAdd(egg, false);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not add egg " + egg.Name + " to the list of eggs you are holding onto from your friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
     }
+
+	public IEnumerator updateMetadataAfterOwnEggCheckedIn(string eggName)
+	{
+		yield return SpatialClient2.single.UpdateMetadata(MainMenuScript.EggsCanvas, "Could not check in egg " + eggName + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION, true);
+	}
 
     public IEnumerator hatchEgg(OwnedEgg egg)
     {
 		Analytics.CustomEvent("EggHatched", new Dictionary<string, object> {
 			{"PlayerId", userId},
 			{"Time", DateTime.UtcNow.ToString()},
-			{"Location", new List<float>{Input.location.lastData.longitude, Input.location.lastData.latitude}},
-			{"HatchedEgg", egg}
+			{"Location", Input.location.lastData.latitude.ToString() + ", " + Input.location.lastData.longitude.ToString()},
+			{"HatchedEgg", egg.Id}
 		});
         userSession.User.Metadata.EggsOwned.remove(egg);
         userSession.User.Metadata.Kaiju.hatchEgg(egg);
         CoroutineResponse spritesResponse = new CoroutineResponse();
         StartCoroutine(egg.KaijuEmbryo.initializeSprites(spritesResponse));
-        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION);
+        yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not hatch egg " + egg.Name + ". " + CHECK_YOUR_INTERNET_CONNECTION, true);
         while (spritesResponse.Success == null) yield return null;
     }
 
@@ -178,18 +248,22 @@ public class SpatialClient2 : MonoBehaviour
             return "";
     }
 
-    public LocationCombination getLocationsForEgg(LocationCombinationData combo)
-    {
-        List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
-        List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
+	public IEnumerator getLocationsForEgg(LocationCombinationData combo, List<HatchLocationMarker> markersToTake, List<GenericLocation> genericLocationsToTake)
+	{
+		markersToTake.Clear ();
+		genericLocationsToTake.Clear ();
+		Debug.Log (_locationDatabase.SpecificMarkers.Values.Count);
         foreach (LocationTypeCountTuple locationIndex in combo.GenericLocations)
             genericLocationsToTake.Add(new GenericLocation(locationIndex));
+		Debug.Log ("pirates are we");
         foreach (string markerIndex in combo.SpecificMarkers)
         {
-            SpatialMarker marker = _locationDatabase.getSpecificMarkerWithId(markerIndex);
+			Debug.Log ("marker: " + markerIndex);
+            SpatialMarker marker = _locationDatabase.getSpecificMarkerWithId(markerIndex); // TODO replace by get marker by ID
             markersToTake.Add(new HatchLocationMarker(marker.Name, marker.Loc, marker.Id));
+			Debug.Log ("ouokl");
         }
-        return new LocationCombination(markersToTake, genericLocationsToTake);
+		yield return null;
     }
 
     private IEnumerator checkFirstLogin()
@@ -204,7 +278,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             Debug.Log("first login");
             yield return userSession.User.Metadata.initialize();
-            yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION);
+            yield return UpdateMetadata(MainMenuScript.LoginCanvas, "Could not create new egg lists on the server. " + CHECK_YOUR_INTERNET_CONNECTION, true);
         }
     }
 
@@ -277,7 +351,7 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     // Longitude must be between -180 and 180. latitude must be between -90 and 90.
-    public IEnumerator CreateMarker(double latitude, double longitude, string name, string description, MarkerMetadata metadata = null, string projectID = PROJECT_ID)
+    public IEnumerator CreateMarker(double latitude, double longitude, string name, string description, MarkerMetadata metadata, string projectID = PROJECT_ID)
     {
         ready = false;
 
@@ -376,6 +450,7 @@ public class SpatialClient2 : MonoBehaviour
             {
                 markers.Clear();
                 markers.AddRange(rm.Markers);
+						Debug.Log ("markercount: " + markers.Count.ToString());
                 ready = true;
                 Debug.Log(www.text);
                 response.setSuccess(true);
@@ -392,7 +467,7 @@ public class SpatialClient2 : MonoBehaviour
     {
         response.reset();
         basicMarkers.Clear();
-        string url = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={0},{1}&radius={2}&type={3}&key={4}", latitude, longitude, radius, GenericLocation.googlePlacesTypeToString(type), GOOGLE_API_KEY);
+		string url = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={0},{1}&radius={2}&type={3}&rankby=distance&key={4}", latitude, longitude, radius, GenericLocation.googlePlacesTypeToString(type), GOOGLE_API_KEY);
         WWW www = new WWW(url);
         yield return www;
 
@@ -503,7 +578,8 @@ public class SpatialClient2 : MonoBehaviour
             ResponseMarkersMessage rm = JsonUtility.FromJson<ResponseMarkersMessage>(www.text);
             if (rm.Success)
             {
-                markers = rm.Markers;
+				markers.Clear();
+				markers.AddRange(rm.Markers);
                 ready = true;
                 response.setSuccess(true);
                 Debug.Log(www.text);
@@ -597,7 +673,9 @@ public class SpatialClient2 : MonoBehaviour
 
             // TODO download the location and kaiju database
             CoroutineResponse markersResponse = new CoroutineResponse();
-            StartCoroutine(GetMarkersByMetadataType(_locationDatabase.SpecificMarkers, MarkerMetadata.MarkerType.CHECK_IN_LOCATION, markersResponse));
+            //StartCoroutine(GetMarkersByMetadataType(_locationDatabase.SpecificMarkers, MarkerMetadata.MarkerType.CHECK_IN_LOCATION, markersResponse)); TODO uncomment this once this works, or delete it when you can get marker by ID
+			StartCoroutine(getCheckInMarkers(markersResponse));
+
             yield return checkFirstLogin();
             yield return checkIfStreakIsOutdated();
             streakInitialized = true;
@@ -621,6 +699,19 @@ public class SpatialClient2 : MonoBehaviour
         }
         // do not call displayError, since that error screen would direct to the main menu instead of the login screen
     }
+
+	public IEnumerator getCheckInMarkers(CoroutineResponse response)
+	{
+		List<SpatialMarker> allMarkers = new List<SpatialMarker> ();
+		yield return GetMarkersByProject(allMarkers, new CoroutineResponse());
+		foreach (SpatialMarker marker in allMarkers) {
+					Debug.Log ("markertype: " + marker.Metadata.Type.ToString());
+			if (marker.Metadata.Type == MarkerMetadata.MarkerType.CHECK_IN_LOCATION)
+				_locationDatabase.SpecificMarkers [marker.Id] = marker;
+		}
+		Debug.Log ("locdatacount" + _locationDatabase.SpecificMarkers.Count.ToString ());
+		response.setSuccess (true);
+	}
 
     public static IEnumerator waitUntilCoroutinesReturn(IEnumerable<CoroutineResponse> responses)
     {
@@ -725,7 +816,7 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
 
@@ -753,13 +844,13 @@ public class SpatialClient2 : MonoBehaviour
         {
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
 
     public IEnumerator GetFriends(string projectID = PROJECT_ID)
     {
-        MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
+        MessageController.single.displayWaitScreen(null);
         ready = false;
         
         /*WWWForm form = new WWWForm();
@@ -775,7 +866,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MessageController.single.displayError(MainMenuScript.EggsCanvas, "Could not get friends. Check your internet connection.");
+            MessageController.single.displayError(null, "Could not get friends. Check your internet connection.");
         }
         else
         {
@@ -802,16 +893,16 @@ public class SpatialClient2 : MonoBehaviour
                 {
                     if (egg.Id.StartsWith(userSession.User.Id))
                     {
-                        userSession.User.Metadata.EggsOwned.checkAndAdd(egg);
+                        userSession.User.Metadata.EggsOwned.checkAndAdd(egg, true);
                         ownEggsUpdated = true;
                     }
                 }
             }
-            if (ownEggsUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION);
-            else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION);
+            if (ownEggsUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not refresh your egg list. " + CHECK_YOUR_INTERNET_CONNECTION, true);
+            else if (metadataUpdated) yield return UpdateMetadata(MainMenuScript.EggsCanvas, "Could not get egg requests from friends. " + CHECK_YOUR_INTERNET_CONNECTION, true);
             ready = true;
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(true);
+            MessageController.single.closeWaitScreen(false);
         }
     }
     
@@ -836,6 +927,14 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
+	public void sendRequestToFriend(FriendData friend)
+	{
+		if (OwnEggMenuItem.eggToSend.addRequest(friend.Friend.Id))
+			StartCoroutine(SpatialClient2.single.UpdateMetadata(MainMenuScript.FriendsCanvas, "Could not send request to " + friend.Friend.getName() + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION, true));
+		else
+			MessageController.single.displayError(MainMenuScript.FriendsCanvas, "You already sent a request to " + friend.Friend.getName() + '!');
+	}
+
     /* public IEnumerator UpdateMetadataWithEggs(string errorText)
     {
         // update the actual eggsOwned list on the metadata
@@ -843,9 +942,9 @@ public class SpatialClient2 : MonoBehaviour
         yield return UpdateMetadata(errorText);
     } */
 
-	public IEnumerator UpdateMetadata(Canvas sender, string errorText)
+	private IEnumerator UpdateMetadata(Canvas sender, string errorText, bool displayWaitScreen)
 	{
-        MessageController.single.displayWaitScreen(sender);
+		if (displayWaitScreen) MessageController.single.displayWaitScreen(sender);
         metadataUpdatedSuccessfully = false;
         ready = false;
         Debug.Log("updating user metadata");
@@ -871,7 +970,7 @@ public class SpatialClient2 : MonoBehaviour
             ready = true;
 			Debug.Log(www.text);
             Debug.Log("user metadata updated");
-            MessageController.single.closeWaitScreen(true);
+			if (displayWaitScreen) MessageController.single.closeWaitScreen(false);
 		}
 	}
 }
@@ -977,7 +1076,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
     // the furthest distance to check for a kaiju spawn point, in meters
-    public const double KAIJU_MARKER_RADIUS = 1500.0;
+    public const double KAIJU_MARKER_RADIUS = 15000000000.0; // TODO make this smaller after you have more spawn locations around
 
     [SerializeField]
     private KaijuList kaiju;
@@ -1102,6 +1201,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
         List<SpatialMarker> markersAround = new List<SpatialMarker>();
         CoroutineResponse response = new CoroutineResponse();
         yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, KAIJU_MARKER_RADIUS, true, markersAround, response);
+		Debug.Log (markersAround.Count);
         kaiju = new KaijuList((new KaijuFrequencyList()).randomKaiju(markersAround));
     }
 
@@ -1405,6 +1505,7 @@ public class FriendList
 [System.Serializable]
 public class ImageBounds
 {
+    [SerializeField]
     private double north;
     public double North
     {
@@ -1412,6 +1513,7 @@ public class ImageBounds
         private set { north = value; }
     }
 
+    [SerializeField]
     private double south;
     public double South
     {
@@ -1419,6 +1521,7 @@ public class ImageBounds
         private set { south = value; }
     }
 
+    [SerializeField]
     private double east;
     public double East
     {
@@ -1426,6 +1529,7 @@ public class ImageBounds
         private set { east = value; }
     }
 
+    [SerializeField]
     private double west;
     public double West
     {
@@ -1575,38 +1679,32 @@ public class MarkerMetadata
 [System.Serializable]
 public abstract class ImmutableList<T> : IEnumerable<T>
 {
-    [SerializeField]
-    protected List<T> list;
+    protected abstract IEnumerable<T> getList();
+    protected abstract void createEmptyList();
+    protected abstract void createList(IEnumerable<T> items);
 
     public ImmutableList()
     {
-        list = new List<T>();
+        //list = new List<T>();
+        createEmptyList();
     }
 
     public ImmutableList(IEnumerable<T> items)
     {
-        list = new List<T>(items);
+        //list = new List<T>(items);
+        createList(items);
     }
 
-    public IEnumerator<T> GetEnumerator()
-    {
-        return list.GetEnumerator();
-    }
+	abstract public IEnumerator<T> GetEnumerator ();
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return list.GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator ()
+	{
+        return GetEnumerator();
     }
 
     public int Count
     {
-        get { return list.Count; }
-    }
-
-    public T this[int index]
-    {
-        get { return list[index]; }
-        // there should be no set!
+		get { return getList().Count(); }
     }
 }
 
@@ -1648,6 +1746,28 @@ public class MarkersByMetadataRequestTerm
 [System.Serializable]
 public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
 {
+    [SerializeField]
+    private List<string> list;
+	protected override IEnumerable<string> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<string>();
+    }
+
+    protected override void createList(IEnumerable<string> items)
+    {
+        list = new List<string>(items);
+    }
+
+	override public IEnumerator<string> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
     private HashSet<string> ids;
 
     public IdList() : base()
@@ -1680,12 +1800,35 @@ public class IdList : ImmutableList<string>, ISerializationCallbackReceiver
         ids.Add(id);
         list.Add(id);
     }
+
 }
 
 /** An immutable list of eggs. Use in the eggsOwned field. */
 [System.Serializable]
 public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 {
+    [SerializeField]
+    private List<OwnedEgg> list;
+	protected override IEnumerable<OwnedEgg> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<OwnedEgg>();
+    }
+
+    protected override void createList(IEnumerable<OwnedEgg> items)
+    {
+        list = new List<OwnedEgg>(items);
+    }
+
+	override public IEnumerator<OwnedEgg> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
     protected Dictionary<string, OwnedEgg> eggs;
 
     public EggList() : base()
@@ -1706,15 +1849,19 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 
     public void OnBeforeSerialize()
     {
+		Debug.Log ("serializing eggs");
         list = new List<OwnedEgg>(eggs.Values);
     }
 
-    public void checkAndAdd(OwnedEgg egg)
+    public void checkAndAdd(OwnedEgg egg, bool ownEgg)
     {
         if (!eggs.ContainsKey(egg.Id))
         {
-            list.Add(egg);
-            eggs[egg.Id] = egg;
+            if (!(egg.Hatchable && ownEgg)) // if the egg is hatchable and the user doesn't have it, that means the user already hatched the egg themselves
+            {
+                list.Add(egg);
+                eggs[egg.Id] = egg;
+            }
         }
         else
             eggs[egg.Id].updateCheckins(egg);
@@ -1731,6 +1878,28 @@ public class EggList : ImmutableList<OwnedEgg>, ISerializationCallbackReceiver
 [System.Serializable]
 public class KaijuList : ImmutableList<Kaiju>
 {
+    [SerializeField]
+    private List<Kaiju> list;
+	protected override IEnumerable<Kaiju> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<Kaiju>();
+    }
+
+    protected override void createList(IEnumerable<Kaiju> items)
+    {
+        list = new List<Kaiju>(items);
+    }
+
+	override public IEnumerator<Kaiju> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
     public KaijuList(Kaiju firstKaiju) : base()
     {
         list.Add(firstKaiju);
@@ -1741,12 +1910,40 @@ public class KaijuList : ImmutableList<Kaiju>
         egg.KaijuEmbryo.hatch(egg);
         list.Add(egg.KaijuEmbryo);
     }
+
+    // TODO DELETE THIS AFTER SETUP
+    /*public void addToKaijuListForMarkerSetup(Kaiju k)
+    {
+        list.Add(k);
+    } */
 }
 
 // the streak path, containing marker ids
 [System.Serializable]
 public class StreakPath : ImmutableList<string>
 {
+    [SerializeField]
+    private List<string> list;
+	protected override IEnumerable<string> getList()
+    {
+        return list;
+    }
+
+    protected override void createEmptyList()
+    {
+        list = new List<string>();
+    }
+
+    protected override void createList(IEnumerable<string> items)
+    {
+        list = new List<string>(items);
+    }
+
+	override public IEnumerator<string> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
     public void resetPath()
     {
         list.Clear();
@@ -1756,6 +1953,11 @@ public class StreakPath : ImmutableList<string>
     {
         list.Add(markerId);
     }
+
+	public string this[int index]
+	{
+		get { return list[index]; }
+	}
 }
 
 [System.Serializable]
@@ -1767,7 +1969,6 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
 
     public T randomKaiju(List<SpatialMarker> markers)
     {
-        list.Clear();
         Dictionary<SpatialMarker, float> distances = new Dictionary<SpatialMarker, float>();
         foreach (SpatialMarker marker in markers)
         {
@@ -1776,6 +1977,7 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         }
         if (distances.Count == 0)
         {
+			Debug.Log ("gsdfg");
             // no kaiju markers around!
             // return STANDARD_KAIJU; TODO uncomment this once we have a standard kaiju.
         }
@@ -1784,40 +1986,137 @@ public abstract class FrequencyList<T> : ImmutableList<ItemWithFrequency<T>>
         int j;
         foreach (SpatialMarker marker in distances.Keys)
         {
-                list.AddRange(itemsInMarker(marker));
-                for (j = i; j < list.Count; j++)
+                addItemsInMarker(marker);
+			for (j = i; j < getList().Count(); j++)
                 {
-                    list[i].Index = index;
-                    index += list[i].Frequency * distances[marker];
+				Debug.Log ("index 0: " + getElementAtIndex (0).Index.ToString());
+				Debug.Log ("index 1: " + getElementAtIndex (1).Index.ToString());
+				Debug.Log ("index 2: " + getElementAtIndex (2).Index.ToString());
+					getElementAtIndex(j).Index = index;
+					index += getElementAtIndex(j).Frequency * distances[marker];
                 }
                 i = j;
         }
+		Debug.Log ("Nindex 0: " + getElementAtIndex (0).Index.ToString());
+		Debug.Log ("Nindex 1: " + getElementAtIndex (1).Index.ToString());
+		Debug.Log ("Nindex 2: " + getElementAtIndex (2).Index.ToString());
         index = UnityEngine.Random.Range(0.0f, index);
-        for (i = 1; i < list.Count; i++)
+		Debug.Log ("Rindex 0: " + getElementAtIndex (0).Index.ToString());
+		Debug.Log ("Rindex 1: " + getElementAtIndex (1).Index.ToString());
+		Debug.Log ("Rindex 2: " + getElementAtIndex (2).Index.ToString());
+		Debug.Log ("new index = " + index.ToString());
+		for (i = 1; i < getList().Count(); i++)
         {
-            if (index < list[i].Index) return list[i - 1].Item;
+			Debug.Log ("Eindex 0: " + getElementAtIndex (0).Index.ToString());
+			Debug.Log ("Eindex 1: " + getElementAtIndex (1).Index.ToString());
+			Debug.Log ("Eindex 2: " + getElementAtIndex (2).Index.ToString());
+			Debug.Log ("item index: " + getElementAtIndex (i).Index.ToString ());
+			if (index < getElementAtIndex(i).Index) return getElementAtIndex(i-1).getItem();
         }
         // return last element in the kaiju list
-        return list[i - 1].Item;
+		return getElementAtIndex(i-1).getItem();
     }
 
-    protected abstract IEnumerable<ItemWithFrequency<T>> itemsInMarker(SpatialMarker marker);
+    protected abstract void addItemsInMarker(SpatialMarker marker);
+	protected abstract ItemWithFrequency<T> getElementAtIndex (int index);
 }
 
+[System.Serializable]
 public class KaijuFrequencyList : FrequencyList<Kaiju>
 {
-    override protected IEnumerable<ItemWithFrequency<Kaiju>> itemsInMarker(SpatialMarker marker)
+    [SerializeField]
+    private List<KaijuWithFrequency> list;
+	protected override IEnumerable<ItemWithFrequency<Kaiju>> getList()
     {
-        return marker.Metadata.Kaiju;
+        return list.Cast<ItemWithFrequency<Kaiju>>();
     }
+
+    protected override void createEmptyList()
+    {
+        list = new List<KaijuWithFrequency>();
+    }
+
+    protected override void createList(IEnumerable<ItemWithFrequency<Kaiju>> items)
+    {
+        list = items.Cast<KaijuWithFrequency>().ToList();
+    }
+
+	override public IEnumerator<ItemWithFrequency<Kaiju>> GetEnumerator()
+	{
+		return list.Cast<ItemWithFrequency<Kaiju>>().GetEnumerator();
+	}
+
+	/*override public IEnumerator<KaijuWithFrequency> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
+	override IEnumerator IEnumerable.GetEnumerator()
+	{
+		return list.GetEnumerator();
+	} */
+
+    public KaijuFrequencyList(IEnumerable<ItemWithFrequency<Kaiju>> items) : base(items) { }
+    public KaijuFrequencyList() : base() { }
+
+    override protected void addItemsInMarker(SpatialMarker marker)
+    {
+		list.AddRange(marker.Metadata.Kaiju.list);
+    }
+
+	override protected ItemWithFrequency<Kaiju> getElementAtIndex(int index)
+	{
+		return list[index];
+	}
 }
 
+[System.Serializable]
 public class LocationFrequencyList : FrequencyList<LocationCombinationData>
 {
-    override protected IEnumerable<ItemWithFrequency<LocationCombinationData>> itemsInMarker(SpatialMarker marker)
+    [SerializeField]
+    private List<LocationWithFrequency> list;
+	protected override IEnumerable<ItemWithFrequency<LocationCombinationData>> getList()
     {
-        return marker.Metadata.Locations;
+        return list.Cast<ItemWithFrequency<LocationCombinationData>>();
     }
+
+    protected override void createEmptyList()
+    {
+        list = new List<LocationWithFrequency>();
+    }
+
+    protected override void createList(IEnumerable<ItemWithFrequency<LocationCombinationData>> items)
+    {
+        list = items.Cast<LocationWithFrequency>().ToList();
+    }
+
+	override public IEnumerator<ItemWithFrequency<LocationCombinationData>> GetEnumerator()
+	{
+		return list.Cast<ItemWithFrequency<LocationCombinationData>>().GetEnumerator();
+	}
+
+	/*override public IEnumerator<LocationWithFrequency> GetEnumerator()
+	{
+		return list.GetEnumerator();
+	}
+
+	override IEnumerator IEnumerable.GetEnumerator()
+	{
+		return list.GetEnumerator();
+	} */
+
+    public LocationFrequencyList(IEnumerable<ItemWithFrequency<LocationCombinationData>> items) : base(items) { }
+    public LocationFrequencyList() : base() { }
+
+    override protected void addItemsInMarker(SpatialMarker marker)
+    {
+		list.AddRange(marker.Metadata.Locations.list);
+    }
+
+	override protected ItemWithFrequency<LocationCombinationData> getElementAtIndex(int index)
+	{
+		return list[index];
+	}
 }
 
 //[System.Serializable]

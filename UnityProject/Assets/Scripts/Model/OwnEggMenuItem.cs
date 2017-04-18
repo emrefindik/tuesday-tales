@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OwnEggMenuItem : FriendEggMenuItem
+public class OwnEggMenuItem : GenericEggMenuItem
 {
     public static OwnedEgg eggToSend;
 
@@ -30,8 +30,23 @@ public class OwnEggMenuItem : FriendEggMenuItem
         
     override protected IEnumerator updateServer()
     {
-        yield return SpatialClient2.single.UpdateMetadata(MainMenuScript.EggsCanvas, "Could not check in egg " + _egg.Name + ". " + SpatialClient2.CHECK_YOUR_INTERNET_CONNECTION);
+		yield return SpatialClient2.single.updateMetadataAfterOwnEggCheckedIn(_egg.Name);
     }
+
+	override protected void initializeOtherText()
+	{
+		// TODO uncomment and change this to initialize helpers
+		/*_friendNameText.text = "";
+            bool firstElement = true;
+            foreach (string friendUserID in _egg.Helpers)
+            {
+                if (firstElement)
+                    firstElement = false;
+                else
+                    _friendNameText.text += COMMA;
+                _friendNameText.text += SpatialClient2.single.getNameOfFriend(friendUserID);
+            } */
+	}
 
     public void onHatch()
     {

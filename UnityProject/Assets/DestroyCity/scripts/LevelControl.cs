@@ -136,10 +136,13 @@ public class LevelControl : MonoBehaviour {
 		findEggCanvas.SetActive (false);
 		editEggNameCanvas.SetActive (false);
 
+		Debug.Log ("Canvas finished");
 		// Init Reward
 		score = 0;
 		eggIndex = -1;
 		eggName = "";
+
+		Debug.Log ("REward f");
 
 		// Init Game States
 		buildingDestroyedCount = 0;
@@ -151,20 +154,37 @@ public class LevelControl : MonoBehaviour {
 		shakeDetectionThreshold *= shakeDetectionThreshold;
 		lowPassValue = Input.acceleration;
 
+		Debug.Log("Shake f ");
 		// To Be Used GameObjects
 		shakeText = gameCanvas.transform.FindChild("ShakeText").gameObject;
 		shakeText.SetActive (false);
 		ground = GameObject.FindGameObjectWithTag ("ground");
 		progressBar = gameCanvas.transform.FindChild ("FullImage").gameObject;
 
+		Debug.Log ("Progress finished");
+
 		GetComponent<SpriteControl> ().deactivateColor ();
 
-		MainMenuScript mainMenu = GameObject.Find ("MainMenu").GetComponent<MainMenuScript> ();
+		MainMenuScript mainMenu = mainController.GetComponent<MainMenuScript> ();
 		selectedKaiju = mainMenu.SelectedKaiju;
-		kaiju = transform.FindChild ("Kaiju").gameObject;
+		kaiju = GameObject.Find ("Kaiju").gameObject;
+		Debug.Log ("Kaiju: " + kaiju);
+		Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
 		kaiju.GetComponent<MonsterCreator> ().
-			setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.BodySprite, selectedKaiju.HandSprite, selectedKaiju.MonsterColor);
+		setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
 
+		Debug.Log ("Setup Kaiju");
+
+		StartCoroutine (closeDestroyText(2.0f));
+	}
+
+	IEnumerator closeDestroyText(float seconds)
+	{
+		yield return new WaitForSeconds (seconds);
+		Debug.Log ("Inside close destroy");
+		GameObject destroyText = gameCanvas.transform.FindChild("DestroyText").gameObject;
+		destroyText.SetActive (false);
+		Debug.Log ("Set active false finished");
 	}
 
 	/**********************************
@@ -201,8 +221,8 @@ public class LevelControl : MonoBehaviour {
 			if (findEggCanvas.activeSelf)
 				return;
 			// TODO: Change this back
-			//if (winCanvas && (winCoroutineEnded.Success == true)) {
-			if (winCanvas) {
+			if (winCanvas && (winCoroutineEnded.Success == true)) {
+			//if (winCanvas) {
 				GameObject scoreText = winCanvas.transform.FindChild ("ScoreText").gameObject;
 				scoreText.GetComponent<Text> ().text = "x " + score.ToString ();
 				winCanvas.SetActive (true);
@@ -219,8 +239,7 @@ public class LevelControl : MonoBehaviour {
 			shakeNow = true;
 			shakeText.SetActive (true);
 			buildingDestroyedCount = -1;
-			// TODO: UNCOMMENT THIS
-			//StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
+			StartCoroutine(MainController.single.addDestoryCityReward(score, winCoroutineEnded));
 			ground = GameObject.FindGameObjectWithTag("ground");
 			ground.GetComponent<Ground>().startShake(0.5f);
 		}
@@ -235,6 +254,7 @@ public class LevelControl : MonoBehaviour {
 				shakeNow  = false;
 				shakeText.SetActive (false);
 				eggIndex = KaijuDatabase.instance.generateEgg ();
+				Debug.Log ("egg index start: " + eggIndex.ToString ());
 				StartCoroutine (showReward ());
 			}
 		}
@@ -311,20 +331,23 @@ public class LevelControl : MonoBehaviour {
 	IEnumerator showReward()
 	{
 		// TODO: UNCOMMENT THIS DISABLED FOR TEST
-		/*
+
         float offset = Time.time;
         if (eggIndex != -1)
         {
+			Debug.Log ("Calling Coroutine");
             yield return KaijuDatabase.instance.checkAndDownloadEggSprite(eggIndex, new CoroutineResponse());
+			Debug.Log ("Coroutine Finished");
             GameObject EggImage = findEggCanvas.transform.FindChild("EggImage").gameObject;
-            EggImage.GetComponent<Image>().sprite = KaijuDatabase.instance.eggSprites[eggIndex];
+			Debug.Log ("egg index start: " + eggIndex.ToString ());
+            EggImage.GetComponent<Image>().sprite = KaijuDatabase.instance.EggSprites[eggIndex];
             //StartCoroutine (startShakeCountDown ());
             offset = Time.time - offset;
         }
         //TODO: shake according to the streak
         if (offset < FIRST_SHAKE_WAIT)
             yield return new WaitForSeconds(FIRST_SHAKE_WAIT - offset);
-        */
+        
 		pA.punchGround(2);
 		yield return new WaitForSeconds (.3f);
 		if(eggIndex != -1)
@@ -345,7 +368,8 @@ public class LevelControl : MonoBehaviour {
 		GameObject inputName = editEggNameCanvas.transform.FindChild ("InputEggName").gameObject;
 		eggName = inputName.GetComponent<InputField> ().text;
 		Debug.Log (eggName);
-        // QUESTION FROM EMRE - IS THIS WHERE WE SHOULD CALL CREATEEGGFORSELF?
+		StartCoroutine(OwnedEgg.createEggForSelf (mainController.GetComponent<MainMenuScript> ().EggMenuItemPrefab, 
+			mainController.GetComponent<MainMenuScript> ().EggMenuContentPanel, eggIndex, eggName));
 	}
 
 	public void BackToMainMenu()

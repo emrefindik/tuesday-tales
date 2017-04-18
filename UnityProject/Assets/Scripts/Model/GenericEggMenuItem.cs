@@ -16,7 +16,7 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
     [SerializeField]
     private Text _eggNameText;
     [SerializeField]
-    private Text _friendNameText;
+    private Text _checkInLocationText;
     [SerializeField]
     private Button _checkInButton;
 
@@ -30,21 +30,23 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
         set
         {
             _egg = value;
-            _eggImage.sprite = value.Sprite;
-            _eggNameText.text = value.Name;
-            // TODO show names of all helper friends
-            _friendNameText.text = "";
-            bool firstElement = true;
-            foreach (string friendUserID in _egg.Helpers)
-            {
-                if (firstElement)
-                    firstElement = false;
-                else
-                    _friendNameText.text += COMMA;
-                _friendNameText.text += SpatialClient2.single.getNameOfFriend(friendUserID);
-            }
+            _eggImage.sprite = _egg.Sprite;
+            _eggNameText.text = _egg.Name;
+			resetCheckInLocationText();
+			initializeOtherText();
+            disableCheckInButton();
         }
     }
+
+	protected void resetCheckInLocationText()
+	{
+		_checkInLocationText.text = "";
+		if (!_egg.Hatchable) {
+			foreach (CheckInPlace marker in _egg.PlacesToTake)
+				if (marker.needToBeVisited())
+					_checkInLocationText.text += marker.getDescriptor () + "\n";
+		}
+	}
 
     public void onCheckIn()
     {
@@ -55,6 +57,7 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
     {
         _egg.checkIn();
         yield return updateServer();
+		resetCheckInLocationText ();
         refreshView();
     }
 
@@ -62,6 +65,8 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
 
     /** Called upon checking in to refresh how the egg menu item looks */
     protected abstract void refreshView();
+
+	protected abstract void initializeOtherText();
 
     public void enableCheckInButton()
     {

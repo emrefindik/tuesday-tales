@@ -38,7 +38,7 @@ public class MainMenuScript : MonoBehaviour
         get { return eggsCanvas; }
         private set { eggsCanvas = value; }
     }
-
+		
     // Temporary. May get rid of it if we decided to get rid of sending eggs completely
     private static Canvas friendsCanvas;
     public static Canvas FriendsCanvas
@@ -46,14 +46,6 @@ public class MainMenuScript : MonoBehaviour
         get { return friendsCanvas; }
         private set { friendsCanvas = value; }
     }
-
-    // Displays all the eggs from all the friends
-    //    private static Canvas friendsEggsCanvas;
-    //    public static Canvas FriendsEggsCanvas
-    //    {
-    //        get { return friendsEggsCanvas; }
-    //        private set { friendsEggsCanvas = value; }
-    //    }
     //
     //    private static Canvas checkedInCanvas;
     //    public static Canvas CheckedInCanvas
@@ -61,6 +53,12 @@ public class MainMenuScript : MonoBehaviour
     //        get { return checkedInCanvas; }
     //        private set { checkedInCanvas = value; }
     //    }
+    private static Canvas logoCanvas;
+    public static Canvas LogoCanvas
+    {
+        get { return logoCanvas; }
+        private set { logoCanvas = value; }
+    }
 
     private static Canvas loginCanvas;
     public static Canvas LoginCanvas
@@ -76,7 +74,12 @@ public class MainMenuScript : MonoBehaviour
 		private set { registerCanvas = value; }
 	}
 
-    private static Canvas kaijuCanvas;
+	private static Canvas kaijuCanvas;
+	public static Canvas KaijuCanvas
+	{
+		get { return kaijuCanvas; }
+		private set { kaijuCanvas = value; }
+	}
 
     private static UniWebView webView;
     /*public static UniWebView WebView
@@ -106,13 +109,11 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Canvas _eggsCanvas;
 
-    // Displays all the eggs from all the friends
-    //[SerializeField]
-    //private Canvas _friendsEggsCanvas;
-
     // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
+    [SerializeField]
+    private Canvas _logoCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
 	[SerializeField]
@@ -127,8 +128,17 @@ public class MainMenuScript : MonoBehaviour
 	private Text _checkedInText;
     [SerializeField]
     private GameObject _eggMenuItemPrefab;
+	public GameObject EggMenuItemPrefab {
+		get { return _eggMenuItemPrefab; }
+	}
+
+
     [SerializeField]
     private Transform _eggMenuContentPanel;
+	public Transform EggMenuContentPanel {
+		get { return _eggMenuContentPanel; }
+	}
+
     [SerializeField]
     private GameObject _friendMenuItemPrefab;
     [SerializeField]
@@ -141,6 +151,12 @@ public class MainMenuScript : MonoBehaviour
     private InputField _userNameField;
     [SerializeField]
     private InputField _passwordField;
+	[SerializeField]
+	private ScrollRect _ownEggsScrollView;
+	[SerializeField]
+	private ScrollRect _friendsEggsScrollView;
+	[SerializeField]
+	private Text _eggsCanvasTitle;
 
     private Coroutine _locationUpdateCoroutine;
 
@@ -163,13 +179,14 @@ public class MainMenuScript : MonoBehaviour
         webView = _webView;
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
+        logoCanvas = _logoCanvas;
 		registerCanvas = _registerCanvas;
         kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
-        //friendsEggsCanvas = _friendsEggsCanvas;      
 
-        _loginCanvas.enabled = true;
+        _logoCanvas.enabled = true;
+        _loginCanvas.enabled = false;
 		_registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
@@ -186,6 +203,8 @@ public class MainMenuScript : MonoBehaviour
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
         _webView.OnReceivedMessage += onReceivedMessage;
+
+		friendEggToegg ();
     }
 
     public void Update()
@@ -220,18 +239,19 @@ public class MainMenuScript : MonoBehaviour
                 // logged in, switch to main menu
                 //_pleaseWaitCanvas.enabled = false;
                 //_mainMenuCanvas.enabled = true;
+                Debug.Log("loading webpage");
                 _webView.Load();
                 break;
             case false:
                 // wrong credentials
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _connectionErrorText.enabled = false;
                 _wrongPasswordText.enabled = true;
                 Debug.Log("Wrong User or Password");
                 break;
             case null:
                 // connection error (possible timeout)
-                MessageController.single.closeWaitScreen(true);
+                MessageController.single.closeWaitScreen(false);
                 _wrongPasswordText.enabled = false;
                 _connectionErrorText.enabled = true;
                 Debug.Log("Connection Error");
@@ -312,8 +332,10 @@ public class MainMenuScript : MonoBehaviour
     /** Called when uniwebview successfully loads the HTML page */
     void onLoadComplete(UniWebView webView, bool success, string errorMessage)
     {
-        if (success && !mapLoaded)
+        Debug.Log("load complete");
+		if (success && !mapLoaded && !MessageController.single.Error)
         {
+			/*
             _webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
                 Input.location.lastData.latitude.ToString() + ',' +
                 Input.location.lastData.longitude.ToString() + ",\"" +
@@ -324,9 +346,27 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getMultiplier().ToString() + ',' +
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
                 // TODO add selected kaiju information to loadMap in map.html
+                */
+
+			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ",\"" +
+				//"40.432791" + ',' +
+				//"-79.964793" + ",\"" +
+				SpatialClient2.baseURL + "\",\"" +
+				SpatialClient2.PROJECT_ID + "\"," +
+				SpatialClient2.single.getScore().ToString() + ',' +
+				SpatialClient2.single.getTimer().ToString() + ',' +
+				SpatialClient2.single.getMultiplier().ToString() + ',' +
+				SpatialClient2.single.getStreakPathAsJsonString() + ')');
+
+
+			// TODO add selected kaiju information to loadMap in map.html
 
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
+			foreach (Canvas c in FindObjectsOfType<Canvas>())
+				c.enabled = false;
             Debug.Log("uniwebview is showing");
             mapLoaded = true;
 
@@ -362,11 +402,10 @@ public class MainMenuScript : MonoBehaviour
 //        _webView.EvaluatingJavaScript(
 //            JS_CHECKIN_LOCATION + '(' + SpatialClient2.single.getStreakPathAsJsonString() + ')');
 //    }
-
     void onReceivedMessage(UniWebView webView, UniWebViewMessage message)
     {
         Debug.Log("hi");
-        Debug.Log(message.path);
+		Debug.Log(message.rawMessage);
         switch (message.path)
         {
 			/* case "back":
@@ -397,11 +436,15 @@ public class MainMenuScript : MonoBehaviour
 
                 // TODO update to actually check in
                 break;
-            case "destroy":
+		case "destroy":
+				/*
                 StopCoroutine(_locationUpdateCoroutine);
                 _webView.Stop();
                 mapLoaded = false;
                 _webView.Hide();
+                */
+				_disableWebview ();
+				Debug.Log("Marker ID: " + message.args["id"]);
                 MainController.single.goToDestroyCity(message.args["id"]);
                 break;
             case "resetscore":
@@ -485,16 +528,26 @@ public class MainMenuScript : MonoBehaviour
 
     public void addButtons()
     {
+		int pos = 111;
+		Debug.Log(pos);
         foreach (OwnedEgg e in SpatialClient2.single.EggsOwned)
         {
+			pos++;
+			Debug.Log(pos);
             GameObject eggMenuItem = GameObject.Instantiate(_eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(_eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = e; // also updates the egg menu item's view
         }
+		pos = 211;
+		Debug.Log(pos);
         foreach (Kaiju k in SpatialClient2.single.Kaiju)
         {
+			pos++;
+			Debug.Log(pos);
             _kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
         }
+		pos = 311;
+		Debug.Log(pos);
         foreach (FriendData fd in SpatialClient2.single.Friends)
         {
             GameObject friendMenuItem = GameObject.Instantiate(_friendMenuItemPrefab);
@@ -507,6 +560,7 @@ public class MainMenuScript : MonoBehaviour
                     GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
                     friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
                     friendEggMenuItem.GetComponent<FriendEggMenuItem>().Egg = e; // also updates the egg menu item's view
+					friendEggMenuItem.GetComponent<FriendEggMenuItem>().Friend = fd;
                 }
             }
         }
@@ -514,11 +568,17 @@ public class MainMenuScript : MonoBehaviour
 
     public void initializeCheckinDataStructures()
     {
+		int pos = 111;
+		Debug.Log (pos);
         foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
         {
+			pos++;
+			Debug.Log (pos);
             if (!item.Egg.Hatchable)
                 item.Egg.initializeCheckInnables();
         }
+		pos = 211;
+		Debug.Log (pos);
         _markersByDistance = new List<SpatialMarker>();
         _idMarkers = new Dictionary<string, Dictionary<OwnedEgg, HatchLocationMarker>>();
         idMarkers = _idMarkers;
@@ -529,6 +589,8 @@ public class MainMenuScript : MonoBehaviour
         _googleMarkers = new Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>>();
         foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
         {
+			pos++;
+			Debug.Log (pos);
             if (!item.Egg.Hatchable)
             {
                 foreach (GenericLocation loc in item.Egg.GenericLocationsToTake)
@@ -555,6 +617,8 @@ public class MainMenuScript : MonoBehaviour
                 }
             }
         }
+		pos = 311;
+		Debug.Log (pos);
         foreach (GenericLocation.GooglePlacesType type in _placeTypes.Keys)
         {
             _googleResponses[type] = new CoroutineResponse();
@@ -592,6 +656,9 @@ public class MainMenuScript : MonoBehaviour
                         egg.CheckInnableLocs[_googleMarkers[type][0]] = _placeTypes[type][egg];
                 }
             }
+			Debug.Log ("markers by distance count: " + _markersByDistance.Count.ToString());
+			foreach (string id in _idMarkers.Keys)
+				Debug.Log (id);
             foreach (SpatialMarker marker in _markersByDistance)
             {
                 if (_idMarkers.ContainsKey(marker.Id))
@@ -615,6 +682,8 @@ public class MainMenuScript : MonoBehaviour
 
     public static void showWebView()
     {
+		foreach (Canvas c in FindObjectsOfType<Canvas>())
+			c.enabled = false;
         webView.Show();
     }
 
@@ -640,6 +709,32 @@ public class MainMenuScript : MonoBehaviour
             googleMarkers.Remove(type);
         }
     }
+
+	public static void addNewEggToCheckinnables(OwnedEgg egg)
+	{
+		foreach (GenericLocation loc in egg.GenericLocationsToTake)
+		{
+			if (loc.needToBeVisited())
+			{
+				if (!placeTypes.ContainsKey(loc.LocationType))
+					placeTypes[loc.LocationType] = new Dictionary<OwnedEgg, HashSet<GenericLocation>>();
+				if (!placeTypes[loc.LocationType].ContainsKey(egg))
+				{
+					placeTypes[loc.LocationType][egg] = new HashSet<GenericLocation>();
+				}
+				placeTypes[loc.LocationType][egg].Add(loc);
+			}
+		}
+		foreach (HatchLocationMarker hlm in egg.MarkersToTake)
+		{
+			if (hlm.needToBeVisited())
+			{
+				if (!idMarkers.ContainsKey(hlm.Id))
+					idMarkers[hlm.Id] = new Dictionary<OwnedEgg, HatchLocationMarker>();
+				idMarkers[hlm.Id][egg] = hlm;
+			}
+		}
+	}
 
 	public void onRegister()
 	{
@@ -685,9 +780,52 @@ public class MainMenuScript : MonoBehaviour
 
 	}
 
+    public void onBackFromRegister()
+    {
+        _registerCanvas.enabled = false;
+        _loginCanvas.enabled = true;
+    }
+
     public static void addKaijuButton(Kaiju k)
     {
         kaijuCanvas.GetComponent<KaijuScreenController>().addKaijuMenuItem(k);
+    }
+
+	public void disableWebview()
+	{
+		_disableWebview ();
+	}
+
+	private void _disableWebview()
+	{
+		StopCoroutine(_locationUpdateCoroutine);
+		_webView.Stop();
+		mapLoaded = false;
+		_webView.Hide();
+	}
+
+	public void eggToFriendsEgg()
+	{
+		/*_eggsCanvas.enabled = false;
+		_friendsEggsCanvas.enabled = true; */
+		_ownEggsScrollView.gameObject.SetActive (false);
+		_eggsCanvasTitle.text = "Your Friends' Eggs";
+		_friendsEggsScrollView.gameObject.SetActive (true);
+	}
+
+	public void friendEggToegg()
+	{
+		/*_eggsCanvas.enabled = true;
+		_friendsEggsCanvas.enabled = false;*/
+		_friendsEggsScrollView.gameObject.SetActive (false);
+		_eggsCanvasTitle.text = "Your Eggs";
+		_ownEggsScrollView.gameObject.SetActive (true);
+	}
+
+    public void tapLogo()
+    {
+        _loginCanvas.enabled = true;
+        _logoCanvas.enabled = false;
     }
 
 }

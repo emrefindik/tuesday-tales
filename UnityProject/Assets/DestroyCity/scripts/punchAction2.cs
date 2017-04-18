@@ -117,6 +117,8 @@ public class punchAction2 : MonoBehaviour {
 
 	public void punchGround(int times)
 	{
+		ground = GameObject.FindGameObjectWithTag ("ground");
+		Debug.Log ("Ground " + ground);
 		ground.GetComponent<Ground> ().startShake (1.0f * times);
 		Debug.Log ("punch ground");
 		StartCoroutine(bangGround(times));
