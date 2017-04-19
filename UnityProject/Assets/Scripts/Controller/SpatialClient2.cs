@@ -15,6 +15,14 @@ public class SpatialClient2 : MonoBehaviour
     public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // new test project ID
     public const string GOOGLE_API_KEY = "AIzaSyCejidwxDYN4APVvtlE7ZPsBtVdhB7JG70";
 
+    // URL to connect to to check whether user has internet connection
+    public const string PING_URL = "http://tuesday-tales.etc.cmu.edu/Photos/pingtest.txt";
+    // the text that should be returned from pingURL
+    public const string PING_TEXT = "a";
+
+    // every PING_TIME seconds, the game checks whether the user has an internet connection
+    public const float PING_TIME = 10.0f;
+
     public static SpatialClient2 single;
 
     private LoginResponse userSession = null;
@@ -49,9 +57,11 @@ public class SpatialClient2 : MonoBehaviour
     private bool metadataUpdatedSuccessfully = false;
     private bool isCheckingStreak = false;
     private bool streakInitialized = false;
+    private bool _hasInternetConnection;
 
     void Start()
     {
+        _hasInternetConnection = true;
         ready = false;
         isCheckingStreak = false;
         _locationDatabase = new LocationDatabase(new Dictionary<string, SpatialMarker>());
@@ -59,10 +69,14 @@ public class SpatialClient2 : MonoBehaviour
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
-        //_kaijuDatabase = new KaijuDatabase();
+
+        // for test. DELETE THIS
+        StartCoroutine(checkInternetConnection());
+
         // for marker setup. delete this
         setUpMarkers();
         StartCoroutine(addFriends());
+
     }
 
     private IEnumerator addFriends()
@@ -71,6 +85,24 @@ public class SpatialClient2 : MonoBehaviour
         yield return AddFriend("58f3a9f42a07420011c19e0f");
         Debug.Log("yo! friend added"); */
         yield return null;
+    }
+
+    /** Checks whether the user has internet connection every PING_TIME seconds.
+      * If the user previously lost connection but reestablished connection,
+      * updates the user metadata. */
+    public IEnumerator checkInternetConnection()
+    {
+        bool connectionSuccessful;
+        while (true)
+        {
+            WWW pingWWW = new WWW(PING_URL);
+            yield return pingWWW;
+            connectionSuccessful = pingWWW.text == PING_TEXT && String.IsNullOrEmpty(pingWWW.error);
+            if (!_hasInternetConnection && connectionSuccessful)
+                UpdateMetadata(null, "", false);
+            _hasInternetConnection = connectionSuccessful;
+            yield return new WaitForSeconds(PING_TIME);
+        }
     }
 
     private void setUpMarkers()
@@ -694,6 +726,7 @@ public class SpatialClient2 : MonoBehaviour
             while (kaijuImageResponse.Success == null || eggImageResponse.Success == null || markersResponse.Success == null)
                 yield return null;
             yield return waitUntilCoroutinesReturn(friendImageResponses);
+            StartCoroutine(checkInternetConnection());
             ready = true;
             response.setSuccess(true);
         }

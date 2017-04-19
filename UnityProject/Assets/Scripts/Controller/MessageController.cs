@@ -62,6 +62,8 @@ public class MessageController : MonoBehaviour
     public void displayError(Canvas sender, string errorText)
     {
 		StopAllCoroutines ();
+        if (SpatialClient2.single.isLoggedIn())
+            StartCoroutine(SpatialClient2.single.checkInternetConnection());
         _canvasesWaiting = 0;
         _errorMessage.text = errorText;
         if (_pleaseWaitCanvas.enabled)
