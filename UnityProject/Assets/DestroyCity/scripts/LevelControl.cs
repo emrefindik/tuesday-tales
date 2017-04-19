@@ -124,6 +124,7 @@ public class LevelControl : MonoBehaviour {
 		num_of_blocks = GameObject.FindGameObjectsWithTag ("block").Length;
 		totalProgress = num_of_pieces * (int)ProgressAmount.Building + num_of_blocks * (int)ProgressAmount.Block;
 		progressCount [0] = totalProgress;
+		Debug.Log (num_of_blocks);
     }
 
 	// Init all the game states
