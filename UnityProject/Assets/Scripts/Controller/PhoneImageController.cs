@@ -49,7 +49,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.EggHatching);
+		//initCamera (CameraMode.EggHatching);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
