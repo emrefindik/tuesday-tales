@@ -150,11 +150,11 @@ function updateTimer()
 }
 
 function onMarkerClick(markerId, markerPosition) {
-	if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
+	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
 		window.location.href = "uniwebview://destroy?id=" + markerId;
-	} else {
+	//} else {
 		// TODO show error screen
-	}
+	//}
 }
 
 function updatePath() {

@@ -417,12 +417,9 @@ public class MainMenuScript : MonoBehaviour
                 mapLoaded = false;
                 _webView.Hide(); */
 
-                StopCoroutine(_locationUpdateCoroutine);
-                _webView.Stop();
+                _disableWebview();
                 _eggsCanvas.enabled = true;
                 StartCoroutine(updateCheckinnables());
-                mapLoaded = false;
-                _webView.Hide();
 
                 // TODO update to actually check in
                 break;
@@ -444,11 +441,8 @@ public class MainMenuScript : MonoBehaviour
                 // TODO transfer to camera
                 break;
             case "kaiju":
-                StopCoroutine(_locationUpdateCoroutine);
-                _webView.Stop();
+                _disableWebview();
                 _kaijuCanvas.enabled = true;
-                mapLoaded = false;
-                _webView.Hide();
                 break;
             default:
                 break;
@@ -508,12 +502,14 @@ public class MainMenuScript : MonoBehaviour
     {
         _friendsCanvas.enabled = false;
         _eggsCanvas.enabled = true;
+        StartCoroutine(updateCheckinnables());
     }
 
     public void onBackFromFriendSelection()
     {
         _friendsCanvas.enabled = false;
         _eggsCanvas.enabled = true;
+        StartCoroutine(updateCheckinnables());
     }
 
     public void addButtons()
@@ -788,11 +784,13 @@ public class MainMenuScript : MonoBehaviour
 
 	private void _disableWebview()
 	{
-		StopCoroutine(_locationUpdateCoroutine);
-		_webView.Stop();
-		mapLoaded = false;
-		_webView.Hide();
-	}
+        StopCoroutine(_locationUpdateCoroutine);
+        _webView.Stop();
+        foreach (Canvas c in FindObjectsOfType<Canvas>())
+            c.enabled = false;
+        mapLoaded = false;
+        _webView.Hide();
+    }
 
 	public void eggToFriendsEgg()
 	{
