@@ -1,20 +1,17 @@
 fileFormatVersion: 2
-guid: a5c6f9d23626e524896350f3f6881db5
-timeCreated: 1492384095
-licenseType: Free
+guid: d69de9a53d7978b4eb6377dbadf5e384
+timeCreated: 1492464422
+licenseType: Pro
 TextureImporter:
   fileIDToRecycleName:
-    21300000: L5_mainBuilding
+    21300000: B10
     21300002: Top_left
-    21300004: Top_middle
-    21300006: Top_right
-    21300008: Middle_topLeft
-    21300010: Middle_bottomLeft
-    21300012: Middle_m
-    21300014: Middle_m2
-    21300016: Bottom_left
-    21300018: bottom_middle
-    21300020: bottom_left
+    21300004: Right_end
+    21300006: middle_Left
+    21300008: Middle_center
+    21300010: bottom_left
+    21300012: bottom_rigtht
+    21300014: bass_bottom
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -101,25 +98,17 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
-  - buildTarget: iPhone
-    maxTextureSize: 2048
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: L5_mainBuilding
+      name: B10
       rect:
         serializedVersion: 2
-        x: 1362
+        x: 1270
         y: 0
-        width: 686
-        height: 1100
+        width: 778
+        height: 1140
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -129,114 +118,49 @@ TextureImporter:
       name: Top_left
       rect:
         serializedVersion: 2
-        x: 0
-        y: 1657
-        width: 265
-        height: 391
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Top_middle
-      rect:
-        serializedVersion: 2
-        x: 499
-        y: 1465
-        width: 375
-        height: 578
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Top_right
-      rect:
-        serializedVersion: 2
-        x: 1190
-        y: 1604
-        width: 315
-        height: 439
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Middle_topLeft
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 973
-        width: 310
-        height: 548
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Middle_bottomLeft
-      rect:
-        serializedVersion: 2
-        x: 326
-        y: 518
-        width: 299
-        height: 728
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Middle_m
-      rect:
-        serializedVersion: 2
-        x: 688
-        y: 666
-        width: 315
-        height: 661
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: Middle_m2
-      rect:
-        serializedVersion: 2
-        x: 1056
-        y: 858
+        x: 32
+        y: 1452
         width: 283
-        height: 704
+        height: 589
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: Bottom_left
+      name: Right_end
       rect:
         serializedVersion: 2
-        x: 950
-        y: 28
-        width: 316
-        height: 711
+        x: 372
+        y: 1459
+        width: 309
+        height: 582
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: bottom_middle
+      name: middle_Left
       rect:
         serializedVersion: 2
-        x: 498
-        y: 21
-        width: 410
-        height: 596
+        x: 9
+        y: 751
+        width: 453
+        height: 674
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Middle_center
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 763
+        width: 402
+        height: 860
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -246,10 +170,36 @@ TextureImporter:
       name: bottom_left
       rect:
         serializedVersion: 2
-        x: 27
-        y: 37
-        width: 327
-        height: 439
+        x: 37
+        y: 0
+        width: 489
+        height: 718
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: bottom_rigtht
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 413
+        height: 715
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: bass_bottom
+      rect:
+        serializedVersion: 2
+        x: 1201
+        y: 1216
+        width: 847
+        height: 706
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
