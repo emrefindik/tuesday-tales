@@ -667,10 +667,13 @@ public class MainMenuScript : MonoBehaviour
             }
             foreach (GenericEggMenuItem item in Enumerable.Concat<GenericEggMenuItem>(_eggMenuContentPanel.GetComponentsInChildren<OwnEggMenuItem>(), _friendEggMenuContentPanel.GetComponentsInChildren<FriendEggMenuItem>()))
             {
-                if (item.Egg.CheckInnableLocs.Count > 0 || item.Egg.CheckInnableMarkers.Count > 0)
-                    item.enableCheckInButton();
-                else
-                    item.disableCheckInButton();
+				if (!item.Egg.Hatchable) {
+					if (item.Egg.CheckInnableLocs.Count > 0 || item.Egg.CheckInnableMarkers.Count > 0)
+						item.enableCheckInButton();
+					else
+						item.disableCheckInButton();
+				}
+                
             }
             yield return new WaitForSeconds(CHECK_INNABLE_UPDATE_INTERVAL);
         }
