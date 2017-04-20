@@ -51,7 +51,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		initCamera (CameraMode.EggCheckin);
+		//initCamera (CameraMode.BuildingDestruction);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
