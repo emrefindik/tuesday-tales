@@ -20,6 +20,7 @@ public class PhoneImageController : MonoBehaviour {
 	public GameObject KaijuSelfieModel;
 	public GameObject BuildingSelfieModel;
 	public GameObject EggSelfieModel;
+	public GameObject EggCheckinModel;
 
 	public Texture2D screenShotCopy;
 	static public FacebookManager.ShareStatus shareStatus;
@@ -35,6 +36,7 @@ public class PhoneImageController : MonoBehaviour {
 		BuildingDestruction,
 		EggHatching,
 		Kaiju,
+		EggCheckin,
 		None
 	}
 
@@ -49,7 +51,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		//initCamera (CameraMode.EggHatching);
+		initCamera (CameraMode.EggCheckin);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
@@ -68,6 +70,7 @@ public class PhoneImageController : MonoBehaviour {
 		KaijuSelfieModel.SetActive (false);
 		BuildingSelfieModel.SetActive (false);
 		EggSelfieModel.SetActive (false);
+		EggCheckinModel.SetActive (false);
 
 		MainMenuScript mainMenu = mainController.gameObject.GetComponent<MainMenuScript> ();
 
@@ -88,6 +91,11 @@ public class PhoneImageController : MonoBehaviour {
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
 			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			break;
+		case CameraMode.EggCheckin:
+			EggCheckinModel.SetActive (true);
+			GameObject CheckinEgg = GameObject.Find ("CheckinEgg");
+			CheckinEgg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
 			break;
 		default:
 			break;	
