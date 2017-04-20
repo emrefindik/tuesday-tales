@@ -53,6 +53,14 @@ public class FriendEggMenuItem : GenericEggMenuItem
         MainMenuScript.displayError("You are too far from a desirable location to check in " + _egg._name + '!');
     } */
 
+	//Nicky's Code Start
+	public void onCheckInButtonPressed()
+	{
+		onCheckIn ();
+		MainController.single.selectedEgg = _egg;
+		MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.EggCheckin);
+	}
+	//Nicky's Code End
 
 
 }

@@ -64,6 +64,15 @@ public class OwnEggMenuItem : GenericEggMenuItem
         MessageController.single.closeWaitScreen(true);
     }
 
+	//Nicky's Code Start
+	public void onCheckInButtonPressed()
+	{
+		onCheckIn();
+		MainController.single.selectedEgg = _egg;
+		MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.EggCheckin);
+	}
+	//Nicky's Code End
+
     override protected void refreshView()
     {
         _hatchPanel.SetActive(_egg.Hatchable);
