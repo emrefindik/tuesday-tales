@@ -23,6 +23,7 @@ public class PhoneImageController : MonoBehaviour {
 	public GameObject EggCheckinModel;
 
 	public Texture2D screenShotCopy;
+	public GameObject photoRect;
 	static public FacebookManager.ShareStatus shareStatus;
 
 	string frontCamName = "";
@@ -51,7 +52,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		//initCamera (CameraMode.BuildingDestruction);
+		//initCamera (CameraMode.EggCheckin);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
@@ -273,7 +274,7 @@ public class PhoneImageController : MonoBehaviour {
 		uiCanvas.SetActive (true);
 
 		shareCanvas.SetActive (true);
-		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
+		//photoRect = shareCanvas.transform.Find ("Photo").gameObject;
 		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
 		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
 		Debug.Log ("Screenshot Width" + screenShotCopy.width);
