@@ -87,6 +87,7 @@ public class PhoneImageController : MonoBehaviour {
 			EggSelfieModel.SetActive (true);
 			GameObject Egg = GameObject.Find ("Egg");
 			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
+			Egg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
