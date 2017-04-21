@@ -61,7 +61,8 @@ public class MessageController : MonoBehaviour
 
     public void displayError(Canvas sender, string errorText)
     {
-		StopAllCoroutines ();
+        foreach(MonoBehaviour b in gameObject.GetComponentsInChildren<MonoBehaviour>())
+		    b.StopAllCoroutines ();
         if (SpatialClient2.single.isLoggedIn())
             StartCoroutine(SpatialClient2.single.checkInternetConnection());
         _canvasesWaiting = 0;

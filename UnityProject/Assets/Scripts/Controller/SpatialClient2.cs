@@ -50,28 +50,34 @@ public class SpatialClient2 : MonoBehaviour
         get { return userSession.User.Metadata.Kaiju; }
     }
 
+    private bool StreakNeedsReset
+    {
+        get {
+            return !_isResettingStreak
+          && userSession.User.Metadata.StreakTimerStart != UserMetadata.NO_STREAK
+          && getTimer() <= 0 && userSession.User.Metadata.StreakMarkers.Count > 0; }
+    }
+
     private bool ready = false;
     private UserList allUser = new UserList();
     private Project project;
 
     private bool metadataUpdatedSuccessfully = false;
-    private bool isCheckingStreak = false;
     private bool streakInitialized = false;
     private bool _hasInternetConnection;
+    private bool _isResettingStreak;
+
 
     void Start()
     {
         _hasInternetConnection = true;
         ready = false;
-        isCheckingStreak = false;
+        _isResettingStreak = false;
         _locationDatabase = new LocationDatabase(new Dictionary<string, SpatialMarker>());
         streakInitialized = false;
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
-
-        // for test. DELETE THIS
-        StartCoroutine(checkInternetConnection());
 
         // for marker setup. delete this
         setUpMarkers();
@@ -158,9 +164,11 @@ public class SpatialClient2 : MonoBehaviour
 
     private void Update()
     {
-        if (streakInitialized && !isCheckingStreak
-            && userSession.User.Metadata.StreakTimerStart != UserMetadata.NO_STREAK)
-            StartCoroutine(checkIfStreakIsOutdated());
+        if (streakInitialized && StreakNeedsReset)
+        {
+            _isResettingStreak = true;
+            StartCoroutine(resetStreak());
+        }
     }
 
     public bool isLoggedIn()
@@ -207,6 +215,7 @@ public class SpatialClient2 : MonoBehaviour
         userSession.User.Metadata.resetStreak();
         yield return UpdateMetadata(null, "Could not update score. " + CHECK_YOUR_INTERNET_CONNECTION, false);
         Debug.Log("reset streak");
+        _isResettingStreak = false;
     }
 
 
@@ -709,7 +718,7 @@ public class SpatialClient2 : MonoBehaviour
 			StartCoroutine(getCheckInMarkers(markersResponse));
 
             yield return checkFirstLogin();
-            yield return checkIfStreakIsOutdated();
+            if (StreakNeedsReset) yield return resetStreak();
             streakInitialized = true;
             CoroutineResponse kaijuImageResponse = new CoroutineResponse();
             StartCoroutine(getKaijuImages(kaijuImageResponse));
@@ -806,25 +815,6 @@ public class SpatialClient2 : MonoBehaviour
         response.setSuccess(true);
     }
 
-    public IEnumerator checkIfStreakIsOutdated()
-    {
-        isCheckingStreak = true;
-        if (getTimer() <= 0)
-        {
-            yield return resetStreak();
-            isCheckingStreak = false;
-            yield break;
-        }
-        // waits for the remaining amount on timer + 10 seconds, then calls this coroutine again
-        StartCoroutine(waitBeforeCheckStreak());
-    }
-
-    public IEnumerator waitBeforeCheckStreak()
-    {
-        yield return new WaitForSeconds(getTimer() + 10);
-        StartCoroutine(checkIfStreakIsOutdated());
-    }
-
     public IEnumerator AddFriend(string friendID, string projectID = PROJECT_ID)
     {
         MessageController.single.displayWaitScreen(MainMenuScript.FriendsCanvas);
@@ -899,6 +889,7 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
+            print("friend error text maybe: " + www.text);
             MessageController.single.displayError(null, "Could not get friends. Check your internet connection.");
         }
         else
@@ -983,7 +974,8 @@ public class SpatialClient2 : MonoBehaviour
         Debug.Log("updating user metadata");
         string url = baseURL + "/v1/project-user/update-metadata";
         WWWForm form = new WWWForm();
-
+        Debug.Log(JsonUtility.ToJson(userSession.User.Metadata));
+        Debug.Log("token: " + userSession.Token);
         form.AddField("metadata", JsonUtility.ToJson(userSession.User.Metadata));
         form.AddField("projectId", PROJECT_ID);
 		Dictionary<string, string> header = new Dictionary<string, string>();
@@ -995,6 +987,7 @@ public class SpatialClient2 : MonoBehaviour
 		if (!string.IsNullOrEmpty(www.error))
 		{
             print(www.error);
+            print("error text maybe: " + www.text);
             MessageController.single.displayError(sender, errorText);
 		}
 		else
