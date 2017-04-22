@@ -67,6 +67,7 @@ public class SpatialClient2 : MonoBehaviour
     private bool _hasInternetConnection;
     private bool _isResettingStreak;
 
+
     void Start()
     {
         _hasInternetConnection = true;
@@ -77,9 +78,6 @@ public class SpatialClient2 : MonoBehaviour
         metadataUpdatedSuccessfully = false;
         single = this;
         userSession = null;
-
-        // for test. DELETE THIS
-        //StartCoroutine(checkInternetConnection());
 
         // for marker setup. delete this
         setUpMarkers();

@@ -104,6 +104,7 @@ public class MainController : MonoBehaviour
 
 	public void goToMapView()
 	{
+		gameObject.GetComponent<AudioSource> ().Play ();
 		if (destroyCityScene)
 			Destroy (destroyCityScene);
 
@@ -135,6 +136,7 @@ public class MainController : MonoBehaviour
 
     public void goToDestroyCity(string markerId)
     {
+		gameObject.GetComponent<AudioSource> ().Stop();
 		markerIdAnalytics = markerId;
 		destructionTime = 0;
         currentMarkerId = markerId;
@@ -159,6 +161,7 @@ public class MainController : MonoBehaviour
 
 	public void goToPhoneCamera(PhoneImageController.CameraMode mode)
 	{
+		gameObject.GetComponent<AudioSource> ().Stop ();
 		Debug.Log ("go to phone camera");
 
 		mainMenuCamera.enabled = false;

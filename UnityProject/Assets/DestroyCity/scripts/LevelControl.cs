@@ -35,6 +35,7 @@ public class LevelControl : MonoBehaviour {
 	//float[] progress;
 	int[] progressCount;
 	int totalProgress;
+	const int tolerence = 2;
     int buildingDestroyedCount;
     int number_of_buildings = 1;
     bool win;   // check this status : whether has win
@@ -122,8 +123,9 @@ public class LevelControl : MonoBehaviour {
         progressCount = new int[1];
 		num_of_pieces = GameObject.FindGameObjectsWithTag("building").Length;
 		num_of_blocks = GameObject.FindGameObjectsWithTag ("block").Length;
-		totalProgress = num_of_pieces * (int)ProgressAmount.Building + num_of_blocks * (int)ProgressAmount.Block;
+		totalProgress = num_of_pieces * (int)ProgressAmount.Building + (num_of_blocks - tolerence) * (int)ProgressAmount.Block;
 		progressCount [0] = totalProgress;
+		Debug.Log (num_of_blocks);
     }
 
 	// Init all the game states

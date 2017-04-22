@@ -14,10 +14,17 @@ public class BuildingCreator : MonoBehaviour {
 	{
 		
 		buildingDict = new Dictionary<string, int> ();
-		buildingDict ["58f3eb594e973b0011f5f6b6"] = 0;
-		buildingDict ["58f3eb594e973b0011f5f6b0"] = 1;
-		buildingDict ["58f3eb594e973b0011f5f6b4"] = 2;
-		buildingDict ["58f3eb594e973b0011f5f6b7"] = 3;
+		buildingDict ["58f3eb594e973b0011f5f6b6"] = 1;
+		buildingDict ["58f3eb594e973b0011f5f6b0"] = 2;
+		buildingDict ["58f3eb594e973b0011f5f6b4"] = 3;
+		buildingDict ["58f3eb594e973b0011f5f6b7"] = 4;
+		buildingDict ["58f3eb594e973b0011f5f6b3"] = 5;
+		buildingDict ["58f3eb594e973b0011f5f6b5"] = 6;
+		buildingDict ["58f3eb594e973b0011f5f6b2"] = 7;
+		buildingDict ["58f3eb594e973b0011f5f6b1"] = 8;
+		buildingDict ["58f3eb594e973b0011f5f6af"] = 9;
+		buildingDict ["58f3eb594e973b0011f5f6ae"] = 10;
+
 
 	}
 
@@ -35,7 +42,7 @@ public class BuildingCreator : MonoBehaviour {
 			index = buildingDict [markerId];
 		}
 		else{
-			index = (int)Random.Range (0, 3);
+			index = 0;
 		}
 		loadScene();
 	}

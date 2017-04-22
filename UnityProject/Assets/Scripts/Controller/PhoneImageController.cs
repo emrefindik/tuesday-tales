@@ -20,8 +20,10 @@ public class PhoneImageController : MonoBehaviour {
 	public GameObject KaijuSelfieModel;
 	public GameObject BuildingSelfieModel;
 	public GameObject EggSelfieModel;
+	public GameObject EggCheckinModel;
 
 	public Texture2D screenShotCopy;
+	public GameObject photoRect;
 	static public FacebookManager.ShareStatus shareStatus;
 
 	string frontCamName = "";
@@ -35,6 +37,7 @@ public class PhoneImageController : MonoBehaviour {
 		BuildingDestruction,
 		EggHatching,
 		Kaiju,
+		EggCheckin,
 		None
 	}
 
@@ -49,7 +52,7 @@ public class PhoneImageController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		//initCamera (CameraMode.EggHatching);
+		//initCamera (CameraMode.EggCheckin);
 		shareStatus = FacebookManager.ShareStatus.None;
 	}
 
@@ -68,6 +71,7 @@ public class PhoneImageController : MonoBehaviour {
 		KaijuSelfieModel.SetActive (false);
 		BuildingSelfieModel.SetActive (false);
 		EggSelfieModel.SetActive (false);
+		EggCheckinModel.SetActive (false);
 
 		MainMenuScript mainMenu = mainController.gameObject.GetComponent<MainMenuScript> ();
 
@@ -83,11 +87,17 @@ public class PhoneImageController : MonoBehaviour {
 			EggSelfieModel.SetActive (true);
 			GameObject Egg = GameObject.Find ("Egg");
 			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
+			Egg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
 			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			break;
+		case CameraMode.EggCheckin:
+			EggCheckinModel.SetActive (true);
+			GameObject CheckinEgg = GameObject.Find ("CheckinEgg");
+			CheckinEgg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
 			break;
 		default:
 			break;	
@@ -109,20 +119,30 @@ public class PhoneImageController : MonoBehaviour {
 			// Means getting image
 			if (!CAMREADY) {
                 Debug.Log("Initializing Camera");
-				double ratio = (float)pCamera.height / (float)pCamera.width;
-				double screenRatio = (float)Screen.height / (float)Screen.width;
+				double ratio = (float)pCamera.width / (float)pCamera.height;
+				double screenRatio = (double)Screen.height / (double)Screen.width;
 				//camDisplayPlane.transform.localScale += new Vector3 (0.0f, 0.0f, (float)(ratio-1.0));
 				GameObject cameraImage = camDisplayCanvas.transform.FindChild ("CameraImage").gameObject;
 
                 if(Application.platform == RuntimePlatform.Android)
                     cameraImage.transform.rotation = Quaternion.Euler(0, 0, 90);
-				if (screenRatio > ratio) {
+				
+				if (screenRatio < ratio) {
+					camDisplayCanvas.GetComponent<CanvasScaler> ().referenceResolution = new Vector2 (Screen.width, Screen.height);
 					cameraImage.GetComponent<RectTransform> ().
-					SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(Screen.height * ratio));
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, (float)(Screen.width * ratio));
+					cameraImage.GetComponent<RectTransform> ().
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(Screen.width));
 				} else { 
+					camDisplayCanvas.GetComponent<CanvasScaler> ().referenceResolution = new Vector2 (Screen.width, Screen.height);
 					cameraImage.GetComponent<RectTransform> ().
-					SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, (float)(Screen.width / ratio));
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, (float)(Screen.height));
+					cameraImage.GetComponent<RectTransform> ().
+					SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, (float)(Screen.height / ratio));
 				}
+
+
+
 
 				CAMREADY = true;
 				camDisplayCanvas.SetActive (true);
@@ -255,7 +275,7 @@ public class PhoneImageController : MonoBehaviour {
 		uiCanvas.SetActive (true);
 
 		shareCanvas.SetActive (true);
-		GameObject photoRect = shareCanvas.transform.Find ("Photo").gameObject;
+		//photoRect = shareCanvas.transform.Find ("Photo").gameObject;
 		photoRect.GetComponent<RawImage> ().texture = screenShotCopy;
 		float ratio = (float)screenShotCopy.width / (float)screenShotCopy.height;
 		Debug.Log ("Screenshot Width" + screenShotCopy.width);
