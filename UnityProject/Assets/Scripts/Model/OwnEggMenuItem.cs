@@ -56,12 +56,12 @@ public class OwnEggMenuItem : GenericEggMenuItem
     private IEnumerator hatchEgg()
     {
         MessageController.single.displayWaitScreen(MainMenuScript.EggsCanvas);
-        yield return SpatialClient2.single.hatchEgg(_egg);
-        Destroy(gameObject);
         MainController.single.selectedEgg = _egg;
         MainMenuScript.addKaijuButton(_egg.KaijuEmbryo);
         MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.EggHatching);
         MessageController.single.closeWaitScreen(true);
+        Destroy(gameObject);
+        yield return SpatialClient2.single.hatchEgg(_egg);
     }
 
 	//Nicky's Code Start

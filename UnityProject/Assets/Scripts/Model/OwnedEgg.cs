@@ -158,12 +158,12 @@ public class OwnedEgg
 			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForSelf(), new LocationCombination(markersToTake, genericLocationsToTake));
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
             yield return egg.initializeKaiju();
-            yield return SpatialClient2.single.addEggToSelf(egg);
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = egg; // also updates the egg menu item's view
 			MainMenuScript.addNewEggToCheckinnables(egg);
-			Debug.Log("egg created");
+            yield return SpatialClient2.single.addEggToSelf(egg);
+            Debug.Log("egg created");
         }
         else
         {
@@ -184,8 +184,8 @@ public class OwnedEgg
 			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForFriend(friend), new LocationCombination(markersToTake, genericLocationsToTake));
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
             yield return egg.initializeKaiju();
-            yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
 			MainMenuScript.addNewEggToCheckinnables(egg);
+            yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
         }
         else
         {
