@@ -85,7 +85,8 @@ function updateCurrentLocation(lat, lon){
     latitude = lat;
     longitude = lon;
     var newLatLng = new google.maps.LatLng(latitude, longitude);
-    meLocation.setPosition(newLatLng);
+    //meLocation.setPosition(newLatLng);
+	meLocation.setCenter(newLatLng);
 }
 
 function resizeMap() {
@@ -104,27 +105,33 @@ function updateMultiplier(newMultiplier)
     document.getElementById("multiplier").innerHTML = newMultiplier.toString();
 }
 
-secondsRemaining = 0;
+/*secondsRemaining = 0;
 function startTimer(seconds)
 {
     secondsRemaining = seconds - 1;
     timer = setInterval(updateTimer, 1000);
     updateDisplayedTime();
-}
+} */
 
-function updateDisplayedTime()
+function updateDisplayedTime(secondsRemaining)
 {
-    var secondText = (secondsRemaining % 60).toString();
-    if (secondsRemaining % 60 < 10)
+    if (secondsRemaining < 0)
     {
-        secondText = "0" + secondText;
+        if (score > 0) timeout();
     }
-    document.getElementById("time").innerHTML = Math.floor(secondsRemaining / 60).toString() + ": " + secondText;
+    else
+    {
+        var secondText = (secondsRemaining % 60).toString();
+        if (secondsRemaining % 60 < 10) {
+            secondText = "0" + secondText;
+        }
+        document.getElementById("time").innerHTML = Math.floor(secondsRemaining / 60).toString() + ": " + secondText;
+    }
 }
 
 function timeout()
 {
-    clearInterval(timer);
+    //clearInterval(timer);
     updateScore(0);
 	updateMultiplier(1);
 	pathMarkerSpatialIds = []
@@ -135,22 +142,12 @@ function timeout()
 	document.getElementById("time").innerHTML = "";
 	
 	// let Spatial know that the player timed out
-    window.location.href = "uniwebview://resetscore";
-}
-
-function updateTimer()
-{
-    if (secondsRemaining == 0)
-    {
-        timeout();
-        return;
-    }
-    secondsRemaining = secondsRemaining - 1;
-    updateDisplayedTime();
+    //window.location.href = "uniwebview://resetscore";
 }
 
 function onMarkerClick(markerId, markerPosition) {
-	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
+	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {  OLD CODE
+	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {  NEW CODE
 		window.location.href = "uniwebview://destroy?id=" + markerId;
 	//} else {
 		// TODO show error screen
@@ -162,18 +159,19 @@ function updatePath() {
 	googleMarkers.forEach(function(marker) {
 		for (var i = 0; i < pathMarkerSpatialIds.length; i++) {
 			if (pathMarkerSpatialIds[i] == marker.spatialId) {
-				newPath.push(marker.getPosition());
+				newPath[i] = marker.getPosition();
 				marker.setMap(null);
 				marker.intactOverlay.setMap(null);
-				marker.destroyedOverlay.setMap(map);
+				if (map.getZoom() > 15) marker.destroyedOverlay.setMap(map);
 				return;
 			}
 		}
 		// we know marker is not in path
 		marker.setMap(map);
-		marker.intactOverlay.setMap(map);
+		if (map.getZoom() > 15) marker.intactOverlay.setMap(map);
 		marker.destroyedOverlay.setMap(null);
 	});
+	newPath = newPath.filter(function(n){ return n != undefined });
 	destroyPath.setPath(newPath);
 }
 
@@ -190,7 +188,7 @@ function initializeMap() {
 		map.setCenter(mapCenter);
 	});
 	
-    meLocation = new google.maps.Marker({
+    /*meLocation = new google.maps.Marker({
                                               position: {lat: latitude, lng: longitude},
                                               map: map,
                                               icon: {
@@ -205,6 +203,17 @@ function initializeMap() {
                                               //url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
                                                 url: "http://matthewestone.com/PhotoTest/58deb4c133627.png"
                                               }
+    }); */
+	
+	meLocation = new google.maps.Circle({
+                                              center: {lat: latitude, lng: longitude},
+											  map: map,
+                                              radius: maxCheckInDistance,
+											  strokeColor: "#161616",
+											  strokeOpacity: 0.3,
+											  strokeWeight: 2,
+											  fillColor: "#2062B3",
+											  fillOpacity: 0.3
     });
 
 	destroyPath = new google.maps.Polyline({
@@ -223,8 +232,7 @@ function initializeMap() {
 				var googleMarker = new google.maps.Marker({
 					position: {lat: spatialMarker.loc.coordinates[1], lng: spatialMarker.loc.coordinates[0]},
 					label: {
-						color: "yellow",
-						fontSize: "35px",
+						fontSize: "14px",
 						fontWeight: "bold",
 						text: spatialMarker.name
 					},
@@ -234,6 +242,7 @@ function initializeMap() {
 				googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, googleMarker.getPosition()); });
 				googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
 				googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
+				// TODO check if intactImagePath or destroyedImagePath exists, otherwise load map overlay
 				googleMarkers.push(googleMarker);
 				break;
 			case "overlay":
@@ -246,6 +255,18 @@ function initializeMap() {
 	});
 	updatePath();
 	
+	google.maps.event.addListener(map, 'zoom_changed', function() {
+		if (map.getZoom() <= 15) {
+			googleMarkers.forEach(function(marker){
+				marker.setMap(null);
+			});
+		} else {                           
+			googleMarkers.forEach(function(marker){
+				marker.setMap(map);
+			});
+		}
+	});
+	
 	//var mapOverla = new google.maps.GroundOverlay("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", { north: 40.445924, south: 40.439190, east: -79.936435, west: -79.948635 }, {opacity: 0.2});
 	//mapOverla.setMap(map);
 }
@@ -254,7 +275,8 @@ function initializeMap() {
 // lon = longitude the player is currently at
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
-function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
+    //function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
+function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarkerIds) {
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
@@ -289,16 +311,16 @@ function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multipl
         // no need to display the timer
         document.getElementById("timetext").innerHTML = "";
     }
-    else
+    /*else
     {
         startTimer(timerSeconds);
-    }
+    } */
     
 }
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, []);
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
 </script>
 </body>
 </html>

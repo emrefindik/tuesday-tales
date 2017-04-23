@@ -23,10 +23,14 @@ public class MainMenuScript : MonoBehaviour
     // the scene index of the destruction scene in the build settings
     const int DESTRUCTION_SCENE_INDEX = 1;
 
+    // the number of fixedupdate calls after which we update the timer on map.html
+    const int UPDATE_TIMER_INTERVAL = 3;
+
     public const string MAP_ADDRESS = "map.html";
 
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
     const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
+    const string JS_UPDATE_TIMER_NAME = "updateDisplayedTime";
     //const string JS_CHECKIN_LOCATION = "addPointToPath";
 
     private static bool mapLoaded;
@@ -166,6 +170,7 @@ public class MainMenuScript : MonoBehaviour
     private Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> _placeTypes;
     private Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
     private Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
+    private int _untilNextTimerUpdate;
 
     public Kaiju SelectedKaiju
     {
@@ -175,6 +180,7 @@ public class MainMenuScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        _untilNextTimerUpdate = 0;
         _locationUpdateCoroutine = null;
         webView = _webView;
         eggsCanvas = _eggsCanvas;
@@ -207,9 +213,19 @@ public class MainMenuScript : MonoBehaviour
 		friendEggToegg ();
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
-
+        if (mapLoaded)
+        {
+            if (_untilNextTimerUpdate <= 0)
+            {
+                _webView.EvaluatingJavaScript(JS_UPDATE_TIMER_NAME +
+                    '(' + SpatialClient2.single.getTimer().ToString() + ')');
+                _untilNextTimerUpdate = UPDATE_TIMER_INTERVAL;
+            }
+            else
+                _untilNextTimerUpdate--;
+        }
     }
 
     public IEnumerator submit()
@@ -356,7 +372,7 @@ public class MainMenuScript : MonoBehaviour
 				SpatialClient2.baseURL + "\",\"" +
 				SpatialClient2.PROJECT_ID + "\"," +
 				SpatialClient2.single.getScore().ToString() + ',' +
-				SpatialClient2.single.getTimer().ToString() + ',' +
+				//SpatialClient2.single.getTimer().ToString() + ',' +
 				SpatialClient2.single.getMultiplier().ToString() + ',' +
 				SpatialClient2.single.getStreakPathAsJsonString() + ')');
 
@@ -673,7 +689,6 @@ public class MainMenuScript : MonoBehaviour
 					else
 						item.disableCheckInButton();
 				}
-                
             }
             yield return new WaitForSeconds(CHECK_INNABLE_UPDATE_INTERVAL);
         }
