@@ -115,6 +115,7 @@ public class KaijuDatabase : MonoBehaviour {
 
     private IEnumerator checkAndDownloadHeadSprite(int index, CoroutineResponse response)
     {
+		Debug.Log ("Downloading Head Sprites: " + index.ToString ());
         response.reset();
         while (_headDownloadingIndex == index) yield return null; // this image is currently being downloaded
         if (_headSprites.ContainsKey(index))

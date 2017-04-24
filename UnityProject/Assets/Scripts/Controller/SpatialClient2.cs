@@ -113,9 +113,13 @@ public class SpatialClient2 : MonoBehaviour
 
     private void setUpMarkers()
     {
-        //StartCoroutine(DeleteMarkerById("58f11e8da30d230011f0f121"));
+        //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
-
+		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
+		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Mount Everest", "", MarkerMetadata.newCheckInLocationMetadata()));
+		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Hawaii", "", MarkerMetadata.newCheckInLocationMetadata()));
+		//StartCoroutine(DeleteMarkerById("58f3eb594e973b0011f5f6b5"));
+		//StartCoroutine (CreateMarker (40.44334, -79.943345, "Purnell Center for the Arts", "Home to Carnegie Mellon University's School of Drama and the Philip Chosky Theater.", MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.jpg", "", new ImageBounds (40.4435, 40.4431, -79.9431, -79.9435))));
         /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
         StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
         //StartCoroutine(DeleteMarkerById("58f2df8699807700111ae95d"));
@@ -126,8 +130,8 @@ public class SpatialClient2 : MonoBehaviour
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
 
         List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
-        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
-        List<string> str1 = new List<string>();
+        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();*/
+        /*List<string> str1 = new List<string>();
         str1.Add("58f00e3f2aac62001128c2c1"); // cathedral of learning - right off campus
         List<string> str2 = new List<string>();
         str2.Add("58f00e3f2aac62001128c2c2"); // peace garden - on campus
@@ -156,10 +160,21 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str7), 4));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
-        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2)); */
 
-        StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2))));
-        */
+		/*List<string> str2 = new List<string>();
+		str2.Add("58fd43ac8bd5410011d11150"); // mount everest
+		List<string> str3 = new List<string>();
+		str3.Add("58fd43ac8bd5410011d11152"); // hawaii
+		List<string> str4 = new List<string>();
+		str4.Add("58fd43ac8bd5410011d11151"); // paris
+
+		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 1));
+		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 1));
+		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 1));
+
+        StartCoroutine(CreateMarker(40.442557, -79.942535, "softs kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2))));
+		*/
     }
 
     private void Update()
