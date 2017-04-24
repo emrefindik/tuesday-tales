@@ -113,6 +113,39 @@ public class SpatialClient2 : MonoBehaviour
 
     private void setUpMarkers()
     {
+		/*StartCoroutine (CreateUser (new CoroutineResponse (), "1qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "2qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "3qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "4qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "5qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "6qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "7qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "8qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "9qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "0qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "11qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "12qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "13qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "14qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "15qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "16qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "17qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "18qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "19qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "10qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "21qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "22qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "23qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "24qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "25qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "26qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "27qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "28qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "29qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "20qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "30qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "31qa", "1"));
+		StartCoroutine (CreateUser (new CoroutineResponse (), "32qa", "1")); */
         //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
 		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));

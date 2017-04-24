@@ -239,6 +239,7 @@ public class PhoneImageController : MonoBehaviour {
 		Texture2D screenshot = ScreenCapture.Capture();
 
 		Color32[] pix = screenshot.GetPixels32();
+		Destroy (screenShotCopy);
 		screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
 		screenShotCopy.SetPixels32(pix);
 		screenShotCopy.Apply();
