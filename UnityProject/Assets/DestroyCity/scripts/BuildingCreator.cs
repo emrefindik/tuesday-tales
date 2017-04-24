@@ -19,7 +19,7 @@ public class BuildingCreator : MonoBehaviour {
 		buildingDict ["58f3eb594e973b0011f5f6b4"] = 3;
 		buildingDict ["58f3eb594e973b0011f5f6b7"] = 4;
 		buildingDict ["58f3eb594e973b0011f5f6b3"] = 5;
-		buildingDict ["58f3eb594e973b0011f5f6b5"] = 6;
+		buildingDict ["58fd56788bd5410011d1115d"] = 6;
 		buildingDict ["58f3eb594e973b0011f5f6b2"] = 7;
 		buildingDict ["58f3eb594e973b0011f5f6b1"] = 8;
 		buildingDict ["58f3eb594e973b0011f5f6af"] = 9;
