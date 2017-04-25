@@ -160,15 +160,20 @@ function updatePath() {
 		for (var i = 0; i < pathMarkerSpatialIds.length; i++) {
 			if (pathMarkerSpatialIds[i] == marker.spatialId) {
 				newPath[i] = marker.getPosition();
+                marker.inPath = true;
 				marker.setMap(null);
 				marker.intactOverlay.setMap(null);
-				if (map.getZoom() > 15) marker.destroyedOverlay.setMap(map);
+				if (map.getZoom() > 15)
+                    marker.destroyedOverlay.setMap(map);
 				return;
 			}
 		}
 		// we know marker is not in path
-		marker.setMap(map);
-		if (map.getZoom() > 15) marker.intactOverlay.setMap(map);
+        marker.inPath = false;
+        if (map.getZoom() > 15) {
+            marker.setMap(map);
+            marker.intactOverlay.setMap(map);
+        }
 		marker.destroyedOverlay.setMap(null);
 	});
 	newPath = newPath.filter(function(n){ return n != undefined });
@@ -239,6 +244,7 @@ function initializeMap() {
 					title: spatialMarker.name
 				});
 				googleMarker.spatialId = spatialMarker._id;
+                googleMarker.inPath = false;
 				googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, googleMarker.getPosition()); });
 				googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
 				googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
@@ -259,10 +265,20 @@ function initializeMap() {
 		if (map.getZoom() <= 15) {
 			googleMarkers.forEach(function(marker){
 				marker.setMap(null);
+                marker.intactOverlay.setMap(null);
+                marker.destroyedOverlay.setMap(null);
 			});
 		} else {                           
 			googleMarkers.forEach(function(marker){
-				marker.setMap(map);
+                if (marker.inPath)
+                {
+                    marker.destroyedOverlay.setMap(map);
+                }
+                else
+                {
+                    marker.setMap(map);
+                    marker.intactOverlay.setMap(map);
+                }
 			});
 		}
 	});

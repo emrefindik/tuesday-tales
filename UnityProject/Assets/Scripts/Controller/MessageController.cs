@@ -57,6 +57,8 @@ public class MessageController : MonoBehaviour
 			_pleaseWaitCanvas.enabled = true;
 		}
         _canvasesWaiting++;
+		Debug.Log ("CanvasWaiting: " + _canvasesWaiting);
+
     }
 
     public void displayError(Canvas sender, string errorText)
@@ -90,6 +92,7 @@ public class MessageController : MonoBehaviour
 			else
 				showPreviousScreen();
         }
+		Debug.Log ("Close Wait Screen" + _canvasesWaiting);
     }
 
     public void onBackFromErrorScreen()
