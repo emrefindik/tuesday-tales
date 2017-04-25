@@ -23,13 +23,13 @@ public class GetFriendsHandler : MonoBehaviour {
 			StartCoroutine (SpatialClient2.single.LoginUser (new CoroutineResponse(), username, password));
 		}
 		if (Input.GetKeyDown(KeyCode.M)) {
-			StartCoroutine (SpatialClient2.single.CreateMarker (50f,50f,"test", "test marker",null));
+			//StartCoroutine (SpatialClient2.single.CreateMarker (50f,50f,"test", "test marker",null));
 		}
 		if (Input.GetKeyDown (KeyCode.I)) {
 			StartCoroutine(SpatialClient2.single.GetProjectInfo());
 		}
 		if (Input.GetKeyDown (KeyCode.A)) {
-			StartCoroutine(SpatialClient2.single.AddFriend(friendID, Auth)); 
+			StartCoroutine(SpatialClient2.single.AddFriend(friendID, Auth));
 		}
 		if (Input.GetKeyDown (KeyCode.G)) {
 			StartCoroutine(SpatialClient2.single.GetFriends(userID)); 

@@ -40,6 +40,14 @@ public class Kaiju : ISerializationCallbackReceiver
     }
 
     [SerializeField]
+    private string _givenName;
+    public string GivenName
+    {
+        get { return _givenName; }
+        set { _givenName = value; }
+    }
+
+    [SerializeField]
     /** The user IDs (NOT FRIEND ID!) of the friend that helped you hatch this kaiju's egg */
     private IdList _helpers;
     public IEnumerable<string> Helpers
@@ -72,11 +80,12 @@ public class Kaiju : ISerializationCallbackReceiver
         _headType = headType;
         _bodyType = bodyType;
         _name = name;
+        _givenName = "";
         _helpers = null; // not an empty list. the list will be created once the egg hatches.
     }
 
     /** Hatch this kaiju. DOES NOT add it to the user metadata */
-    public void hatch(OwnedEgg egg)
+    /*public void hatch(OwnedEgg egg)
     {
         if (_helpers == null) _helpers = new IdList(egg.Helpers);
     }
@@ -84,6 +93,14 @@ public class Kaiju : ISerializationCallbackReceiver
     public bool isHatched()
     {
         return _helpers != null;
+    } */
+
+    /** Adds the friend user ID to the list of friends who helped this egg hatch,
+      * if that friend does not already exist in that list. */
+    public void addHelper(string friendUserId)
+    {
+        Debug.Log(_helpers.containsId(friendUserId));
+        if (!_helpers.containsId(friendUserId)) _helpers.add(friendUserId);
     }
 
     public IEnumerator initializeSprites(CoroutineResponse response)

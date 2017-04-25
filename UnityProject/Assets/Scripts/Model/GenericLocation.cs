@@ -189,7 +189,13 @@ public class GenericLocation : CheckInPlace
         , TRAVEL_AGENCY
         , UNIVERSITY
         , VETERINARY_CARE
-        , ZOO, DEFAULT
+        , ZOO
+            
+            
+            
+        
+        // KEEP THIS HERE    
+        , DEFAULT
     }
 
     public static GooglePlacesType stringToGooglePlacesType(string placeType)
