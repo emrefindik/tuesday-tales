@@ -4,13 +4,17 @@
 <style>
     #wrapper { position: relative; }
     #map { z-index: 1 }
-    #statsscreen { position: absolute; top: 5px; right: 5px; width: 50%; height: 25%; z-index: 99; background-color: #eeeeee; border-size: 3px; border-style: solid; border-color: #444444}
+    #statsscreen { position: absolute; top: 0px; right: 0px; left: 0px; bottom: 0px; width: 100%; height: 100%; z-index: 99; pointer-events: none}
+    #frameimage {position:absolute; top: 0px; right: 0px; left: 0px; bottom: 0px; width: 100%; height: 100%;}
+    #timervalue { position: absolute; top: 11.5%; width: 100%; height: 10%; text-align: center; font-size: 7vw;}
+    #resourceimage{position: absolute; top:8%; left: 10%; right: 20%; width: 6vw; height: 6vw; margin: auto}
+    #scorevalue { position: absolute; top: 9%; left: 20%; right: 20%; width: 4vw; height: 4vw; margin: auto}
+    #multipliertextdiv { position: absolute; top: 4%; left:4%; right:20%; height: 10%; text-align: center; font-size: 4vw;}
+    #multipliervalue { position: absolute; top: 3.7%; left: 18%; right:12%; height: 10%; text-align: center; font-size: 4vw;}
+
     #scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 30%; }
     #timertextdiv { position: absolute; bottom: 35%; left: 5%; width: 50%; height: 30%; }
-    #multipliertextdiv { position: absolute; bottom: 5%; left: 5%; width: 50%; height: 30%; }
-    #scorevalue { position: absolute; top: 5%; right: 5%; width: 40%; height: 30%; }
-    #timervalue { position: absolute; bottom: 35%; right: 5%; width: 40%; height: 30%; }
-    #multipliervalue { position: absolute; bottom: 5%; right: 5%; width: 40%; height: 30%; }
+    
     #eggsDiv { position: absolute; right: 15%; bottom: 5%; width: 30%; z-index: 99 }
     #eggsDummy { height: 0; margin-top: 66%; }
     #eggsButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
@@ -20,17 +24,26 @@
     #cameraDiv { position: absolute; bottom: 5%; margin-left: auto; margin-right: auto; left: 0; right: 0; width: 18%; z-index: 99 }
     #cameraDummy { height: 0; margin-top: 100%; }
 	#cameraButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
-    h1 { font-size: 20px; }
+    h1 { font-size: 4vw; text-align: center; }
 </style>
 <div id="wrapper">
 	<div id="map"></div>
 	<div id="statsscreen">
+        <img id="frameimage" src="Frame_with_timer.png"></img>
+        <img id="resourceimage" src="Fossile_coin.png"</img>
+        <div id="multipliervalue"><h1 id="multiplier"></h1></div>
+        <div id="scorevalue"><h1 id="score"></h1></div>
+        <div id="multipliertextdiv"><h1 id="multipliertext"></h1></div>
+        <div id="timervalue"><h1 id="time"></h1></div>
+            
+        <!--
 		<div id="scoretextdiv"><h1 id="scoretext">Score:</h1></div>
 		<div id="timertextdiv"><h1 id="timetext">Time:</h1></div>
 		<div id="multipliertextdiv"><h1 id="multipliertext">Combo:</h1></div>
 		<div id="scorevalue"><h1 id="score"></h1></div>
 		<div id="timervalue"><h1 id="time"></h1></div>
 		<div id="multipliervalue"><h1 id="multiplier"></h1></div>
+         -->
     </div>
     <div id="kaijuDiv"><div id="kaijuDummy"></div><img id="kaijuButton" src="Kaiju_button.png" onclick="toKaiju()"></img></div>
     <div id="cameraDiv"><div id="cameraDummy"></div><img id="cameraButton" src="Minus_button.png"></img></div>
@@ -336,7 +349,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
+loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
 </script>
 </body>
 </html>

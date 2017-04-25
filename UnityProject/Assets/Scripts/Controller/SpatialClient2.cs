@@ -863,7 +863,7 @@ public class SpatialClient2 : MonoBehaviour
         response.setSuccess(true);
     }
 
-    public IEnumerator AddFriend(string friendID, string projectID = PROJECT_ID)
+    public IEnumerator AddFriend(CoroutineResponse response, string friendID, string projectID = PROJECT_ID)
     {
         MessageController.single.displayWaitScreen(MainMenuScript.FriendsCanvas);
         ready = false;
