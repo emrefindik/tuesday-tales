@@ -74,7 +74,7 @@ public class MainController : MonoBehaviour
 			break;
 		//case GameState.MainMenu:
 		//	goToMainMenu ();
-			break;
+			//break;
 		case GameState.MapView:
 			goToMapView ();
 			break;

@@ -30,7 +30,7 @@ public class OwnEggMenuItem : GenericEggMenuItem
         
     override protected IEnumerator updateServer()
     {
-		yield return SpatialClient2.single.updateMetadataAfterOwnEggCheckedIn(_egg.Name);
+		yield return SpatialClient2.single.updateMetadataAfterOwnEggCheckedIn(_egg.KaijuEmbryo.Name);
     }
 
 	override protected void initializeOtherText()
