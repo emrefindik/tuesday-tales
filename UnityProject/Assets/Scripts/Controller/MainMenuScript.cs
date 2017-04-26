@@ -847,4 +847,37 @@ public class MainMenuScript : MonoBehaviour
         _logoCanvas.enabled = false;
     }
 
+	public void onAddFriend()
+	{
+		string userName = _friendsEggsScrollView.transform.
+			FindChild ("FriendUsernameField").GetComponent<InputField> ().text;
+
+		string userID = "";
+		// Call Spatial Client
+		// string userId =
+		StartCoroutine(addFriend(userID));
+	}
+
+	IEnumerator addFriend(string userID)
+	{
+		CoroutineResponse response = new CoroutineResponse();
+		response.reset();
+		yield return SpatialClient2.single.AddFriend(response, userID);
+		switch (response.Success)
+		{
+		case true:
+			// add Friend to canvas
+
+			break;
+		case false:
+			// 
+
+			break;
+		case null:
+			// 
+
+			break;
+		}
+	}
+		
 }

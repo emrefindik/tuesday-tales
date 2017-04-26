@@ -87,7 +87,6 @@ public class PhoneImageController : MonoBehaviour {
 			EggSelfieModel.SetActive (true);
 			GameObject Egg = GameObject.Find ("Egg");
 			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
-			Egg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
@@ -240,6 +239,7 @@ public class PhoneImageController : MonoBehaviour {
 		Texture2D screenshot = ScreenCapture.Capture();
 
 		Color32[] pix = screenshot.GetPixels32();
+		Destroy (screenShotCopy);
 		screenShotCopy = new Texture2D(screenshot.width, screenshot.height);
 		screenShotCopy.SetPixels32(pix);
 		screenShotCopy.Apply();

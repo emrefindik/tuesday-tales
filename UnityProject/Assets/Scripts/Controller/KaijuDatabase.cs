@@ -40,6 +40,7 @@ public class KaijuDatabase : MonoBehaviour {
         return EGG_SPRITE_PATH + index.ToString() + PNG;
     }
 
+
     private Dictionary<int, Sprite> _handSprites;
     public Dictionary<int, Sprite> HandSprites
     {
@@ -68,10 +69,18 @@ public class KaijuDatabase : MonoBehaviour {
         private set { _bodySprites = value; }
     }
 
+
     private int _handDownloadingIndex;
     private int _headDownloadingIndex;
     private int _bodyDownloadingIndex;
     private int _eggDownloadingIndex;
+
+	/* Nicky Start */
+	public Sprite [] eggSprite;
+	public Sprite [] bodySprite;
+	public Sprite [] headSprite;
+	public Sprite [] handSprite;
+	/* Nicky End */
 
     void Start()
     {
@@ -85,6 +94,19 @@ public class KaijuDatabase : MonoBehaviour {
         _headSprites = new Dictionary<int, Sprite>();
         _handSprites = new Dictionary<int, Sprite>();
 
+		for (int i = 0; i < eggSprite.Length; i++) {
+			_eggSprites [i+1] = eggSprite [i];
+		}
+		for (int i = 0; i < headSprite.Length; i++) {
+			_headSprites [i+1] = headSprite [i];
+		}
+		for (int i = 0; i < handSprite.Length; i++) {
+			_handSprites [i+1] = handSprite [i];
+		}
+		for (int i = 0; i < bodySprite.Length; i++) {
+			_bodySprites [i+1] = bodySprite [i];
+		}
+
     }
 
     private IEnumerator checkAndDownloadHandSprite(int index, CoroutineResponse response)
@@ -96,6 +118,7 @@ public class KaijuDatabase : MonoBehaviour {
             response.setSuccess(true);
             yield break;
         }
+		Debug.Log("Should never go here");
         _handDownloadingIndex = index;
         WWW www = new WWW(handSpriteAtIndex(index));
         yield return www;
