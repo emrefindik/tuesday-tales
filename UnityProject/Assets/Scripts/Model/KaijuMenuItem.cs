@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class KaijuMenuItem : MonoBehaviour
 {
     public Text _kaijuNameText;
+    public Text _kaijuGivenNameText;
     public Text _kaijuDescriptionText;
     public Image _kaijuImage;
 
@@ -20,6 +21,7 @@ public class KaijuMenuItem : MonoBehaviour
         {
             _kaiju = value;
             _kaijuNameText.text = value.Name;
+            _kaijuGivenNameText.text = value.GivenName;
             _kaijuImage.sprite = value.HeadSprite;
 			_kaijuImage.color = value.MonsterColor;
             // TODO SET KAIJUIMAGE!!

@@ -256,6 +256,7 @@ public class MainMenuScript : MonoBehaviour
                 //_pleaseWaitCanvas.enabled = false;
                 //_mainMenuCanvas.enabled = true;
                 Debug.Log("loading webpage");
+                yield return SpatialClient2.single.checkIfMarkersExist(); // populates with building markers if there are none around
                 _webView.Load();
                 break;
             case false:
@@ -335,14 +336,14 @@ public class MainMenuScript : MonoBehaviour
     {
         _kaijuCanvas.enabled = false;
         MessageController.single.displayWaitScreen(_kaijuCanvas);
-        _webView.Load();
+        _webView.Show();
     }
 
     public void onBackFromEggs()
     {
         _eggsCanvas.enabled = false;
         MessageController.single.displayWaitScreen(_eggsCanvas);
-        _webView.Load();
+        _webView.Show();
     }
 
     /** Called when uniwebview successfully loads the HTML page */
@@ -363,7 +364,7 @@ public class MainMenuScript : MonoBehaviour
                 SpatialClient2.single.getStreakPathAsJsonString() + ')');
                 // TODO add selected kaiju information to loadMap in map.html
                 */
-
+            
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
 				//Input.location.lastData.latitude.ToString() + ',' +
 				//Input.location.lastData.longitude.ToString() + ",\"" +
@@ -378,7 +379,6 @@ public class MainMenuScript : MonoBehaviour
 
 
 			// TODO add selected kaiju information to loadMap in map.html
-
             _webView.Show();
             MessageController.single.closeWaitScreen(false);
 			foreach (Canvas c in FindObjectsOfType<Canvas>())

@@ -40,7 +40,7 @@ public class OwnedEgg
     }
 
     /** The user IDs (NOT FRIEND ID!) of the friend that helped you hatch this egg */
-    [SerializeField]
+    /*[SerializeField]
     private IdList _helpers;
     public IEnumerable<string> Helpers
     {
@@ -49,7 +49,7 @@ public class OwnedEgg
             if (_helpers != null) return _helpers;
             return Enumerable.Empty<string>();
         }
-    }
+    } */
 
     [SerializeField]
     /** The user IDs (NOT FRIEND ID!) of the friends you sent requests to */
@@ -72,13 +72,13 @@ public class OwnedEgg
         private set { _id = value; }
     }
 
-    [SerializeField]
+    /*[SerializeField]
     private string _name;
     public string Name
     {
         get { return _name; }
         private set { _name = value; }
-    }
+    } */
 
     [SerializeField]
     private Kaiju _kaiju;
@@ -111,36 +111,23 @@ public class OwnedEgg
 
     // TODO add other relevant fields
 
-    private OwnedEgg(string name, int imageIndex, string id, LocationCombination combo)
+    private OwnedEgg(int imageIndex, string id, LocationCombination combo, string kaijuName, Kaiju kaiju)
     {
-        _name = name;
         _id = id;
         _imageIndex = imageIndex;
-        _helpers = new IdList();
         _requests = new IdList();
         _requiredLocations = combo;
         //_size = STARTING_EGG_SIZE;
         _checkInnableMarkers = new List<HatchLocationMarker>();
         _checkInnableLocs = new Dictionary<BasicMarker, HashSet<GenericLocation>>();
         _hatchable = !(PlacesToTake.Count() > 0);
-        _kaiju = null;
+        _kaiju = kaiju;
+        _kaiju.GivenName = kaijuName;
     }
 
     public IEnumerator initializeSprite(CoroutineResponse response)
     {
         yield return KaijuDatabase.instance.checkAndDownloadEggSprite(_imageIndex, response);
-    }
-
-    public IEnumerator initializeKaiju()
-    {
-        if (_kaiju == null)
-        {
-            List<SpatialMarker> markersAround = new List<SpatialMarker>();
-            CoroutineResponse markerResponse = new CoroutineResponse();
-            yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, UserMetadata.KAIJU_MARKER_RADIUS, true, markersAround, markerResponse);
-            _kaiju = (new KaijuFrequencyList()).randomKaiju(markersAround);
-        }
-        else yield break;
     }
 
     public static IEnumerator createEggForSelf(GameObject eggMenuItemPrefab, Transform eggMenuContentPanel, int imageIndex, string eggName = "")
@@ -154,10 +141,9 @@ public class OwnedEgg
 			Debug.Log("hell yeah");
 			List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
 			List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
-			yield return SpatialClient2.single.getLocationsForEgg ((new LocationFrequencyList ()).randomKaiju (markersAround), markersToTake, genericLocationsToTake);
-			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForSelf(), new LocationCombination(markersToTake, genericLocationsToTake));
+			yield return SpatialClient2.single.getLocationsForEgg (SpatialClient2.single.randomLocationFromMarkers(markersAround), markersToTake, genericLocationsToTake);
+			OwnedEgg egg = new OwnedEgg(imageIndex, SpatialClient2.single.newEggIdForSelf(), new LocationCombination(markersToTake, genericLocationsToTake), eggName, SpatialClient2.single.randomKaijuFromMarkers(markersAround));
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
-            yield return egg.initializeKaiju();
             GameObject eggMenuItem = GameObject.Instantiate(eggMenuItemPrefab);
             eggMenuItem.transform.SetParent(eggMenuContentPanel, false);
             eggMenuItem.GetComponent<OwnEggMenuItem>().Egg = egg; // also updates the egg menu item's view
@@ -180,10 +166,9 @@ public class OwnedEgg
             yield return SpatialClient2.single.GetMarkersByDistance(Input.location.lastData.longitude, Input.location.lastData.latitude, UserMetadata.KAIJU_MARKER_RADIUS, true, markersAround, markerResponse);
 			List<HatchLocationMarker> markersToTake = new List<HatchLocationMarker>();
 			List<GenericLocation> genericLocationsToTake = new List<GenericLocation>();
-			yield return SpatialClient2.single.getLocationsForEgg ((new LocationFrequencyList ()).randomKaiju (markersAround), markersToTake, genericLocationsToTake);
-			OwnedEgg egg = new OwnedEgg(eggName, imageIndex, SpatialClient2.single.newEggIdForFriend(friend), new LocationCombination(markersToTake, genericLocationsToTake));
+			yield return SpatialClient2.single.getLocationsForEgg (SpatialClient2.single.randomLocationFromMarkers(markersAround), markersToTake, genericLocationsToTake);
+			OwnedEgg egg = new OwnedEgg(imageIndex, SpatialClient2.single.newEggIdForFriend(friend), new LocationCombination(markersToTake, genericLocationsToTake), eggName, SpatialClient2.single.randomKaijuFromMarkers(markersAround));           
             yield return egg.initializeSprite(new CoroutineResponse()); // sprite should already be there since we are coming from the egg screen, but just checking
-            yield return egg.initializeKaiju();
 			MainMenuScript.addNewEggToCheckinnables(egg);
             yield return SpatialClient2.single.addOrUpdateEggInFriendsEggs(egg);
         }
@@ -250,8 +235,8 @@ public class OwnedEgg
         {
             typeGlDict[location.LocationType].updateVisits(location);
         }
-        foreach (string friendUserId in egg._helpers)
-            addHelper(friendUserId);
+        foreach (string friendUserId in egg._kaiju.Helpers)
+            _kaiju.addHelper(friendUserId);
         foreach (CheckInPlace place in PlacesToTake)
         {
             if (place.needToBeVisited()) return;
@@ -266,13 +251,5 @@ public class OwnedEgg
         if (_requests.Contains(friendUserId)) return false;
         _requests.add(friendUserId);
         return true;
-    }
-
-    /** Adds the friend user ID to the list of friends who helped this egg hatch,
-      * if that friend does not already exist in that list. */
-    public void addHelper(string friendUserId)
-    {
-        Debug.Log(_helpers.containsId(friendUserId));
-        if (!_helpers.containsId(friendUserId)) _helpers.add(friendUserId);
     }
 }
