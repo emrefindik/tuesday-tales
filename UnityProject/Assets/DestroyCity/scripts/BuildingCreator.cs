@@ -42,7 +42,7 @@ public class BuildingCreator : MonoBehaviour {
 			index = buildingDict [markerId];
 		}
 		else{
-			index = 0;
+			index = 1;
 		}
 		loadScene();
 	}

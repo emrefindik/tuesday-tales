@@ -32,7 +32,10 @@ public class fallPart : MonoBehaviour {
         {
             Rigidbody gravity =  c.gameObject.GetComponent<Rigidbody>();
             gravity.useGravity = true;
-            gravity.GetComponent<Collider>().enabled = false;
+			gravity.GetComponent<SpriteRenderer> ().sortingOrder = 12;
+            //gravity.GetComponent<Collider>().enabled = false;
+			c.gameObject.layer = LayerMask.NameToLayer("Ruins");
+			c.GetComponent<BoxCollider> ().isTrigger = false;
             StartCoroutine(Shake());
 			healthControl.increaseProgress(1, LevelControl.ScoreType.Building);
         }

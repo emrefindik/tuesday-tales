@@ -11,7 +11,9 @@ public class BlockFallenCheck: MonoBehaviour {
 		if (c.gameObject.tag == "block") {
 			Destroy (c.gameObject);
 			levelControl.increaseProgress (1, LevelControl.ScoreType.Blocks);
-		} else {
+		} 
+		else if (c.gameObject.tag != "building")
+		{
 			Destroy (c.gameObject);
 		}
 
