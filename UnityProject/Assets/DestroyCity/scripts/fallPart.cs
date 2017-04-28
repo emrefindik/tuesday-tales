@@ -19,6 +19,7 @@ public class fallPart : MonoBehaviour {
     {
         smesh = GetComponent<AudioSource>();
 		smesh.clip = smeshAudio;
+		smesh.playOnAwake = false;
 		scream = gameObject.AddComponent<AudioSource>();
 		scream.clip = screamAudio;
 		scream.playOnAwake = false;
@@ -27,9 +28,9 @@ public class fallPart : MonoBehaviour {
     void OnTriggerEnter(Collider c)
     {
 
-        smesh.Play();
         if (c.tag == "building")
         {
+			smesh.Play();
             Rigidbody gravity =  c.gameObject.GetComponent<Rigidbody>();
             gravity.useGravity = true;
 			gravity.GetComponent<SpriteRenderer> ().sortingOrder = 12;
@@ -43,6 +44,7 @@ public class fallPart : MonoBehaviour {
 
         if(c.tag == "people")
         {
+			smesh.Play();
 			scream.Play ();
             Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
