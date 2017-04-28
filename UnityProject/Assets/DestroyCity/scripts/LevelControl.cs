@@ -168,12 +168,17 @@ public class LevelControl : MonoBehaviour {
 		GetComponent<SpriteControl> ().deactivateColor ();
 
 		MainMenuScript mainMenu = mainController.GetComponent<MainMenuScript> ();
-		selectedKaiju = mainMenu.SelectedKaiju;
 		kaiju = GameObject.Find ("Kaiju").gameObject;
-		Debug.Log ("Kaiju: " + kaiju);
-		Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
-		kaiju.GetComponent<MonsterCreator> ().
-		setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+		selectedKaiju = mainMenu.SelectedKaiju;
+		if (selectedKaiju != null) {
+			Debug.Log ("Kaiju: " + kaiju);
+			Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
+			kaiju.GetComponent<MonsterCreator> ().
+				setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+		} else {
+			kaiju.GetComponent<MonsterCreator> ().
+			setUpMonster (1,1,1, Color.green);
+		}
 
 		Debug.Log ("Setup Kaiju");
 
