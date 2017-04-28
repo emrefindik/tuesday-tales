@@ -50,7 +50,7 @@ public class LevelControl : MonoBehaviour {
 	// Shake Action
 	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
 	const float lowPassKernelWidthInSeconds = 1.0f;
-	float shakeDetectionThreshold = 6.0f;
+	float shakeDetectionThreshold = 2.0f;
 	float lowPassFilterFactor = accelerometerUpdateInterval /
 		lowPassKernelWidthInSeconds;
 	Vector3 lowPassValue;
@@ -63,6 +63,7 @@ public class LevelControl : MonoBehaviour {
 	MainController mainController;
 	GameObject kaiju;
 	Kaiju selectedKaiju;
+	GameObject[] blocks;
 
 	// REWARD:
 	int eggIndex;
@@ -122,10 +123,18 @@ public class LevelControl : MonoBehaviour {
 		number_of_buildings = 1;
         progressCount = new int[1];
 		num_of_pieces = GameObject.FindGameObjectsWithTag("building").Length;
-		num_of_blocks = GameObject.FindGameObjectsWithTag ("block").Length;
+		blocks = GameObject.FindGameObjectsWithTag ("block");
+		num_of_blocks = blocks.Length;
 		totalProgress = num_of_pieces * (int)ProgressAmount.Building + (num_of_blocks - tolerence) * (int)ProgressAmount.Block;
 		progressCount [0] = totalProgress;
 		Debug.Log (num_of_blocks);
+
+		/*
+		for (int i = 0; i < blocks.Length; i++) {
+			blocks [i].AddComponent<DragableObjects> ();
+			blocks [i].GetComponent<DragableObjects> ().cam = this.GetComponent<Camera> ();
+		}
+		*/
     }
 
 	// Init all the game states
@@ -356,6 +365,7 @@ public class LevelControl : MonoBehaviour {
             yield return new WaitForSeconds(FIRST_SHAKE_WAIT - offset);
         
 		pA.punchGround(2);
+		Handheld.Vibrate ();
 		yield return new WaitForSeconds (.3f);
 		if(eggIndex != -1)
 			findEggCanvas.SetActive(true);
