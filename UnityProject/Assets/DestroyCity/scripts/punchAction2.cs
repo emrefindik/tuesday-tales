@@ -9,6 +9,9 @@ public class punchAction2 : MonoBehaviour {
 	public GameObject monster;
 
 	Vector3 _inputPosition;
+	Vector3 _startPos;
+	Vector3 _endPos;
+	float startTime;
 	float tapCheckX;
 	const float TAPTOLERENCE = 10;
 
@@ -71,8 +74,10 @@ public class punchAction2 : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0))
 		{
 			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
+			startTime = Time.time;
+			_startPos = _inputPosition;
 			Debug.Log ("GetMouseButtonDown");
-			punchStrength = PUNCH_STRENGTH_MAX;
+			punchStrength = 0;
 			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -1f);
 			pressEffect.Play ();
 
@@ -90,8 +95,8 @@ public class punchAction2 : MonoBehaviour {
 					movingFist.layer = LayerMask.NameToLayer ("Human");
 					movingFist.GetComponent<Collider> ().enabled = true;
 
-
-				}
+				}			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
+				
 				
 				Debug.Log ("level2On");
 				screenPoint = cam.WorldToScreenPoint (gameObject.transform.position);
@@ -145,9 +150,9 @@ public class punchAction2 : MonoBehaviour {
 
 		if(Input.GetMouseButtonUp(0))
 		{
+			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
 			if (!level2On) {
 				tapCheckX = Input.mousePosition.x;
-				_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
 				pressEffect.Stop ();
 
 				if (Mathf.Abs (Input.mousePosition.x - tapCheckX) > TAPTOLERENCE)
@@ -161,20 +166,26 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 			else{
+				_endPos = _inputPosition;
 				Debug.Log ("button up, setting null");
 				Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 				Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
 				Vector3 vel = curPosition - oldPosition;
+				float magnitude = Vector3.Distance (_startPos, _endPos);
+				vel = vel.normalized * magnitude * 0.2f;
 				if (draggingObject != null) {
 					Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
-					rigidBody.AddForce (vel * rigidBody.mass * 15, ForceMode.Impulse);
+					rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
 					draggingObject = null;
 					throwSound.Play ();
 				}
 
 				oldPosition = new Vector3 (0, 0, 0);
-				movingFist.GetComponent<Rigidbody> ().velocity = vel * 0.3f;
-				StartCoroutine (_DelayDestroy (movingFist, 0.5f));
+				movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
+				if(magnitude < 2f)
+					StartCoroutine (_DelayDestroy (movingFist, 0.1f));
+				else
+					StartCoroutine (_DelayDestroy (movingFist, 0.5f));
 			}
 		}
 
