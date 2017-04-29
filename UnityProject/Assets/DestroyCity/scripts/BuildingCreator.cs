@@ -42,7 +42,8 @@ public class BuildingCreator : MonoBehaviour {
 			index = buildingDict [markerId];
 		}
 		else{
-			index = (int)Random.Range (1, 10);
+			//index = (int)Random.Range (1, 10);
+			index = 1;
 		}
 		loadScene();
 	}

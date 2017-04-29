@@ -24,13 +24,16 @@ public class Eat : MonoBehaviour {
 	void OnCollisionEnter(Collision c)
 	{
 		if (c.gameObject.tag == "block") {
-			if (c.gameObject.GetComponent<Rigidbody> ().velocity.magnitude > 1)
+			/*
+			if (c.gameObject.GetComponent<Rigidbody> ().velocity.magnitude > 2f)
 				return;
+			*/
 			levelControl.increaseProgress (1, LevelControl.ScoreType.Blocks);
 			eatSound.Play();
 			StartCoroutine (_Eat (c.gameObject));
 			if(eatEffect)
 				eatEffect.Play ();
+			c.transform.GetComponentInChildren<ParticleSystem> ().Play ();
 		} 
 
 	}
@@ -43,7 +46,7 @@ public class Eat : MonoBehaviour {
 		rigidBody.velocity = direction * 3.5f;
 		rigidBody.angularVelocity = new Vector3 ( 10, 0, 0 );
 		rigidBody.useGravity = false;
-		yield return new WaitForSeconds (0.5f);
+		yield return new WaitForSeconds (1f);
 		Destroy (g);
 	}
 }
