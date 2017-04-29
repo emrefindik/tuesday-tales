@@ -24,6 +24,8 @@ public class Eat : MonoBehaviour {
 	void OnCollisionEnter(Collision c)
 	{
 		if (c.gameObject.tag == "block") {
+			if (c.gameObject.GetComponent<Rigidbody> ().velocity.magnitude > 1)
+				return;
 			levelControl.increaseProgress (1, LevelControl.ScoreType.Blocks);
 			eatSound.Play();
 			StartCoroutine (_Eat (c.gameObject));

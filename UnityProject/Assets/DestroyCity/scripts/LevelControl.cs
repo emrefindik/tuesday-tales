@@ -145,12 +145,24 @@ public class LevelControl : MonoBehaviour {
 		progressCount [0] = totalProgress;
 		Debug.Log (num_of_blocks);
 
-		/*
+
 		for (int i = 0; i < blocks.Length; i++) {
-			blocks [i].AddComponent<DragableObjects> ();
-			blocks [i].GetComponent<DragableObjects> ().cam = this.GetComponent<Camera> ();
+			;
 		}
-		*/
+
+		GameObject[] humans = GameObject.FindGameObjectsWithTag ("people");
+		for (int i = 0; i < humans.Length; i++) {
+			Rigidbody rb = humans [i].GetComponent<Rigidbody> ();
+			if (rb == null)
+				rb = humans [i].AddComponent<Rigidbody> ();
+			rb.useGravity = false;
+			humans [i].GetComponent<SpriteRenderer> ().sortingOrder = 1;
+			humans [i].layer = LayerMask.NameToLayer ("Human");
+		}
+
+		ground = GameObject.FindGameObjectWithTag ("ground");
+		ground.layer = LayerMask.NameToLayer ("GamePhysics");
+
     }
 
 	// Init all the game states

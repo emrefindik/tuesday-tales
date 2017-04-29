@@ -111,6 +111,20 @@ public class punchAction2 : MonoBehaviour {
 					Debug.Log ("hit");
 					Debug.Log (hit.transform.gameObject.name);
 					if (hit.transform.gameObject.tag == "block" || hit.transform.gameObject.tag == "people") {
+						if (hit.transform.gameObject.tag == "people") {
+							CharacterController cc = hit.transform.gameObject.GetComponent<CharacterController> ();
+							if (cc)
+								cc.enabled = false;
+						} else {
+							Rigidbody[] children = hit.transform.GetComponentsInChildren<Rigidbody> ();
+							foreach (Rigidbody child in children) {
+								child.useGravity = true;
+							}
+							CharacterController [] cc = hit.transform.GetComponentsInChildren<CharacterController> ();
+							foreach (CharacterController c in cc) {
+								c.enabled = false;
+							}
+						}
 						draggingObject = hit.transform.gameObject;
 
 						// Add Trail to object
