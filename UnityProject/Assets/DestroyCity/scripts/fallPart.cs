@@ -8,8 +8,7 @@ public class fallPart : MonoBehaviour {
     float magnitude = .1f;
 
     public GameObject bloodEffect;
-    public AudioClip smeshAudio;
-	public AudioClip screamAudio;
+  
     AudioSource smesh;
 	AudioSource scream;
     public LevelControl healthControl;
@@ -17,12 +16,8 @@ public class fallPart : MonoBehaviour {
 
     void Start()
     {
-        smesh = GetComponent<AudioSource>();
-		smesh.clip = smeshAudio;
-		smesh.playOnAwake = false;
-		scream = gameObject.AddComponent<AudioSource>();
-		scream.clip = screamAudio;
-		scream.playOnAwake = false;
+		smesh = healthControl.smesh;
+		scream = healthControl.scream;
     }
 
     void OnTriggerEnter(Collider c)

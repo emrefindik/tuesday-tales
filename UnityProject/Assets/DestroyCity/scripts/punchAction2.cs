@@ -7,6 +7,7 @@ public class punchAction2 : MonoBehaviour {
 	public GameObject leftFist;
 	public GameObject rightFist;
 	public GameObject monster;
+	public Material trailMat;
 
 	Vector3 _inputPosition;
 	Vector3 _startPos;
@@ -51,6 +52,8 @@ public class punchAction2 : MonoBehaviour {
 		throwSound = gameObject.AddComponent<AudioSource> ();
 		throwSound.clip = throwClip;
 		throwSound.playOnAwake = false;
+
+
 
     }
 
@@ -109,6 +112,19 @@ public class punchAction2 : MonoBehaviour {
 					Debug.Log (hit.transform.gameObject.name);
 					if (hit.transform.gameObject.tag == "block" || hit.transform.gameObject.tag == "people") {
 						draggingObject = hit.transform.gameObject;
+
+						// Add Trail to object
+						TrailRenderer trail = draggingObject.GetComponent<TrailRenderer>();
+						if( trail == null)
+							trail = draggingObject.AddComponent<TrailRenderer>();
+						trail.material = trailMat;
+						trail.startWidth = 0.3f;
+						trail.endWidth = 0.1f;
+						trail.startColor = Color.white;
+						trail.endColor = new Color (1, 1, 1, 0.5f);
+						trail.time = 1;
+
+
 						draggingObject.GetComponent<Rigidbody> ().useGravity = true;
 						Debug.Log (draggingObject);
 						offset = draggingObject.transform.position - cam.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
@@ -134,15 +150,18 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 			if (level2On) {
-				Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+				//Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 
-				Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
+				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
+				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
 
 				if (draggingObject != null) {
+					Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
 					draggingObject.transform.position = curPosition;
+					oldPosition = curPosition;
+
 				}
 
-				oldPosition = curPosition;
 				movingFist.transform.position = _inputPosition;
 			}
 
@@ -169,20 +188,28 @@ public class punchAction2 : MonoBehaviour {
 			else{
 				_endPos = _inputPosition;
 				Debug.Log ("button up, setting null");
-				Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
-				Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
-				Vector3 vel = curPosition - oldPosition;
+				//Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
+
 				float magnitude = Vector3.Distance (_startPos, _endPos);
-				vel = vel.normalized * magnitude * 0.2f;
+
 				if (draggingObject != null) {
-					Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
-					rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
+					Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
+					Vector3 vel = curPosition - oldPosition;
+					if (vel.magnitude > 0.3f) {
+						vel = vel.normalized * magnitude * 0.2f;
+						Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
+						rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
+						movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
+						throwSound.Play ();
+					}
+
 					draggingObject = null;
-					throwSound.Play ();
+
 				}
 
 				oldPosition = new Vector3 (0, 0, 0);
-				movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
+
 				if(magnitude < 2f)
 					StartCoroutine (_DelayDestroy (movingFist, 0.1f));
 				else

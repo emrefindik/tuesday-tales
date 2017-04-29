@@ -37,7 +37,9 @@ public class Eat : MonoBehaviour {
 	{
 		Rigidbody rigidBody = g.GetComponent<Rigidbody> ();
 		rigidBody.constraints = RigidbodyConstraints.None;
-		rigidBody.velocity = new Vector3 (0, 0, 3.5f);
+		Vector3 direction = (transform.position - rigidBody.transform.position).normalized;
+		rigidBody.velocity = direction * 3.5f;
+		rigidBody.angularVelocity = new Vector3 ( 10, 0, 0 );
 		rigidBody.useGravity = false;
 		yield return new WaitForSeconds (0.5f);
 		Destroy (g);

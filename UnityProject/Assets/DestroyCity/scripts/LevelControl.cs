@@ -65,6 +65,14 @@ public class LevelControl : MonoBehaviour {
 	Kaiju selectedKaiju;
 	GameObject[] blocks;
 
+	public AudioClip smeshAudio;
+	public AudioClip screamAudio;
+
+	[HideInInspector]
+	public AudioSource smesh;
+	[HideInInspector]
+	public AudioSource scream;
+
 	// REWARD:
 	int eggIndex;
 	string eggName;
@@ -103,6 +111,14 @@ public class LevelControl : MonoBehaviour {
         initSystem();
 		initLevel();
         winCoroutineEnded = new CoroutineResponse();
+
+		smesh = gameObject.AddComponent<AudioSource> ();
+		smesh.clip = smeshAudio;
+		smesh.playOnAwake = false;
+
+		scream = gameObject.AddComponent<AudioSource> ();
+		scream.clip = screamAudio;
+		scream.playOnAwake = false;
     }
 
 	// Set up information about this building
