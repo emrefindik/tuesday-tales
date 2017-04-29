@@ -35,12 +35,19 @@ public class punchAction2 : MonoBehaviour {
 
 	bool locked = false;	// ignore input lock
 
+	public AudioClip throwClip;
+	AudioSource throwSound;
+
     void Start () {
         leftFist.GetComponent<Collider>().enabled = false;
         rightFist.GetComponent<Collider>().enabled = false;
 
 		locked = false;
 		level2On = false;
+
+		throwSound = gameObject.AddComponent<AudioSource> ();
+		throwSound.clip = throwClip;
+		throwSound.playOnAwake = false;
 
     }
 
@@ -162,12 +169,21 @@ public class punchAction2 : MonoBehaviour {
 					Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
 					rigidBody.AddForce (vel * rigidBody.mass * 15, ForceMode.Impulse);
 					draggingObject = null;
+					throwSound.Play ();
 				}
+
 				oldPosition = new Vector3 (0, 0, 0);
-				Destroy (movingFist);
+				movingFist.GetComponent<Rigidbody> ().velocity = vel * 0.3f;
+				StartCoroutine (_DelayDestroy (movingFist, 0.5f));
 			}
 		}
 
+	}
+
+	IEnumerator _DelayDestroy(GameObject g, float time)
+	{
+		yield return new WaitForSeconds (time);
+		Destroy (g);
 	}
 		
 	void initPunch(bool punchDirection)
