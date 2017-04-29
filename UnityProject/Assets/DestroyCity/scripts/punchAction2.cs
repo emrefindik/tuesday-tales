@@ -95,8 +95,8 @@ public class punchAction2 : MonoBehaviour {
 					movingFist.layer = LayerMask.NameToLayer ("Human");
 					movingFist.GetComponent<Collider> ().enabled = true;
 
-				}			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
-				
+				}			
+
 				
 				Debug.Log ("level2On");
 				screenPoint = cam.WorldToScreenPoint (gameObject.transform.position);
@@ -125,7 +125,8 @@ public class punchAction2 : MonoBehaviour {
 		}
 
 		if (Input.GetMouseButton (0)) {
-			
+			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
+
 			// add punch strength
 			if (punchStrength < PUNCH_STRENGTH_MAX) {
 				punchStrength += PUNCH_STRENGTH_STEP;
@@ -142,7 +143,7 @@ public class punchAction2 : MonoBehaviour {
 				}
 
 				oldPosition = curPosition;
-				movingFist.transform.position = curPosition;
+				movingFist.transform.position = _inputPosition;
 			}
 
 		}
