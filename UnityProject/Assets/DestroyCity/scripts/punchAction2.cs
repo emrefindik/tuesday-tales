@@ -210,8 +210,8 @@ public class punchAction2 : MonoBehaviour {
 				if (draggingObject != null) {
 					Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
 					Vector3 vel = curPosition - oldPosition;
-					if (vel.magnitude > 0.3f) {
-						vel = vel.normalized * magnitude * 0.2f;
+					if (vel.magnitude > 0.2f) {
+						vel = vel.normalized * magnitude * 0.4f;
 						Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
 						rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
 						movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
