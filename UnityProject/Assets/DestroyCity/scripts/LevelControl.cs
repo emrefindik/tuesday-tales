@@ -50,7 +50,7 @@ public class LevelControl : MonoBehaviour {
 	// Shake Action
 	const float accelerometerUpdateInterval = (float)(1.0 / 60.0);
 	const float lowPassKernelWidthInSeconds = 1.0f;
-	float shakeDetectionThreshold = 6.0f;
+	float shakeDetectionThreshold = 2.0f;
 	float lowPassFilterFactor = accelerometerUpdateInterval /
 		lowPassKernelWidthInSeconds;
 	Vector3 lowPassValue;
@@ -63,6 +63,15 @@ public class LevelControl : MonoBehaviour {
 	MainController mainController;
 	GameObject kaiju;
 	Kaiju selectedKaiju;
+	GameObject[] blocks;
+
+	public AudioClip smeshAudio;
+	public AudioClip screamAudio;
+
+	[HideInInspector]
+	public AudioSource smesh;
+	[HideInInspector]
+	public AudioSource scream;
 
 	// REWARD:
 	int eggIndex;
@@ -102,6 +111,14 @@ public class LevelControl : MonoBehaviour {
         initSystem();
 		initLevel();
         winCoroutineEnded = new CoroutineResponse();
+
+		smesh = gameObject.AddComponent<AudioSource> ();
+		smesh.clip = smeshAudio;
+		smesh.playOnAwake = false;
+
+		scream = gameObject.AddComponent<AudioSource> ();
+		scream.clip = screamAudio;
+		scream.playOnAwake = false;
     }
 
 	// Set up information about this building
@@ -122,10 +139,30 @@ public class LevelControl : MonoBehaviour {
 		number_of_buildings = 1;
         progressCount = new int[1];
 		num_of_pieces = GameObject.FindGameObjectsWithTag("building").Length;
-		num_of_blocks = GameObject.FindGameObjectsWithTag ("block").Length;
+		blocks = GameObject.FindGameObjectsWithTag ("block");
+		num_of_blocks = blocks.Length;
 		totalProgress = num_of_pieces * (int)ProgressAmount.Building + (num_of_blocks - tolerence) * (int)ProgressAmount.Block;
 		progressCount [0] = totalProgress;
 		Debug.Log (num_of_blocks);
+
+
+		for (int i = 0; i < blocks.Length; i++) {
+			;
+		}
+
+		GameObject[] humans = GameObject.FindGameObjectsWithTag ("people");
+		for (int i = 0; i < humans.Length; i++) {
+			Rigidbody rb = humans [i].GetComponent<Rigidbody> ();
+			if (rb == null)
+				rb = humans [i].AddComponent<Rigidbody> ();
+			rb.useGravity = false;
+			humans [i].GetComponent<SpriteRenderer> ().sortingOrder = 1;
+			humans [i].layer = LayerMask.NameToLayer ("Human");
+		}
+
+		ground = GameObject.FindGameObjectWithTag ("ground");
+		ground.layer = LayerMask.NameToLayer ("GamePhysics");
+
     }
 
 	// Init all the game states
@@ -168,12 +205,17 @@ public class LevelControl : MonoBehaviour {
 		GetComponent<SpriteControl> ().deactivateColor ();
 
 		MainMenuScript mainMenu = mainController.GetComponent<MainMenuScript> ();
-		selectedKaiju = mainMenu.SelectedKaiju;
 		kaiju = GameObject.Find ("Kaiju").gameObject;
-		Debug.Log ("Kaiju: " + kaiju);
-		Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
-		kaiju.GetComponent<MonsterCreator> ().
-		setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+		selectedKaiju = mainMenu.SelectedKaiju;
+		if (selectedKaiju != null) {
+			Debug.Log ("Kaiju: " + kaiju);
+			Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
+			kaiju.GetComponent<MonsterCreator> ().
+				setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+		} else {
+			kaiju.GetComponent<MonsterCreator> ().
+			setUpMonster (1,1,1, Color.green);
+		}
 
 		Debug.Log ("Setup Kaiju");
 
@@ -351,6 +393,7 @@ public class LevelControl : MonoBehaviour {
             yield return new WaitForSeconds(FIRST_SHAKE_WAIT - offset);
         
 		pA.punchGround(2);
+		Handheld.Vibrate ();
 		yield return new WaitForSeconds (.3f);
 		if(eggIndex != -1)
 			findEggCanvas.SetActive(true);

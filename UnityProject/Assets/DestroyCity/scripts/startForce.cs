@@ -36,6 +36,6 @@ public class startForce : MonoBehaviour
 
     void OnCollisionEnter()
     {
-        Destroy(this.gameObject);
+        //Destroy(this.gameObject);
     }
 }

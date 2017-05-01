@@ -22,7 +22,12 @@ public class KaijuScreenController : MonoBehaviour {
 
     public Kaiju SelectedKaiju
     {
-        get { return _menuData.SelectedKaiju; }
+        get { 
+			if (_menuData != null)
+				return _menuData.SelectedKaiju;
+			else
+				return null;
+		}
     }
 
     // Use this for initialization

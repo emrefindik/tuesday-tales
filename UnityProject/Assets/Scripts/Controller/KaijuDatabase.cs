@@ -82,7 +82,7 @@ public class KaijuDatabase : MonoBehaviour {
 	public Sprite [] handSprite;
 	/* Nicky End */
 
-    void Start()
+    void Awake()
     {
         instance = this;
         _handDownloadingIndex = NO_DOWNLOAD;

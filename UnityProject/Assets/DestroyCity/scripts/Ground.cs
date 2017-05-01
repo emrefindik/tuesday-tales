@@ -7,6 +7,8 @@ public class Ground : MonoBehaviour {
 	public float offset;
 	public AudioClip buildingCollapseAudio;
 	AudioSource buildingCollapse;
+	public AudioClip blockCollapseAudio;
+	AudioSource blockCollapse;
 	private float baseY;
 	bool shake;
 	float duration = .3f;
@@ -19,6 +21,9 @@ public class Ground : MonoBehaviour {
 		buildingCollapse = gameObject.AddComponent<AudioSource>();
 		buildingCollapse.clip = buildingCollapseAudio;
 		buildingCollapse.playOnAwake = false;
+		blockCollapse = gameObject.AddComponent<AudioSource>();
+		blockCollapse.clip = blockCollapseAudio;
+		blockCollapse.playOnAwake = false;
 	}
 	
 	// Update is called once per frame
@@ -33,8 +38,13 @@ public class Ground : MonoBehaviour {
 
 	public void startShake(float seconds){
 		shake = true;
-		if(buildingCollapse)
-			buildingCollapse.Play ();
+		if (seconds > .3f) {
+			if (buildingCollapse)
+				buildingCollapse.Play ();
+		} else {
+			if (blockCollapse)
+				blockCollapse.Play ();
+		}
 		StartCoroutine(stopShake(seconds));
 		StartCoroutine(Shake());
 	}
