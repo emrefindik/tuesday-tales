@@ -1250,7 +1250,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
     public static DateTime startTime = new DateTime(2017, 3, 30, 20, 0, 0);
 
     // interval between first two destructions to trigger a streak
-    public const int INITIAL_RAMPAGE_INTERVAL = 300;
+    public const int INITIAL_RAMPAGE_INTERVAL = 600;
     // value to set streakTimerStart to when there is no streak
     public const int NO_STREAK = -1;
     // value to set lastRampage when the user has not destroyed anything yet
@@ -1347,7 +1347,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
         if (streakTimerStart <= 0 || streakTimerStart == NO_STREAK)
             streakTimerStart = INITIAL_RAMPAGE_INTERVAL;
         else
-            streakTimerStart /= 2;
+			streakTimerStart = (int)((float)streakTimerStart * 0.8f);
         scoreMultiplier++;
         streakMarkers.addMarkerId(newMarkerId);
     }
