@@ -7,6 +7,7 @@ public class punchAction2 : MonoBehaviour {
 	public GameObject leftFist;
 	public GameObject rightFist;
 	public GameObject monster;
+	public LevelControl levelControl;
 	public Material trailMat;
 
 	Vector3 _inputPosition;
@@ -53,8 +54,6 @@ public class punchAction2 : MonoBehaviour {
 		throwSound.clip = throwClip;
 		throwSound.playOnAwake = false;
 
-
-
     }
 
 
@@ -69,6 +68,10 @@ public class punchAction2 : MonoBehaviour {
 
 		if (locked) {
 			locked = false;
+			return;
+		}
+
+		if (levelControl.getWin ()) {
 			return;
 		}
 			

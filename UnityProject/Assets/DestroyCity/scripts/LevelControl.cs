@@ -39,6 +39,10 @@ public class LevelControl : MonoBehaviour {
     int buildingDestroyedCount;
     int number_of_buildings = 1;
     bool win;   // check this status : whether has win
+	public bool getWin()
+	{
+		return win;
+	}
 
 	// Count to know when to enable interior
 	int fallenPiecesCount;		
@@ -440,7 +444,6 @@ public class LevelControl : MonoBehaviour {
 		editEggNameCanvas.SetActive (true);
 	}
 		
-
 
 	/**********************************
 	 * 
