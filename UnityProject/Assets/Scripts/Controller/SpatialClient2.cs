@@ -1347,7 +1347,7 @@ public class UserMetadata// : ISerializationCallbackReceiver
         if (streakTimerStart <= 0 || streakTimerStart == NO_STREAK)
             streakTimerStart = INITIAL_RAMPAGE_INTERVAL;
         else
-            streakTimerStart *= 2;
+            streakTimerStart *= 0.5;
         scoreMultiplier++;
         streakMarkers.addMarkerId(newMarkerId);
     }
