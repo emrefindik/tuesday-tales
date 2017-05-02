@@ -128,7 +128,7 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     private Text _userNotFoundText;
     [SerializeField]
-    private Text _enterYourFriendsUsernameText;    
+    private Text _enterYourFriendsUsernameText;
     [SerializeField]
     private Text _userFoundText;
     [SerializeField]
