@@ -33,8 +33,8 @@ public class SpatialClient2 : MonoBehaviour
     private LocationDatabase _locationDatabase;
     private KaijuFrequencyList _defaultKaiju;
 
-    private Dictionary<string, FriendData> _friends = new Dictionary<string, FriendData>();
-    public IEnumerable<FriendData> Friends
+    private Dictionary<string, FriendStatus> _friends = new Dictionary<string, FriendStatus>();
+    public IEnumerable<FriendStatus> Friends
     {
         get { return _friends.Values; }
     }
@@ -44,8 +44,8 @@ public class SpatialClient2 : MonoBehaviour
         get { return userSession.User.Metadata.EggsOwned; }
     }
 
-	public string userId{
-		get{
+	public string userId {
+		get {
 			return userSession.User.Id;
 		}
 	}
@@ -157,39 +157,6 @@ public class SpatialClient2 : MonoBehaviour
 
     private void setUpMarkers()
     {
-		/*StartCoroutine (CreateUser (new CoroutineResponse (), "1qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "2qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "3qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "4qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "5qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "6qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "7qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "8qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "9qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "0qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "11qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "12qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "13qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "14qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "15qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "16qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "17qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "18qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "19qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "10qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "21qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "22qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "23qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "24qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "25qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "26qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "27qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "28qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "29qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "20qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "30qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "31qa", "1"));
-		StartCoroutine (CreateUser (new CoroutineResponse (), "32qa", "1")); */
         //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
 		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
@@ -199,16 +166,16 @@ public class SpatialClient2 : MonoBehaviour
 		//StartCoroutine (CreateMarker (40.44334, -79.943345, "Purnell Center for the Arts", "Home to Carnegie Mellon University's School of Drama and the Philip Chosky Theater.", MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.jpg", "", new ImageBounds (40.4435, 40.4431, -79.9431, -79.9435))));
         /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
         StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
-        //StartCoroutine(DeleteMarkerById("58f2df8699807700111ae95d"));
-
-        /*List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
+        /*
+        List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 1, 3, 3, "Gelb"), 5));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.blue, 3, 1, 4, "Buster"), 1));
 
         List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
-        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();*/
-        /*List<string> str1 = new List<string>();
+        List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
+        List<string> str1 = new List<string>();
         str1.Add("58f00e3f2aac62001128c2c1"); // cathedral of learning - right off campus
         List<string> str2 = new List<string>();
         str2.Add("58f00e3f2aac62001128c2c2"); // peace garden - on campus
@@ -237,7 +204,7 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str7), 4));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
-        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2)); */
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
 
 		/*List<string> str2 = new List<string>();
 		str2.Add("58fd43ac8bd5410011d11150"); // mount everest
@@ -248,10 +215,10 @@ public class SpatialClient2 : MonoBehaviour
 
 		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 1));
 		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 1));
-		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 1));
+		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 1)); */
 
-        StartCoroutine(CreateMarker(40.442557, -79.942535, "softs kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2))));
-		*/
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2)), new CoroutineResponse()));
+		
     }
 
     private void Update()
@@ -288,9 +255,7 @@ public class SpatialClient2 : MonoBehaviour
 
     public long getTimer()
     {
-        return (userSession.User.Metadata.LastRampage +
-            userSession.User.Metadata.StreakTimerStart) -
-            UserMetadata.currentTimestamp();
+        return userSession.User.Metadata.getTimer();
     }
 
     // START OF EMRE'S CODE
@@ -376,9 +341,14 @@ public class SpatialClient2 : MonoBehaviour
     public string getNameOfFriend(string friendUserID)
     {
         if (_friends.ContainsKey(friendUserID))
-            return _friends[friendUserID].Friend.getName();
+            return _friends[friendUserID].Friend.Friend.getName();
         else
             return "";
+    }
+
+    public bool alreadyFriend(string friendUserID)
+    {
+        return _friends.ContainsKey(friendUserID);
     }
 
 	public IEnumerator getLocationsForEgg(LocationCombinationData combo, List<HatchLocationMarker> markersToTake, List<GenericLocation> genericLocationsToTake)
@@ -444,6 +414,24 @@ public class SpatialClient2 : MonoBehaviour
             Debug.Log(wrapper._marker.Name);
             ready = true;
             response.setSuccess(true);
+        }
+    }
+
+    public IEnumerator GetUserByUsername(UserWrapper wrapper, string username, string projectID = PROJECT_ID)
+    {
+        WWW www = new WWW(string.Format("{0}/v1/project-user/get-user-by-username?projectId={1}&username={2}", baseURL, projectID, username));
+        yield return www;
+
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            print(www.error + "\n" + www.text);
+            wrapper.initialize(null);
+        }
+        else
+        {
+            Debug.Log(www.text);
+            wrapper.initialize(JsonUtility.FromJson<UserWrapper>(www.text));
+            Debug.Log("user: " + JsonUtility.ToJson(wrapper.User));
         }
     }
 
@@ -855,13 +843,13 @@ public class SpatialClient2 : MonoBehaviour
             StartCoroutine(getKaijuImages(kaijuImageResponse));
             CoroutineResponse eggImageResponse = new CoroutineResponse();
             StartCoroutine(getEggImages(eggImageResponse));
-            yield return GetFriends();
+            yield return GetFriends(false);
             List<CoroutineResponse> friendImageResponses = new List<CoroutineResponse>();
-            foreach (FriendData fd in _friends.Values)
+            foreach (FriendStatus fs in _friends.Values)
             {
                 CoroutineResponse friendImageResponse = new CoroutineResponse();
                 friendImageResponses.Add(friendImageResponse);
-                StartCoroutine(getFriendEggImages(friendImageResponse, fd));
+                StartCoroutine(getFriendEggImages(friendImageResponse, fs.Friend));
             }
             while (kaijuImageResponse.Success == null || eggImageResponse.Success == null || markersResponse.Success == null)
                 yield return null;
@@ -969,9 +957,9 @@ public class SpatialClient2 : MonoBehaviour
         response.setSuccess(true);
     }
 
-    public IEnumerator AddFriend(CoroutineResponse response, string friendID, string projectID = PROJECT_ID)
+    public IEnumerator AddFriend(string friendID, CoroutineResponse response, string projectID = PROJECT_ID)
     {
-        MessageController.single.displayWaitScreen(MainMenuScript.FriendsCanvas);
+        response.reset();
         ready = false;
 
         string url = baseURL + "/v1/project-friend/add-friend";
@@ -987,13 +975,14 @@ public class SpatialClient2 : MonoBehaviour
         if (!string.IsNullOrEmpty(www.error))
         {
             print(www.error);
-            MessageController.single.displayError(MainMenuScript.FriendsCanvas, "Could not add friend. Check your internet connection.");
+            response.setSuccess(false);
+            MessageController.single.displayError(MainMenuScript.FriendSearchCanvas, "Could not add friend. Check your internet connection.");
         }
         else
         {
-            ready = true;
+            ready = true;            
             Debug.Log(www.text);
-            MessageController.single.closeWaitScreen(false);
+            response.setSuccess(true);
         }
     }
 
@@ -1025,7 +1014,7 @@ public class SpatialClient2 : MonoBehaviour
         }
     }
 
-    public IEnumerator GetFriends(string projectID = PROJECT_ID)
+    public IEnumerator GetFriends(bool checkIfNew, string projectID = PROJECT_ID)
     {
         MessageController.single.displayWaitScreen(null);
         ready = false;
@@ -1053,7 +1042,8 @@ public class SpatialClient2 : MonoBehaviour
             bool ownEggsUpdated = false;
             foreach (FriendData fd in friendList.Friends)
             {
-                _friends[fd.Friend.Id] = fd;
+                if (!_friends.ContainsKey(fd.Friend.Id))
+                    _friends[fd.Friend.Id] = new FriendStatus(fd, checkIfNew);
                 if (fd.Friend.Metadata.EggsOwned == null) fd.Friend.Metadata.initializeEggsOwned();
                 // TODO request system for accepting eggs
 
@@ -1176,16 +1166,28 @@ public class GooglePlaceGeometry
 }
 
 [System.Serializable]
-public class LoginResponse
+public class UserWrapper
 {
     [SerializeField]
-	private UserData user;
+    protected UserData user;
     public UserData User
     {
         get { return user; }
         private set { user = value; }
     }
 
+    public void initialize(UserWrapper wrapper)
+    {
+        if (wrapper == null)
+            user = null;
+        else
+            user = wrapper.user;
+    }
+}
+
+[System.Serializable]
+public class LoginResponse : UserWrapper
+{
     [SerializeField]
 	private string token;
     public string Token
@@ -1250,13 +1252,15 @@ public class UserMetadata// : ISerializationCallbackReceiver
     public static DateTime startTime = new DateTime(2017, 3, 30, 20, 0, 0);
 
     // interval between first two destructions to trigger a streak
-    public const int INITIAL_RAMPAGE_INTERVAL = 600;
+    public const int INITIAL_RAMPAGE_INTERVAL = 300;
     // value to set streakTimerStart to when there is no streak
     public const int NO_STREAK = -1;
     // value to set lastRampage when the user has not destroyed anything yet
     public const int NO_RAMPAGE = -1;
     // the furthest distance to check for a kaiju spawn point, in meters
     public const double KAIJU_MARKER_RADIUS = 15000000000.0; // TODO make this smaller after you have more spawn locations around
+    // the bonus added to the time remaining every time a building is destroyed, in seconds
+    public const int TIME_BONUS = 240;
 
     [SerializeField]
     private KaijuList kaiju;
@@ -1340,14 +1344,23 @@ public class UserMetadata// : ISerializationCallbackReceiver
         return Convert.ToInt64(DateTime.UtcNow.Subtract(startTime).TotalSeconds);
     }
 
+    public long getTimer()
+    {
+        return (lastRampage + streakTimerStart) - currentTimestamp();
+    }
+
     public void updateLastRampage(int scoreIncrement, string newMarkerId)
     {
-        lastRampage = currentTimestamp();
         score += scoreIncrement;
         if (streakTimerStart <= 0 || streakTimerStart == NO_STREAK)
             streakTimerStart = INITIAL_RAMPAGE_INTERVAL;
         else
-			streakTimerStart = (int)((float)streakTimerStart * 0.8f);
+        {
+            long timer = getTimer();
+            streakTimerStart = TIME_BONUS;
+            if (timer > 0) streakTimerStart += (int)timer;
+        }
+        lastRampage = currentTimestamp();
         scoreMultiplier++;
         streakMarkers.addMarkerId(newMarkerId);
     }
@@ -1359,7 +1372,6 @@ public class UserMetadata// : ISerializationCallbackReceiver
         score = 0;
         scoreMultiplier = 1;
     }
-    // END OF EMRE'S CODE
 
     /*public void initializeEggsOwned(IEnumerable<OwnedEgg> eggs)
     {
@@ -2309,6 +2321,59 @@ public class LocationFrequencyList : FrequencyList<LocationCombinationData>
 	{
 		return list[index];
 	}
+}
+
+public class FriendStatus
+{
+    private FriendData _friend;
+    public FriendData Friend
+    {
+        get { return _friend; }
+    }
+
+    // whether the friend is new
+    private bool _isNew;
+    public bool IsNew
+    {
+        get { return _isNew; }
+    }
+
+    // whether there are associated menu items with this friend
+    private bool _hasButton;
+    public bool HasButton
+    {
+        get { return _hasButton; }
+    }
+    public FriendStatus(FriendData fd, bool isNew)
+    {
+        _friend = fd;
+        _isNew = isNew;
+        _hasButton = false;
+    }
+
+    public void createButtons(GameObject friendMenuItemPrefab, Transform friendMenuContentPanel, GameObject friendEggMenuItemPrefab, Transform friendEggMenuContentPanel)
+    {
+        GameObject friendMenuItem = GameObject.Instantiate(friendMenuItemPrefab);
+        friendMenuItem.transform.SetParent(friendMenuContentPanel, false);
+        friendMenuItem.GetComponent<FriendMenuItem>().Friend = _friend;
+        foreach (OwnedEgg e in _friend.Friend.Metadata.EggsOwned)
+        {
+            if (!e.Hatchable)
+            {
+                GameObject friendEggMenuItem = GameObject.Instantiate(friendEggMenuItemPrefab);
+                friendEggMenuItem.transform.SetParent(friendEggMenuContentPanel, false);
+                friendEggMenuItem.GetComponent<FriendEggMenuItem>().Egg = e; // also updates the egg menu item's view
+                friendEggMenuItem.GetComponent<FriendEggMenuItem>().Friend = _friend;
+            }
+        }
+        _hasButton = true;
+    }
+
+    /** Mark the friend as a non-new friend. */
+    public void setOld()
+    {
+        _isNew = false;
+    }
 }
 
 public class MarkerWrapper
