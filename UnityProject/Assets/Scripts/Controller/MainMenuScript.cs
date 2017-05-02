@@ -85,6 +85,16 @@ public class MainMenuScript : MonoBehaviour
 		private set { kaijuCanvas = value; }
 	}
 
+	private static Canvas tutorialCanvas;
+	public static Canvas TutorialCanvas
+	{
+		get { return tutorialCanvas; }
+		private set { tutorialCanvas = value; }
+	}
+	private GameObject tutorialImage;
+	public Sprite[] tutorialSprites;
+	private int tutorialIndex;
+
     private static UniWebView webView;
     /*public static UniWebView WebView
     {
@@ -118,6 +128,8 @@ public class MainMenuScript : MonoBehaviour
     private Canvas _friendsCanvas;
     [SerializeField]
     private Canvas _logoCanvas;
+	[SerializeField]
+	private Canvas _tutorialCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
 	[SerializeField]
@@ -177,6 +189,8 @@ public class MainMenuScript : MonoBehaviour
         get { return _kaijuCanvas.GetComponent<KaijuScreenController>().SelectedKaiju; }
     }
 
+	string justRegisteredUsername = null;
+		
     // Use this for initialization
     void Start()
     {
@@ -186,6 +200,7 @@ public class MainMenuScript : MonoBehaviour
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
         logoCanvas = _logoCanvas;
+		tutorialCanvas = _tutorialCanvas;
 		registerCanvas = _registerCanvas;
         kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
@@ -196,6 +211,7 @@ public class MainMenuScript : MonoBehaviour
 		_registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
+		_tutorialCanvas.enabled = false;
         //_mainMenuCanvas.enabled = false;
         //_mapCanvas.enabled = false;
         
@@ -246,18 +262,24 @@ public class MainMenuScript : MonoBehaviour
         yield return SpatialClient2.single.LoginUser(response, _userNameField.text, _passwordField.text);
         switch (response.Success)
         {
-            case true:
-                _connectionErrorText.enabled = false;
-                _wrongPasswordText.enabled = false;
-                // initialize egg menu
-                addButtons();
-                initializeCheckinDataStructures();
-                // logged in, switch to main menu
-                //_pleaseWaitCanvas.enabled = false;
-                //_mainMenuCanvas.enabled = true;
-                Debug.Log("loading webpage");
-                yield return SpatialClient2.single.checkIfMarkersExist(); // populates with building markers if there are none around
-                _webView.Load();
+		case true:
+				_connectionErrorText.enabled = false;
+				_wrongPasswordText.enabled = false;
+	                // initialize egg menu
+				addButtons ();
+				initializeCheckinDataStructures ();
+	                // logged in, switch to main menu
+	                //_pleaseWaitCanvas.enabled = false;
+	                //_mainMenuCanvas.enabled = true;
+				Debug.Log ("loading webpage");
+				yield return SpatialClient2.single.checkIfMarkersExist (); // populates with building markers if there are none around
+				if (_userNameField.text == justRegisteredUsername) {
+					justRegisteredUsername = null;
+					showTutorial ();
+				}
+				else{
+					_webView.Load();
+				}
                 break;
             case false:
                 // wrong credentials
@@ -281,6 +303,26 @@ public class MainMenuScript : MonoBehaviour
 	{
 		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		StartCoroutine (submit());
+	}
+
+	void showTutorial()
+	{
+		tutorialCanvas.enabled = true;
+		tutorialImage = tutorialCanvas.transform.FindChild ("Image").gameObject;
+		tutorialImage.GetComponent<Image> ().sprite = tutorialSprites [0];
+		tutorialIndex = 0;
+	}
+
+	public void nextPage()
+	{
+		tutorialImage = tutorialCanvas.transform.FindChild ("Image").gameObject;
+		tutorialIndex++;
+		if (tutorialIndex < tutorialSprites.Length)
+			tutorialImage.GetComponent<Image> ().sprite = tutorialSprites [tutorialIndex];
+		else {
+			_tutorialCanvas.enabled = false;
+			_webView.Load ();
+		}
 	}
 
     /* public void onEggs()
@@ -779,6 +821,7 @@ public class MainMenuScript : MonoBehaviour
 		{
 		case true:
 			// initialize egg menu
+			justRegisteredUsername = _registerCanvas.transform.FindChild ("UserNameField").GetComponent<InputField> ().text;
 			_loginCanvas.enabled = true;
 			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
 			_registerCanvas.enabled = false;
