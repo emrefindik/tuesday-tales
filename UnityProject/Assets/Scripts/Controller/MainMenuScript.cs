@@ -28,10 +28,14 @@ public class MainMenuScript : MonoBehaviour
 
     public const string MAP_ADDRESS = "map.html";
 
+    // Methods to be called on the JavaScript in map.html
     const string JS_INIT_MAP_METHOD_NAME = "loadMap";
     const string JS_UPDATE_CURRENT_LOCATION_NAME = "updateCurrentLocation";
     const string JS_UPDATE_TIMER_NAME = "updateDisplayedTime";
-    //const string JS_CHECKIN_LOCATION = "addPointToPath";
+
+    const string YOU_ARE_ALREADY_FRIENDS_WITH = "You are already friends with ";
+    const string ADD = "Add ";
+    const string AS_FRIEND = " as friend?";    
 
     private static bool mapLoaded;
 
@@ -85,15 +89,22 @@ public class MainMenuScript : MonoBehaviour
 		private set { kaijuCanvas = value; }
 	}
 
-	private static Canvas tutorialCanvas;
-	public static Canvas TutorialCanvas
-	{
-		get { return tutorialCanvas; }
-		private set { tutorialCanvas = value; }
-	}
-	private GameObject tutorialImage;
-	public Sprite[] tutorialSprites;
-	private int tutorialIndex;
+    private static Canvas tutorialCanvas;
+    public static Canvas TutorialCanvas
+    {
+        get { return tutorialCanvas; }
+        private set { tutorialCanvas = value; }
+    }
+    private GameObject tutorialImage;
+    public Sprite[] tutorialSprites;
+    private int tutorialIndex;
+
+    private static Canvas friendSearchCanvas;
+    public static Canvas FriendSearchCanvas
+    {
+        get { return friendSearchCanvas; }
+        private set { friendSearchCanvas = value; }
+    }
 
     private static UniWebView webView;
     /*public static UniWebView WebView
@@ -112,30 +123,34 @@ public class MainMenuScript : MonoBehaviour
     [SerializeField]
     public UniWebView _webView;
 
-//    [SerializeField]
-//    private Canvas _mainMenuCanvas;
-//    [SerializeField]
-//    private Canvas _mapCanvas;
-//    [SerializeField]
-//    private Canvas _checkedInCanvas;
-
-    // Displays all of the player's own eggs
+    [SerializeField]
+    private InputField _friendSearchBox;
+    [SerializeField]
+    private Text _userNotFoundText;
+    [SerializeField]
+    private Text _enterYourFriendsUsernameText;
+    [SerializeField]
+    private Text _userFoundText;
+	[SerializeField]
+	private Text _addFriendSucceedText;
+    //[SerializeField]
+    //private Button _addFriendButton;
     [SerializeField]
     private Canvas _eggsCanvas;
-
-    // Displays your list of friends for sending an egg
     [SerializeField]
     private Canvas _friendsCanvas;
     [SerializeField]
     private Canvas _logoCanvas;
-	[SerializeField]
-	private Canvas _tutorialCanvas;
+    [SerializeField]
+    private Canvas _tutorialCanvas;
     [SerializeField]
     private Canvas _loginCanvas;
 	[SerializeField]
 	private Canvas _registerCanvas;
     [SerializeField]
     private Canvas _kaijuCanvas;
+    [SerializeField]
+    private Canvas _friendSearchCanvas;
     [SerializeField]
     private Text _wrongPasswordText;
     [SerializeField]
@@ -157,6 +172,7 @@ public class MainMenuScript : MonoBehaviour
 
     [SerializeField]
     private GameObject _friendMenuItemPrefab;
+
     [SerializeField]
     private Transform _friendMenuContentPanel;
     [SerializeField]
@@ -182,6 +198,7 @@ public class MainMenuScript : MonoBehaviour
     private Dictionary<GenericLocation.GooglePlacesType, Dictionary<OwnedEgg, HashSet<GenericLocation>>> _placeTypes;
     private Dictionary<GenericLocation.GooglePlacesType, CoroutineResponse> _googleResponses;
     private Dictionary<GenericLocation.GooglePlacesType, List<BasicMarker>> _googleMarkers;
+    private UserData _userSearchResult;
     private int _untilNextTimerUpdate;
 
     public Kaiju SelectedKaiju
@@ -189,8 +206,8 @@ public class MainMenuScript : MonoBehaviour
         get { return _kaijuCanvas.GetComponent<KaijuScreenController>().SelectedKaiju; }
     }
 
-	string justRegisteredUsername = null;
-		
+    string justRegisteredUsername = null;
+
     // Use this for initialization
     void Start()
     {
@@ -200,27 +217,30 @@ public class MainMenuScript : MonoBehaviour
         eggsCanvas = _eggsCanvas;
         loginCanvas = _loginCanvas;
         logoCanvas = _logoCanvas;
-		tutorialCanvas = _tutorialCanvas;
-		registerCanvas = _registerCanvas;
+        tutorialCanvas = _tutorialCanvas;
+        registerCanvas = _registerCanvas;
         kaijuCanvas = _kaijuCanvas;
         //checkedInCanvas = _checkedInCanvas;
         friendsCanvas = _friendsCanvas;
+        friendSearchCanvas = _friendSearchCanvas;
 
         _logoCanvas.enabled = true;
+        _eggsCanvas.enabled = false;
+        _friendsCanvas.enabled = false;
         _loginCanvas.enabled = false;
-		_registerCanvas.enabled = false;
+        _kaijuCanvas.enabled = false;
+        _registerCanvas.enabled = false;
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
-		_tutorialCanvas.enabled = false;
-        //_mainMenuCanvas.enabled = false;
-        //_mapCanvas.enabled = false;
-        
-        _kaijuCanvas.enabled = false;
+        _tutorialCanvas.enabled = false;
+        //_addFriendButton.enabled = false;
+        _userNotFoundText.enabled = false;
+        _userFoundText.enabled = false;
+		_addFriendSucceedText.enabled = false;
+        _enterYourFriendsUsernameText.enabled = false;
+        _friendSearchCanvas.enabled = false;
+        _userSearchResult = null;
         mapLoaded = false;
-        //_checkedInCanvas.enabled = false;
-        _eggsCanvas.enabled = false;
-        //_friendsEggsCanvas.enabled = false;
-        _friendsCanvas.enabled = false;
 
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
         _webView.OnLoadComplete += onLoadComplete;
@@ -262,24 +282,26 @@ public class MainMenuScript : MonoBehaviour
         yield return SpatialClient2.single.LoginUser(response, _userNameField.text, _passwordField.text);
         switch (response.Success)
         {
-		case true:
-				_connectionErrorText.enabled = false;
-				_wrongPasswordText.enabled = false;
-	                // initialize egg menu
-				addButtons ();
-				initializeCheckinDataStructures ();
-	                // logged in, switch to main menu
-	                //_pleaseWaitCanvas.enabled = false;
-	                //_mainMenuCanvas.enabled = true;
-				Debug.Log ("loading webpage");
-				yield return SpatialClient2.single.checkIfMarkersExist (); // populates with building markers if there are none around
-				if (_userNameField.text == justRegisteredUsername) {
-					justRegisteredUsername = null;
-					showTutorial ();
-				}
-				else{
-					_webView.Load();
-				}
+            case true:
+                _connectionErrorText.enabled = false;
+                _wrongPasswordText.enabled = false;
+                // initialize egg menu
+                addButtons();
+                initializeCheckinDataStructures();
+                // logged in, switch to main menu
+                //_pleaseWaitCanvas.enabled = false;
+                //_mainMenuCanvas.enabled = true;
+                Debug.Log("loading webpage");
+                yield return SpatialClient2.single.checkIfMarkersExist(); // populates with building markers if there are none around
+                if (_userNameField.text == justRegisteredUsername)
+                {
+                    justRegisteredUsername = null;
+                    showTutorial();
+                }
+                else
+                {
+                    _webView.Load();
+                }
                 break;
             case false:
                 // wrong credentials
@@ -305,25 +327,26 @@ public class MainMenuScript : MonoBehaviour
 		StartCoroutine (submit());
 	}
 
-	void showTutorial()
-	{
-		tutorialCanvas.enabled = true;
-		tutorialImage = tutorialCanvas.transform.FindChild ("Image").gameObject;
-		tutorialImage.GetComponent<Image> ().sprite = tutorialSprites [0];
-		tutorialIndex = 0;
-	}
+    void showTutorial()
+    {
+        tutorialCanvas.enabled = true;
+        tutorialImage = tutorialCanvas.transform.FindChild("Image").gameObject;
+        tutorialImage.GetComponent<Image>().sprite = tutorialSprites[0];
+        tutorialIndex = 0;
+    }
 
-	public void nextPage()
-	{
-		tutorialImage = tutorialCanvas.transform.FindChild ("Image").gameObject;
-		tutorialIndex++;
-		if (tutorialIndex < tutorialSprites.Length)
-			tutorialImage.GetComponent<Image> ().sprite = tutorialSprites [tutorialIndex];
-		else {
-			_tutorialCanvas.enabled = false;
-			_webView.Load ();
-		}
-	}
+    public void nextPage()
+    {
+        tutorialImage = tutorialCanvas.transform.FindChild("Image").gameObject;
+        tutorialIndex++;
+        if (tutorialIndex < tutorialSprites.Length)
+            tutorialImage.GetComponent<Image>().sprite = tutorialSprites[tutorialIndex];
+        else
+        {
+            _tutorialCanvas.enabled = false;
+            _webView.Load();
+        }
+    }
 
     /* public void onEggs()
     {
@@ -368,9 +391,12 @@ public class MainMenuScript : MonoBehaviour
         _mainMenuCanvas.enabled = true;
     } */
 
-	public void openRegisterScreen()
+    public void openRegisterScreen()
 	{
 		_loginCanvas.enabled = false;
+		_wrongPasswordText.enabled = false;
+		_connectionErrorText.enabled = false;
+		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		_registerCanvas.enabled = true;
 	}
 
@@ -508,8 +534,9 @@ public class MainMenuScript : MonoBehaviour
             case "resetscore":
                 StartCoroutine(SpatialClient2.single.resetStreak());
                 break;
-            case "camera":
-                // TODO transfer to camera
+			case "addfriend":
+				_disableWebview ();
+				_friendSearchCanvas.enabled = true;
                 break;
             case "kaiju":
                 _disableWebview();
@@ -605,21 +632,15 @@ public class MainMenuScript : MonoBehaviour
         }
 		pos = 311;
 		Debug.Log(pos);
-        foreach (FriendData fd in SpatialClient2.single.Friends)
+        refreshFriendButtons();
+    }
+
+    public void refreshFriendButtons()
+    {
+        foreach (FriendStatus fs in SpatialClient2.single.Friends)
         {
-            GameObject friendMenuItem = GameObject.Instantiate(_friendMenuItemPrefab);
-            friendMenuItem.transform.SetParent(_friendMenuContentPanel, false);
-            friendMenuItem.GetComponent<FriendMenuItem>().Friend = fd;
-            foreach (OwnedEgg e in fd.Friend.Metadata.EggsOwned)
-            {
-                if (!e.Hatchable)
-                {
-                    GameObject friendEggMenuItem = GameObject.Instantiate(_friendEggMenuItemPrefab);
-                    friendEggMenuItem.transform.SetParent(_friendEggMenuContentPanel, false);
-                    friendEggMenuItem.GetComponent<FriendEggMenuItem>().Egg = e; // also updates the egg menu item's view
-					friendEggMenuItem.GetComponent<FriendEggMenuItem>().Friend = fd;
-                }
-            }
+            if (!fs.HasButton)
+                fs.createButtons(_friendMenuItemPrefab, _friendMenuContentPanel, _friendEggMenuItemPrefab, _friendEggMenuContentPanel);
         }
     }
 
@@ -820,9 +841,8 @@ public class MainMenuScript : MonoBehaviour
 		switch (response.Success)
 		{
 		case true:
-			// initialize egg menu
-			justRegisteredUsername = _registerCanvas.transform.FindChild ("UserNameField").GetComponent<InputField> ().text;
-			_loginCanvas.enabled = true;
+            justRegisteredUsername = _registerCanvas.transform.FindChild("UserNameField").GetComponent<InputField>().text;
+            _loginCanvas.enabled = true;
 			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
 			_registerCanvas.enabled = false;
 			break;
@@ -890,37 +910,82 @@ public class MainMenuScript : MonoBehaviour
         _logoCanvas.enabled = false;
     }
 
-	public void onAddFriend()
-	{
-		string userName = _friendsEggsScrollView.transform.
-			FindChild ("FriendUsernameField").GetComponent<InputField> ().text;
+    public void onBackFromUserSearch()
+    {
+        _friendSearchCanvas.enabled = false;
+        showWebView();
+    }
 
-		string userID = "";
-		// Call Spatial Client
-		// string userId =
-		StartCoroutine(addFriend(userID));
-	}
+    public void onSearch()
+    {
+        _userNotFoundText.enabled = false;
+        _userFoundText.enabled = false;
+		_addFriendSucceedText.enabled = false;
+        _userSearchResult = null;
+        //_addFriendButton.enabled = false;
+        if (_friendSearchBox.text == "")
+        {
+            _enterYourFriendsUsernameText.enabled = true;
+        }
+        else
+        {
+            _enterYourFriendsUsernameText.enabled = false;
+            StartCoroutine(searchFriend());
+        }
+    }
 
-	IEnumerator addFriend(string userID)
-	{
-		CoroutineResponse response = new CoroutineResponse();
-		response.reset();
-		yield return SpatialClient2.single.AddFriend(response, userID);
-		switch (response.Success)
-		{
-		case true:
-			// add Friend to canvas
+    private IEnumerator searchFriend()
+    {
+        MessageController.single.displayWaitScreen(_friendSearchCanvas);
+        UserWrapper wrapper = new UserWrapper();
+        yield return SpatialClient2.single.GetUserByUsername(wrapper, _friendSearchBox.text);
+        if (wrapper.User != null)
+        {
+            _userSearchResult = wrapper.User;
+            if (SpatialClient2.single.alreadyFriend(_userSearchResult.Id))
+            {
+                _userFoundText.text = YOU_ARE_ALREADY_FRIENDS_WITH + _userSearchResult.getName() + '.';
+				_userFoundText.enabled = true;
+            }
+            else
+            {
+                //_userFoundText.text = ADD + _userSearchResult.getName() + AS_FRIEND;
+                //_addFriendButton.enabled = true;
 
-			break;
-		case false:
-			// 
+				onAddFriend ();
+            }
+            //_userFoundText.enabled = true;
+        }
+        else
+        {
+            _userNotFoundText.enabled = true;
+        }
+        MessageController.single.closeWaitScreen(false);
+    }
 
-			break;
-		case null:
-			// 
+    public void onAddFriend()
+    {
+        StartCoroutine(addFriend());
+    }
 
-			break;
-		}
-	}
-		
+    private IEnumerator addFriend()
+    {
+        MessageController.single.displayWaitScreen(_friendsCanvas);
+        CoroutineResponse addFriendSuccess = new CoroutineResponse();
+        yield return SpatialClient2.single.AddFriend(_userSearchResult.Id, addFriendSuccess);
+        if (addFriendSuccess.Success == true)
+        {
+            yield return SpatialClient2.single.GetFriends(true);
+            refreshFriendButtons();
+            //_addFriendButton.enabled = false;
+            _userNotFoundText.enabled = false;
+            _userFoundText.enabled = false;
+			_addFriendSucceedText.enabled = true;
+            _enterYourFriendsUsernameText.enabled = true;
+            _userSearchResult = null;
+            //_friendSearchCanvas.enabled = false;
+        }
+        MessageController.single.closeWaitScreen(false);
+    }
+
 }

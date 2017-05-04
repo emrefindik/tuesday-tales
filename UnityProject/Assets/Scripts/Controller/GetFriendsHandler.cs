@@ -30,10 +30,10 @@ public class GetFriendsHandler : MonoBehaviour {
 		}
 		if (Input.GetKeyDown (KeyCode.A)) {
 
-			StartCoroutine(SpatialClient2.single.AddFriend(new CoroutineResponse(), friendID, Auth)); 
+			//StartCoroutine(SpatialClient2.single.AddFriend(new CoroutineResponse(), friendID, Auth)); 
 		}
 		if (Input.GetKeyDown (KeyCode.G)) {
-			StartCoroutine(SpatialClient2.single.GetFriends(userID)); 
+			//StartCoroutine(SpatialClient2.single.GetFriends(userID)); 
 		}
 	}
 }
