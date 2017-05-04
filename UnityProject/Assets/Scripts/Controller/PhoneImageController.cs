@@ -97,7 +97,7 @@ public class PhoneImageController : MonoBehaviour {
 			EggCheckinModel.SetActive (true);
 			GameObject CheckinEgg = GameObject.Find ("CheckinEgg");
 			CheckinEgg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
-			CheckinEgg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
+			//CheckinEgg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
 			break;
 		default:
 			break;	

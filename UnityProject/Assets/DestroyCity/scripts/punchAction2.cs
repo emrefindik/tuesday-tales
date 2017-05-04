@@ -203,6 +203,7 @@ public class punchAction2 : MonoBehaviour {
 			}
 
 			else{
+
 				_endPos = _inputPosition;
 				Debug.Log ("button up, setting null");
 				//Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
