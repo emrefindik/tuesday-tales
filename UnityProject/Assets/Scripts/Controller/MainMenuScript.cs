@@ -863,6 +863,8 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromRegister()
     {
         _registerCanvas.enabled = false;
+		_connectionErrorText.enabled = false;
+		_wrongPasswordText.enabled = false;
         _loginCanvas.enabled = true;
     }
 
