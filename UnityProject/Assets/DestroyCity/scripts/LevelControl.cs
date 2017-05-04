@@ -70,7 +70,7 @@ public class LevelControl : MonoBehaviour {
 	GameObject[] blocks;
 
 	public AudioClip smeshAudio;
-	public AudioClip screamAudio;
+	public AudioClip[] screamAudio;
 
 	[HideInInspector]
 	public AudioSource smesh;
@@ -121,7 +121,6 @@ public class LevelControl : MonoBehaviour {
 		smesh.playOnAwake = false;
 
 		scream = gameObject.AddComponent<AudioSource> ();
-		scream.clip = screamAudio;
 		scream.playOnAwake = false;
     }
 
@@ -443,7 +442,18 @@ public class LevelControl : MonoBehaviour {
 	{
 		editEggNameCanvas.SetActive (true);
 	}
-		
+
+	public void playScream()
+	{
+		scream.clip = screamAudio[Random.Range (0, screamAudio.Length - 1)];
+		scream.Play ();
+	}
+
+	public void playSmesh()
+	{
+		smesh.Play ();
+	}
+
 
 	/**********************************
 	 * 

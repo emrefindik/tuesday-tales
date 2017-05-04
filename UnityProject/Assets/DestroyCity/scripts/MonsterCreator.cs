@@ -27,6 +27,8 @@ public class MonsterCreator : MonoBehaviour {
 	public GameObject body;
 	public GameObject leftHand;
 	public GameObject rightHand;
+	public GameObject leftHandIdle;
+	public GameObject rightHandIdle;
 
 	Color monsterColor;
 	//Color eyeColor;
@@ -58,7 +60,15 @@ public class MonsterCreator : MonoBehaviour {
 		renderer.sprite = handSprite;
 		renderer.material.color = mColor;
 
+		renderer = leftHandIdle.GetComponent<SpriteRenderer> ();
+		renderer.sprite = handSprite;
+		renderer.material.color = mColor;
+
 		renderer = rightHand.GetComponent<SpriteRenderer> ();
+		renderer.sprite = handSprite;
+		renderer.color = mColor;
+
+		renderer = rightHandIdle.GetComponent<SpriteRenderer> ();
 		renderer.sprite = handSprite;
 		renderer.color = mColor;
 
@@ -110,7 +120,15 @@ public class MonsterCreator : MonoBehaviour {
 		renderer.sprite = KaijuDatabase.instance.HandSprites [handType];
 		renderer.material.color = monsterColor;
 
+		renderer = leftHandIdle.GetComponent<SpriteRenderer> ();
+		renderer.sprite = KaijuDatabase.instance.HandSprites [handType];
+		renderer.material.color = monsterColor;
+
 		renderer = rightHand.GetComponent<SpriteRenderer> ();
+		renderer.sprite = KaijuDatabase.instance.HandSprites [handType];
+		renderer.color = monsterColor;
+
+		renderer = rightHandIdle.GetComponent<SpriteRenderer> ();
 		renderer.sprite = KaijuDatabase.instance.HandSprites [handType];
 		renderer.color = monsterColor;
 
