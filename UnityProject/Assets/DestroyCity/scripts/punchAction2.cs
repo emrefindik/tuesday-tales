@@ -98,8 +98,9 @@ public class punchAction2 : MonoBehaviour {
 			//if (level2On) {
 				
 				if (_inputPosition.x < BUILDING_CENTER_X) {
-					leftFistIdle.SetActive (false);
+					//leftFistIdle.SetActive (false);
 					Debug.Log (leftFist);
+					
 					movingFist = Instantiate (leftFist, new Vector3 (IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
 					leftCount ++ ;
 					if (level2On) {
@@ -109,10 +110,12 @@ public class punchAction2 : MonoBehaviour {
 				
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = true;
+					
 				}
 				if (_inputPosition.x >= BUILDING_CENTER_X) {
-					rightFistIdle.SetActive (false);
+					//rightFistIdle.SetActive (false);
 					Debug.Log (rightFist);
+					
 					movingFist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
 					rightCount ++;
 					if (level2On) {
@@ -121,6 +124,7 @@ public class punchAction2 : MonoBehaviour {
 					}
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = false;
+					
 				}			
 
 				
@@ -206,8 +210,10 @@ public class punchAction2 : MonoBehaviour {
 					}
 
 				}
-
-				movingFist.transform.position = _inputPosition;
+				
+				if(movingFist)
+					movingFist.transform.position = _inputPosition;
+					
 			//}
 
 		}
