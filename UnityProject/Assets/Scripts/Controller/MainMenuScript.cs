@@ -135,6 +135,7 @@ public class MainMenuScript : MonoBehaviour
 	private Text _addFriendSucceedText;
     //[SerializeField]
     //private Button _addFriendButton;
+
     [SerializeField]
     private Canvas _eggsCanvas;
     [SerializeField]
@@ -233,10 +234,10 @@ public class MainMenuScript : MonoBehaviour
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
         _tutorialCanvas.enabled = false;
-        //_addFriendButton.enabled = false;
         _userNotFoundText.enabled = false;
         _userFoundText.enabled = false;
 		_addFriendSucceedText.enabled = false;
+
         _enterYourFriendsUsernameText.enabled = false;
         _friendSearchCanvas.enabled = false;
         _userSearchResult = null;
@@ -925,6 +926,7 @@ public class MainMenuScript : MonoBehaviour
 		_addFriendSucceedText.enabled = false;
         _userSearchResult = null;
         //_addFriendButton.enabled = false;
+
         if (_friendSearchBox.text == "")
         {
             _enterYourFriendsUsernameText.enabled = true;
@@ -970,6 +972,7 @@ public class MainMenuScript : MonoBehaviour
         StartCoroutine(addFriend());
     }
 
+
     private IEnumerator addFriend()
     {
         MessageController.single.displayWaitScreen(_friendsCanvas);
@@ -986,6 +989,7 @@ public class MainMenuScript : MonoBehaviour
             _enterYourFriendsUsernameText.enabled = true;
             _userSearchResult = null;
             //_friendSearchCanvas.enabled = false;
+
         }
         MessageController.single.closeWaitScreen(false);
     }
