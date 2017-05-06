@@ -21,6 +21,7 @@ public class PhoneImageController : MonoBehaviour {
 	public GameObject BuildingSelfieModel;
 	public GameObject EggSelfieModel;
 	public GameObject EggCheckinModel;
+	public GameObject[] HatchingEggs;
 
 	public Texture2D screenShotCopy;
 	public GameObject photoRect;
@@ -85,8 +86,13 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
 			EggSelfieModel.SetActive (true);
-			GameObject Egg = GameObject.Find ("Egg");
-			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
+			Debug.Log (mainController.selectedEgg.Index);
+			GameObject Egg = HatchingEggs [mainController.selectedEgg.Index - 1];
+			Egg.SetActive (true);
+			GameObject kaijuHead = GameObject.Find ("KaijuHead");
+			kaijuHead.SetActive (false);
+			StartCoroutine (ShowKaijuHead (kaijuHead));
+			kaijuHead.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.KaijuEmbryo.HeadSprite;
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
@@ -107,6 +113,12 @@ public class PhoneImageController : MonoBehaviour {
 		camDisplayCanvas.SetActive (false);
 		shareCanvas.SetActive (false);
 
+	}
+
+	IEnumerator ShowKaijuHead(GameObject head)
+	{
+		yield return new WaitForSeconds (1.0f);
+		head.SetActive (false);
 	}
 
 	void Update()

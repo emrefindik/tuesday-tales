@@ -110,11 +110,12 @@ public class punchAction2 : MonoBehaviour {
 					
 					movingFist = Instantiate (leftFist, new Vector3 (IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
 					leftCount ++ ;
-					if (level2On) {
-						movingFist.layer = LayerMask.NameToLayer ("Human");
-						movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
-					}
 					movingIdleFist = leftFistIdle;
+				if (level2On) {
+					movingFist.layer = LayerMask.NameToLayer ("Human");
+					movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
+					} 
+					
 				
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = true;
@@ -126,11 +127,12 @@ public class punchAction2 : MonoBehaviour {
 					
 					movingFist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
 					rightCount ++;
+					movingIdleFist = rightFistIdle;
 					if (level2On) {
 						movingFist.layer = LayerMask.NameToLayer ("Human");
 						movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
-					}
-					movingIdleFist = rightFistIdle;
+					} 
+					
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = false;
 					

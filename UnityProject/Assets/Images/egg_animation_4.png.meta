@@ -1,9 +1,14 @@
 fileFormatVersion: 2
-guid: 937f7ec18db264060aec2242da3675ff
-timeCreated: 1494021209
+guid: 555799aec607f4270829286f54d09d76
+timeCreated: 1494038508
 licenseType: Free
 TextureImporter:
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    21300000: egg_animation_4_0
+    21300002: egg_animation_4_1
+    21300004: egg_animation_4_2
+    21300006: egg_animation_4_3
+    21300008: egg_animation_4_4
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -34,7 +39,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -67,13 +72,13 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
   - buildTarget: iPhone
-    maxTextureSize: 512
-    textureFormat: 33
+    maxTextureSize: 2048
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
-    overridden: 1
+    overridden: 0
   - buildTarget: Android
     maxTextureSize: 2048
     textureFormat: -1
@@ -84,7 +89,72 @@ TextureImporter:
     overridden: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: egg_animation_4_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 770
+        width: 366
+        height: 253
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: egg_animation_4_1
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 724
+        width: 389
+        height: 297
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: egg_animation_4_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 390
+        width: 435
+        height: 368
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: egg_animation_4_3
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 16
+        width: 359
+        height: 415
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: egg_animation_4_4
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 21
+        width: 346
+        height: 443
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
     outline: []
   spritePackingTag: 
   userData: 
