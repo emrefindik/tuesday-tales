@@ -111,7 +111,7 @@ public class MonsterCreator : MonoBehaviour {
 		headType = headT;
 		eyeType = Random.Range (0, KaijuDatabase.instance.eyeSprites.Length - 1);
 		bodyType = bodyT;
-		monsterColor = mColor;
+		monsterColor = Color.white;
 		loadSprites ();
 	}
 
