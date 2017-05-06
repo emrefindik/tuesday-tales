@@ -72,6 +72,13 @@ public class punchAction2 : MonoBehaviour {
 	public Camera cam;
 	private GameObject draggingObject;
 	private GameObject movingFist;
+	private GameObject movingIdleFist;
+
+	// To move the idle fist
+	public Vector3 Target;
+	public float RotationSpeed;
+	private Quaternion _lookRotation;
+	private Vector3 _direction;
 
 	void Update () {
 
@@ -107,6 +114,7 @@ public class punchAction2 : MonoBehaviour {
 						movingFist.layer = LayerMask.NameToLayer ("Human");
 						movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
 					}
+					movingIdleFist = leftFistIdle;
 				
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = true;
@@ -122,6 +130,7 @@ public class punchAction2 : MonoBehaviour {
 						movingFist.layer = LayerMask.NameToLayer ("Human");
 						movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
 					}
+					movingIdleFist = rightFistIdle;
 					movingFist.GetComponent<Collider> ().enabled = true;
 					isLeft = false;
 					
@@ -213,6 +222,16 @@ public class punchAction2 : MonoBehaviour {
 				
 				if(movingFist)
 					movingFist.transform.position = _inputPosition;
+
+			if (movingIdleFist) {
+				Transform shoulder = movingIdleFist.transform.parent;
+				Debug.Log ("rotation");
+				Target = new Vector3 (_inputPosition.x, _inputPosition.y, shoulder.position.z);
+				Vector3 shoulderToTarget = Target - shoulder.position;
+
+				Vector3 newDir = Vector3.RotateTowards (shoulder.forward, shoulderToTarget, 100, 0.0f);
+				shoulder.rotation = Quaternion.LookRotation (newDir);
+			}
 					
 			//}
 
@@ -274,12 +293,12 @@ public class punchAction2 : MonoBehaviour {
 		oldPosition = new Vector3 (0, 0, 0);
 
 
-		/*
+
 		if(magnitude < 2f)
 			StartCoroutine (_DelayDestroy (movingFist, 0.3f, isLeft));
 		else
 			StartCoroutine (_DelayDestroy (movingFist, 0.5f, isLeft));
-		*/
+		
 	}
 
 	bool inBound(Vector3 position)
