@@ -8,7 +8,10 @@ public class KaijuMenuItem : MonoBehaviour
     public Text _kaijuNameText;
     public Text _kaijuGivenNameText;
     public Text _kaijuDescriptionText;
-    public Image _kaijuImage;
+    public Image _kaijuHeadImage;
+	public Image _kaijuBodyImage;
+	public Image _kaijuLHandImage;
+	public Image _kaijuRHandImage;
 
     protected Kaiju _kaiju;
     public Kaiju Kaiju
@@ -19,18 +22,18 @@ public class KaijuMenuItem : MonoBehaviour
         }
         set
         {
-			Debug.Log ("y");
             _kaiju = value;
-			Debug.Log ("yo");
             _kaijuNameText.text = value.Name;
 			Debug.Log (value.GivenName);
             _kaijuGivenNameText.text = value.GivenName;
-			Debug.Log ("yo2");
-            _kaijuImage.sprite = value.HeadSprite;
-			Debug.Log ("yo3");
+            _kaijuHeadImage.sprite = value.HeadSprite;
 			//_kaijuImage.color = value.MonsterColor;
-			_kaijuImage.color = Color.white;
-			Debug.Log ("yo4");
+			_kaijuHeadImage.color = Color.white;
+			_kaijuLHandImage.sprite = value.HandSprite;
+			_kaijuRHandImage.sprite = value.HandSprite;
+			_kaijuBodyImage.sprite = value.BodySprite;
+
+			//_kaijuImage.color = value.MonsterColor;
             // TODO SET KAIJUIMAGE!!
             // TODO SET KAIJU DESCRIPTION TEXT!
         }
