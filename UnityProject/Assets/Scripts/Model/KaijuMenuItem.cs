@@ -19,17 +19,11 @@ public class KaijuMenuItem : MonoBehaviour
         }
         set
         {
-			Debug.Log ("y");
             _kaiju = value;
-			Debug.Log ("yo");
             _kaijuNameText.text = value.Name;
-			Debug.Log (value.GivenName);
             _kaijuGivenNameText.text = value.GivenName;
-			Debug.Log ("yo2");
             _kaijuImage.sprite = value.HeadSprite;
-			Debug.Log ("yo3");
 			_kaijuImage.color = value.MonsterColor;
-			Debug.Log ("yo4");
             // TODO SET KAIJUIMAGE!!
             // TODO SET KAIJU DESCRIPTION TEXT!
         }
