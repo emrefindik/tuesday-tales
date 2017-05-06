@@ -29,6 +29,7 @@ public class KaijuMenuItem : MonoBehaviour
             _kaijuImage.sprite = value.HeadSprite;
 			Debug.Log ("yo3");
 			//_kaijuImage.color = value.MonsterColor;
+			_kaijuImage.color = Color.white;
 			Debug.Log ("yo4");
             // TODO SET KAIJUIMAGE!!
             // TODO SET KAIJU DESCRIPTION TEXT!

@@ -211,13 +211,11 @@ public class LevelControl : MonoBehaviour {
 		kaiju = GameObject.Find ("Kaiju").gameObject;
 		selectedKaiju = mainMenu.SelectedKaiju;
 		if (selectedKaiju != null) {
-			Debug.Log ("Kaiju: " + kaiju);
-			Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
 			kaiju.GetComponent<MonsterCreator> ().
-				setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			setUpMonster (selectedKaiju.HeadType, selectedKaiju.HandType, selectedKaiju.BodyType, selectedKaiju.MonsterColor);
 		} else {
 			kaiju.GetComponent<MonsterCreator> ().
-			setUpMonster (1,1,1, Color.green);
+			setUpMonster (6,1,1, Color.white);
 		}
 
 		Debug.Log ("Setup Kaiju");

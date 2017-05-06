@@ -80,7 +80,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.BuildingDestruction:
 			BuildingSelfieModel.SetActive (true);
 			Kaiju kaiju = mainMenu.SelectedKaiju;
-			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.HandSprite, kaiju.BodySprite, kaiju.MonsterColor);
+			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadType, kaiju.HandType, kaiju.BodyType, kaiju.MonsterColor);
 			break;
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
@@ -91,7 +91,7 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadType, selectedKaiju.HandType, selectedKaiju.BodyType, selectedKaiju.MonsterColor);
 			break;
 		case CameraMode.EggCheckin:
 			EggCheckinModel.SetActive (true);

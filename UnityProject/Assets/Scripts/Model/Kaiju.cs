@@ -12,6 +12,10 @@ public class Kaiju : ISerializationCallbackReceiver
 
     [SerializeField]
     private int _handType;
+	public int HandType
+	{
+		get { return _handType; }
+	}
     public Sprite HandSprite
     {
         get { return KaijuDatabase.instance.HandSprites[_handType]; }
@@ -19,6 +23,10 @@ public class Kaiju : ISerializationCallbackReceiver
 
     [SerializeField]
     private int _headType;
+	public int HeadType
+	{
+		get { return _headType; }
+	}
     public Sprite HeadSprite
     {
         get { return KaijuDatabase.instance.HeadSprites[_headType]; }
@@ -26,6 +34,10 @@ public class Kaiju : ISerializationCallbackReceiver
 
     [SerializeField]
     private int _bodyType;
+	public int BodyType
+	{
+		get { return _bodyType; }
+	}
     public Sprite BodySprite
     {
         get { return KaijuDatabase.instance.BodySprites[_bodyType]; }

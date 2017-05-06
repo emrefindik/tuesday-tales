@@ -8,7 +8,7 @@ public class MonsterCreator : MonoBehaviour {
 	public int handType;
 	[HideInInspector]
 	public int headType;
-	[HideInInspector]
+	//[HideInInspector]
 	public int eyeType;
 	[HideInInspector]
 	public int bodyType;
@@ -22,7 +22,8 @@ public class MonsterCreator : MonoBehaviour {
 
 	public Sprite eyeSprite;
 
-	public GameObject head;
+	public GameObject[] headGameobjects;
+	GameObject head;
 	public GameObject leftEye;
 	public GameObject body;
 	public GameObject leftHand;
@@ -33,6 +34,10 @@ public class MonsterCreator : MonoBehaviour {
 	Color monsterColor;
 	//Color eyeColor;
 
+	void Awake()
+	{
+	}
+
 	// Use this for initialization
 	void Start () {
 		//createRandomMonster ();
@@ -40,8 +45,16 @@ public class MonsterCreator : MonoBehaviour {
 	}
 
 
+	// Note: for this method, there's no way to know which animation needs to be loaded
+	/*
 	public void setUpMonster(Sprite headSprite, Sprite handSprite, Sprite bodySprite, Color mColor)
 	{
+		for (int i = 0; i < headGameobjects.Length; i++) {
+			headGameobjects [i].SetActive (false);
+		}
+
+		// Get index
+		head = headGameobjects[]
 		SpriteRenderer renderer;
 		renderer = head.GetComponent<SpriteRenderer> ();
 		renderer.sprite = headSprite;
@@ -78,6 +91,7 @@ public class MonsterCreator : MonoBehaviour {
 		leftHand.SetActive (true);
 		rightHand.SetActive (true);
 	}
+	*/
 
 	/*
 	void createRandomMonster()
@@ -103,7 +117,13 @@ public class MonsterCreator : MonoBehaviour {
 
 	void loadSprites()
 	{
+		for (int i = 0; i < headGameobjects.Length; i++) {
+			headGameobjects [i].SetActive (false);
+		}
+
 		SpriteRenderer renderer;
+		head = headGameobjects[headType-1];
+		head.SetActive (true);
 		renderer = head.GetComponent<SpriteRenderer> ();
 		renderer.sprite = KaijuDatabase.instance.HeadSprites [headType];
 		renderer.material.color = monsterColor;

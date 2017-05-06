@@ -274,17 +274,17 @@ public class punchAction2 : MonoBehaviour {
 		oldPosition = new Vector3 (0, 0, 0);
 
 
-
+		/*
 		if(magnitude < 2f)
 			StartCoroutine (_DelayDestroy (movingFist, 0.3f, isLeft));
 		else
 			StartCoroutine (_DelayDestroy (movingFist, 0.5f, isLeft));
-		
+		*/
 	}
 
 	bool inBound(Vector3 position)
 	{
-		return position.y < 5.7f && position.y > -2.0f;
+		return position.y < 4.7f && position.y > -3.0f;
 	}
 
 	IEnumerator _DelayDestroy(GameObject fist, float time, bool isLeft)
