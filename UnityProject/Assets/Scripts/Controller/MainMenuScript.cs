@@ -88,7 +88,7 @@ public class MainMenuScript : MonoBehaviour
 		get { return kaijuCanvas; }
 		private set { kaijuCanvas = value; }
 	}
-
+		
     private static Canvas tutorialCanvas;
     public static Canvas TutorialCanvas
     {
@@ -105,7 +105,7 @@ public class MainMenuScript : MonoBehaviour
         get { return friendSearchCanvas; }
         private set { friendSearchCanvas = value; }
     }
-
+		
     private static UniWebView webView;
     /*public static UniWebView WebView
     {
@@ -206,7 +206,7 @@ public class MainMenuScript : MonoBehaviour
     {
         get { return _kaijuCanvas.GetComponent<KaijuScreenController>().SelectedKaiju; }
     }
-
+		
     string justRegisteredUsername = null;
 
     // Use this for initialization
@@ -241,6 +241,10 @@ public class MainMenuScript : MonoBehaviour
         _enterYourFriendsUsernameText.enabled = false;
         _friendSearchCanvas.enabled = false;
         _userSearchResult = null;
+        //_mainMenuCanvas.enabled = false;
+        //_mapCanvas.enabled = false;
+        
+        _kaijuCanvas.enabled = false;
         mapLoaded = false;
 
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
@@ -303,6 +307,7 @@ public class MainMenuScript : MonoBehaviour
                 {
                     _webView.Load();
                 }
+
                 break;
             case false:
                 // wrong credentials
@@ -327,7 +332,7 @@ public class MainMenuScript : MonoBehaviour
 		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		StartCoroutine (submit());
 	}
-
+		
     void showTutorial()
     {
         tutorialCanvas.enabled = true;
@@ -844,6 +849,7 @@ public class MainMenuScript : MonoBehaviour
 		case true:
             justRegisteredUsername = _registerCanvas.transform.FindChild("UserNameField").GetComponent<InputField>().text;
             _loginCanvas.enabled = true;
+
 			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
 			_registerCanvas.enabled = false;
 			break;
