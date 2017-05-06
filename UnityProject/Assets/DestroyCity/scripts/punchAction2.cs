@@ -6,6 +6,13 @@ public class punchAction2 : MonoBehaviour {
 
 	public GameObject leftFist;
 	public GameObject rightFist;
+
+	public GameObject leftFistIdle;
+	public GameObject rightFistIdle;
+	bool isLeft;
+	int leftCount;
+	int rightCount;
+
 	public GameObject monster;
 	public LevelControl levelControl;
 	public Material trailMat;
@@ -54,6 +61,8 @@ public class punchAction2 : MonoBehaviour {
 		throwSound.clip = throwClip;
 		throwSound.playOnAwake = false;
 
+		leftCount = 0;
+		rightCount = 0;
     }
 
 
@@ -63,6 +72,13 @@ public class punchAction2 : MonoBehaviour {
 	public Camera cam;
 	private GameObject draggingObject;
 	private GameObject movingFist;
+	private GameObject movingIdleFist;
+
+	// To move the idle fist
+	public Vector3 Target;
+	public float RotationSpeed;
+	private Quaternion _lookRotation;
+	private Vector3 _direction;
 
 	void Update () {
 
@@ -84,23 +100,42 @@ public class punchAction2 : MonoBehaviour {
 			_startPos = _inputPosition;
 			Debug.Log ("GetMouseButtonDown");
 			punchStrength = 0;
-			pressEffect.transform.position = new Vector3 (_inputPosition.x, _inputPosition.y, -1f);
-			pressEffect.Play ();
 
-			if (level2On) {
+
+			//if (level2On) {
 				
 				if (_inputPosition.x < BUILDING_CENTER_X) {
+					//leftFistIdle.SetActive (false);
 					Debug.Log (leftFist);
+					
 					movingFist = Instantiate (leftFist, new Vector3 (IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
+					leftCount ++ ;
+					movingIdleFist = leftFistIdle;
+				if (level2On) {
 					movingFist.layer = LayerMask.NameToLayer ("Human");
+					movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
+					} 
+					
+				
 					movingFist.GetComponent<Collider> ().enabled = true;
+					isLeft = true;
+					
 				}
 				if (_inputPosition.x >= BUILDING_CENTER_X) {
+					//rightFistIdle.SetActive (false);
 					Debug.Log (rightFist);
+					
 					movingFist = Instantiate (rightFist, new Vector3 (-IDLE_L_X, 5, PUNCH_Z), Quaternion.identity);
-					movingFist.layer = LayerMask.NameToLayer ("Human");
+					rightCount ++;
+					movingIdleFist = rightFistIdle;
+					if (level2On) {
+						movingFist.layer = LayerMask.NameToLayer ("Human");
+						movingFist.GetComponentInChildren<SpriteRenderer> ().sortingOrder = -1;
+					} 
+					
 					movingFist.GetComponent<Collider> ().enabled = true;
-
+					isLeft = false;
+					
 				}			
 
 				
@@ -108,9 +143,12 @@ public class punchAction2 : MonoBehaviour {
 				screenPoint = cam.WorldToScreenPoint (gameObject.transform.position);
 
 				Ray ray = cam.ScreenPointToRay (Input.mousePosition);
+				LayerMask layerMask = -1;
+				if(!level2On)
+					layerMask = ~(1 << LayerMask.NameToLayer ("BuildingPhysics"));
 				RaycastHit hit;
 
-				if (Physics.Raycast (ray, out hit, 100)) {
+				if (Physics.Raycast (ray, out hit, 100, layerMask)) {
 					Debug.Log ("hit");
 					Debug.Log (hit.transform.gameObject.name);
 					if (hit.transform.gameObject.tag == "block" || hit.transform.gameObject.tag == "people") {
@@ -153,7 +191,7 @@ public class punchAction2 : MonoBehaviour {
 
 
 
-			}
+			//}
 
 		}
 
@@ -166,21 +204,38 @@ public class punchAction2 : MonoBehaviour {
 				pressEffect.transform.localScale = new Vector3 (1 + punchStrength, 1 + punchStrength, 1 + punchStrength);
 			}
 
-			if (level2On) {
+			//if (level2On) {
 				//Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 
 				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
 				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
 
 				if (draggingObject != null) {
-					Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
-					draggingObject.transform.position = curPosition;
-					oldPosition = curPosition;
+				if (!inBound (_inputPosition)) {
+					releasePunch ();
+					draggingObject = null;
+					} else {
+						Vector3 curPosition = new Vector3 (_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
+						draggingObject.transform.position = curPosition;
+						oldPosition = curPosition;
+					}
 
 				}
+				
+				if(movingFist)
+					movingFist.transform.position = _inputPosition;
 
-				movingFist.transform.position = _inputPosition;
+			if (movingIdleFist) {
+				Transform shoulder = movingIdleFist.transform.parent;
+				Debug.Log ("rotation");
+				Target = new Vector3 (_inputPosition.x, _inputPosition.y, shoulder.position.z);
+				Vector3 shoulderToTarget = Target - shoulder.position;
+
+				Vector3 newDir = Vector3.RotateTowards (shoulder.forward, shoulderToTarget, 100, 0.0f);
+				shoulder.rotation = Quaternion.LookRotation (newDir);
 			}
+					
+			//}
 
 		}
 
@@ -188,6 +243,8 @@ public class punchAction2 : MonoBehaviour {
 		if(Input.GetMouseButtonUp(0))
 		{
 			_inputPosition = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 10f));
+
+			/*
 			if (!level2On) {
 				tapCheckX = Input.mousePosition.x;
 				pressEffect.Stop ();
@@ -201,45 +258,69 @@ public class punchAction2 : MonoBehaviour {
 					initPunch (PUNCHINGRIGHT);
 				}
 			}
+			*/
+			//else{
 
-			else{
 				_endPos = _inputPosition;
 				Debug.Log ("button up, setting null");
 				//Vector3 curScreenPoint = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 				//Vector3 curPosition = cam.ScreenToWorldPoint (curScreenPoint) + offset;
-
-				float magnitude = Vector3.Distance (_startPos, _endPos);
-
-				if (draggingObject != null) {
-					Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
-					Vector3 vel = curPosition - oldPosition;
-					if (vel.magnitude > 0.2f) {
-						vel = vel.normalized * magnitude * 0.4f;
-						Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
-						rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
-						movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
-						throwSound.Play ();
-					}
-
-					draggingObject = null;
-
-				}
-
-				oldPosition = new Vector3 (0, 0, 0);
-
-				if(magnitude < 2f)
-					StartCoroutine (_DelayDestroy (movingFist, 0.1f));
-				else
-					StartCoroutine (_DelayDestroy (movingFist, 0.5f));
-			}
+				releasePunch();
+				
+					
+			//}
 		}
 
 	}
 
-	IEnumerator _DelayDestroy(GameObject g, float time)
+	void releasePunch()
+	{
+		float magnitude = Vector3.Distance (_startPos, _endPos);
+
+		if (draggingObject != null) {
+			Vector3 curPosition = new Vector3(_inputPosition.x, _inputPosition.y, draggingObject.transform.position.z);
+			Vector3 vel = curPosition - oldPosition;
+			if (vel.magnitude > 0.2f) {
+				vel = vel.normalized * magnitude * 0.4f;
+				Rigidbody rigidBody = draggingObject.GetComponent<Rigidbody> ();
+				rigidBody.AddForce (vel * rigidBody.mass * 20, ForceMode.Impulse);
+				movingFist.GetComponent<Rigidbody> ().velocity = vel * 2;
+				throwSound.Play ();
+			}
+
+			draggingObject = null;
+
+		}
+
+		oldPosition = new Vector3 (0, 0, 0);
+
+
+
+		if(magnitude < 2f)
+			StartCoroutine (_DelayDestroy (movingFist, 0.3f, isLeft));
+		else
+			StartCoroutine (_DelayDestroy (movingFist, 0.5f, isLeft));
+		
+	}
+
+	bool inBound(Vector3 position)
+	{
+		return position.y < 4.7f && position.y > -4.0f;
+	}
+
+	IEnumerator _DelayDestroy(GameObject fist, float time, bool isLeft)
 	{
 		yield return new WaitForSeconds (time);
-		Destroy (g);
+		if (isLeft ) {
+			leftCount--;
+			if(leftCount == 0)
+				leftFistIdle.SetActive (true);
+		} else {
+			rightCount--;
+			if(rightCount == 0)
+				rightFistIdle.SetActive (true);
+		}
+		Destroy (fist);
 	}
 		
 	void initPunch(bool punchDirection)

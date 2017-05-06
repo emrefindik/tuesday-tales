@@ -9,15 +9,11 @@ public class fallPart : MonoBehaviour {
 
     public GameObject bloodEffect;
   
-    AudioSource smesh;
-	AudioSource scream;
-    public LevelControl healthControl;
 
+    public LevelControl levelControl;
 
     void Start()
     {
-		smesh = healthControl.smesh;
-		scream = healthControl.scream;
     }
 
     void OnTriggerEnter(Collider c)
@@ -25,7 +21,7 @@ public class fallPart : MonoBehaviour {
 
         if (c.tag == "building")
         {
-			smesh.Play();
+			levelControl.playSmesh ();
             Rigidbody gravity =  c.gameObject.GetComponent<Rigidbody>();
             gravity.useGravity = true;
 			gravity.GetComponent<SpriteRenderer> ().sortingOrder = 12;
@@ -33,19 +29,19 @@ public class fallPart : MonoBehaviour {
 			c.gameObject.layer = LayerMask.NameToLayer("Ruins");
 			c.GetComponent<BoxCollider> ().isTrigger = false;
             StartCoroutine(Shake());
-			healthControl.increaseProgress(1, LevelControl.ScoreType.Building);
+			levelControl.increaseProgress(1, LevelControl.ScoreType.Building);
         }
 
 
         if(c.tag == "people")
         {
-			smesh.Play();
-			scream.Play ();
+			levelControl.playSmesh ();
+			levelControl.playScream ();
             Destroy(c.gameObject);
             Transform newPos = c.gameObject.GetComponent<Transform>();
 			GameObject blood = Instantiate(bloodEffect, newPos.position + new Vector3(0, 0, -3), transform.rotation);
 			blood.transform.parent = Camera.main.transform;
-			healthControl.increaseProgress(1, LevelControl.ScoreType.Human);
+			levelControl.increaseProgress(1, LevelControl.ScoreType.Human);
         }
     }
 

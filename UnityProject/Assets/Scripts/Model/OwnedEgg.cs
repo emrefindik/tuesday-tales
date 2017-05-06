@@ -27,6 +27,10 @@ public class OwnedEgg
 
     [SerializeField]
     private int _imageIndex;
+	public int Index
+	{
+		get { return _imageIndex; }
+	}
     public Sprite Sprite
     {
         get { return KaijuDatabase.instance.EggSprites[_imageIndex]; }

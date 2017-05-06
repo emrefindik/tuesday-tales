@@ -8,12 +8,12 @@ public class Eat : MonoBehaviour {
 	public AudioClip eatClip;
 	public ParticleSystem eatEffect;
 	AudioSource eatSound;
+	Animator mouthAnimator;
 	// Use this for initialization
 	void Start () {
 		eatSound = gameObject.AddComponent<AudioSource> ();
 		eatSound.clip = eatClip;
 		eatSound.playOnAwake = false;
-		
 	}
 	
 	// Update is called once per frame
@@ -28,6 +28,8 @@ public class Eat : MonoBehaviour {
 			if (c.gameObject.GetComponent<Rigidbody> ().velocity.magnitude > 2f)
 				return;
 			*/
+			mouthAnimator = transform.parent.GetComponent<Animator> ();
+			mouthAnimator.SetBool ("jawANI", true);
 			levelControl.increaseProgress (1, LevelControl.ScoreType.Blocks);
 			eatSound.Play();
 			StartCoroutine (_Eat (c.gameObject));
@@ -47,6 +49,8 @@ public class Eat : MonoBehaviour {
 		rigidBody.angularVelocity = new Vector3 ( 10, 0, 0 );
 		rigidBody.useGravity = false;
 		yield return new WaitForSeconds (1f);
+		mouthAnimator = transform.parent.GetComponent<Animator> ();
+		mouthAnimator.SetBool ("jawANI", false);
 		Destroy (g);
 	}
 }

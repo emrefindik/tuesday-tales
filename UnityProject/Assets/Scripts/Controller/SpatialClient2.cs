@@ -64,7 +64,7 @@ public class SpatialClient2 : MonoBehaviour
     }
 
     private bool ready = false;
-    private UserList allUser = new UserList();
+    public UserList allUser = new UserList();
     private Project project;
 
     private bool metadataUpdatedSuccessfully = false;

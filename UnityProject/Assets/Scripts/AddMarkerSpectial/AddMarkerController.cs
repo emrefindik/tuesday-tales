@@ -34,10 +34,11 @@ public class AddMarkerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (!ok) {			
+		if (!ok) {	
+			StartCoroutine (SpatialClient2.single.GetUsersByProject ());
 			//MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
-			MarkerMetadata mMete = MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.png", 
-				"http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png", new ImageBounds (40.4329, 40.4325, -79.9646, -79.9650));
+			//MarkerMetadata mMete = MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.png", 
+				//"http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png", new ImageBounds (40.4329, 40.4325, -79.9646, -79.9650));
 
 			//StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
 			//StartCoroutine (SpatialClient2.single.DeleteMarkerById ("58f18bdb6ad13600117881d0"));
@@ -64,8 +65,14 @@ public class AddMarkerController : MonoBehaviour {
 			ok = true;
 			*/
 		}
+		if (SpatialClient2.single.allUser.Users.Count != 0) {
+			List<UserData> users = SpatialClient2.single.allUser.Users;
+			for (int i = 0; i < users.Count; i++) {
+				// Can not delete users.... No such function
+			}
+		}
 	}
-
+		
 	IEnumerator UploadImage(string imageName){
 		byte[] data = uploadImage.EncodeToPNG ();
 		WWWForm form = new WWWForm ();
