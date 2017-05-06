@@ -303,7 +303,7 @@ public class punchAction2 : MonoBehaviour {
 
 	bool inBound(Vector3 position)
 	{
-		return position.y < 4.7f && position.y > -3.0f;
+		return position.y < 4.7f && position.y > -4.0f;
 	}
 
 	IEnumerator _DelayDestroy(GameObject fist, float time, bool isLeft)
