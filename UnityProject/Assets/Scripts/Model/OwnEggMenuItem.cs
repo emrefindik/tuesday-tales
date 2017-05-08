@@ -59,7 +59,8 @@ public class OwnEggMenuItem : GenericEggMenuItem
         MainController.single.selectedEgg = _egg;
 		yield return _egg.KaijuEmbryo.initializeSprites (new CoroutineResponse());
         MainMenuScript.addKaijuButton(_egg.KaijuEmbryo);
-        MessageController.single.closeWaitScreen(true);
+        MessageController.single.closeWaitScreen(false);
+		MessageController.single.closeWaitScreen(false);
 		MainController.single.goToPhoneCamera(PhoneImageController.CameraMode.EggHatching);
         Destroy(gameObject);
         yield return SpatialClient2.single.hatchEgg(_egg);

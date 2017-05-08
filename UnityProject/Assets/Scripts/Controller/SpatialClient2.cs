@@ -166,7 +166,8 @@ public class SpatialClient2 : MonoBehaviour
 		//StartCoroutine (CreateMarker (40.44334, -79.943345, "Purnell Center for the Arts", "Home to Carnegie Mellon University's School of Drama and the Philip Chosky Theater.", MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.jpg", "", new ImageBounds (40.4435, 40.4431, -79.9431, -79.9435))));
         /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
         StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
-        /*
+
+		/*
         List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 1, 3, 3, "Gelb"), 5));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
@@ -205,6 +206,8 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
+
+		*/
 
 		/*List<string> str2 = new List<string>();
 		str2.Add("58fd43ac8bd5410011d11150"); // mount everest

@@ -9,7 +9,7 @@ public abstract class GenericEggMenuItem : MonoBehaviour {
     public const double EGG_SIZE_INCREMENT = 1.0;
 
     // maximum distance between check in point and user's current point, in meters
-    public const double MAX_CHECK_IN_DISTANCE = 40000.0; // TODO change to 100 m or something like that
+    public const double MAX_CHECK_IN_DISTANCE = 100.0; // TODO change to 100 m or something like that
 
     [SerializeField]
     private Image _eggImage;
