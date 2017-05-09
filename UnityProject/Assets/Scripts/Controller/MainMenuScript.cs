@@ -304,7 +304,7 @@ public class MainMenuScript : MonoBehaviour
                     showTutorial();
                 }
                 else
-                {
+				{
                     _webView.Load();
                 }
 
@@ -350,6 +350,7 @@ public class MainMenuScript : MonoBehaviour
         else
         {
             _tutorialCanvas.enabled = false;
+			MessageController.single.displayWaitScreen (null);
             _webView.Load();
         }
     }
@@ -409,13 +410,15 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromKaiju()
     {
         _kaijuCanvas.enabled = false;
-        _webView.Show();
+		MessageController.single.displayWaitScreen (null);
+        _webView.Load();
     }
 
     public void onBackFromEggs()
     {
         _eggsCanvas.enabled = false;
-        _webView.Show();
+		MessageController.single.displayWaitScreen (null);
+        _webView.Load();
     }
 
     /** Called when uniwebview successfully loads the HTML page */
@@ -546,6 +549,9 @@ public class MainMenuScript : MonoBehaviour
                 _disableWebview();
                 _kaijuCanvas.enabled = true;
                 break;
+		case "print":
+			Debug.Log (message.args ["msg"]);
+			break;
             default:
                 break;
         }
@@ -768,7 +774,8 @@ public class MainMenuScript : MonoBehaviour
     {
 		foreach (Canvas c in FindObjectsOfType<Canvas>())
 			c.enabled = false;
-        webView.Show();
+		//MessageController.single.displayWaitScreen (null);
+		webView.Show();
     }
 
     public static void hideWebView()
@@ -920,7 +927,8 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromUserSearch()
     {
         _friendSearchCanvas.enabled = false;
-        showWebView();
+		MessageController.single.displayWaitScreen (null);
+		_webView.Load();
     }
 
     public void onSearch()
