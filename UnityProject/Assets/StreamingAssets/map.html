@@ -65,7 +65,7 @@ markerRadius = 6000;
 score = 0;
 maxCheckInDistance = 50;
 document.getElementById("time").innerHTML = "00" + ": " + "00";
-var minZoomLevel = 17;
+var maxZoomLevel = 19;
 
 
 function toEggs() {
@@ -168,11 +168,11 @@ function timeout()
 
 function onMarkerClick(markerId, markerPosition) {
 	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {  OLD CODE
-	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {  NEW CODE
+	if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {
 		window.location.href = "uniwebview://destroy?id=" + markerId;
-	//} else {
+	} else {
 		// TODO show error screen
-	//}
+	}
 }
 
 function updatePath() {
@@ -215,7 +215,7 @@ function initializeMap() {
 		map.setCenter(mapCenter);
 	});
     google.maps.event.addListener(map, 'zoom_changed', function() {
-                                  if (map.getZoom() < minZoomLevel) map.setZoom(minZoomLevel);
+                                  if (map.getZoom() > maxZoomLevel) map.setZoom(maxZoomLevel);
     });
 	
     meLocation = new google.maps.Marker({

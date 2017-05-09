@@ -409,14 +409,12 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromKaiju()
     {
         _kaijuCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_kaijuCanvas);
         _webView.Show();
     }
 
     public void onBackFromEggs()
     {
         _eggsCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_eggsCanvas);
         _webView.Show();
     }
 
@@ -440,10 +438,10 @@ public class MainMenuScript : MonoBehaviour
                 */
             
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
-				//Input.location.lastData.latitude.ToString() + ',' +
-				//Input.location.lastData.longitude.ToString() + ",\"" +
-				"40.442557" + ',' +
-				"-79.942535" + ",\"" +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ",\"" +
+				//"40.442557" + ',' +
+				//"-79.942535" + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
 				SpatialClient2.PROJECT_ID + "\"," +
 				SpatialClient2.single.getScore().ToString() + ',' +
@@ -477,10 +475,10 @@ public class MainMenuScript : MonoBehaviour
             if (Input.location.status == LocationServiceStatus.Running)
             {
 				_webView.EvaluatingJavaScript (JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
-                //Input.location.lastData.latitude.ToString() + ',' +
-                //Input.location.lastData.longitude.ToString() + ')');
-				"40.442557" + ',' +
-				"-79.942535" + ')');
+                Input.location.lastData.latitude.ToString() + ',' +
+                Input.location.lastData.longitude.ToString() + ')');
+				//"40.442557" + ',' +
+				//"-79.942535" + ')');
             }
             yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
         }
