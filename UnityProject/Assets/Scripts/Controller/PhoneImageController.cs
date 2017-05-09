@@ -21,6 +21,7 @@ public class PhoneImageController : MonoBehaviour {
 	public GameObject BuildingSelfieModel;
 	public GameObject EggSelfieModel;
 	public GameObject EggCheckinModel;
+	public GameObject[] HatchingEggs;
 
 	public Texture2D screenShotCopy;
 	public GameObject photoRect;
@@ -80,24 +81,29 @@ public class PhoneImageController : MonoBehaviour {
 		case CameraMode.BuildingDestruction:
 			BuildingSelfieModel.SetActive (true);
 			Kaiju kaiju = mainMenu.SelectedKaiju;
-			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadSprite, kaiju.HandSprite, kaiju.BodySprite, kaiju.MonsterColor);
+			BuildingSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (kaiju.HeadType, kaiju.HandType, kaiju.BodyType, kaiju.MonsterColor);
 			break;
 		case CameraMode.EggHatching:
 			// TODO: get egg information from spatial
 			EggSelfieModel.SetActive (true);
-			GameObject Egg = GameObject.Find ("Egg");
-			Egg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
+			Debug.Log (mainController.selectedEgg.Index);
+			GameObject Egg = HatchingEggs [mainController.selectedEgg.Index - 1];
+			Egg.SetActive (true);
+			GameObject kaijuHead = GameObject.Find ("KaijuHead");
+			kaijuHead.SetActive (false);
+			StartCoroutine (ShowKaijuHead (kaijuHead));
+			kaijuHead.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.KaijuEmbryo.HeadSprite;
 			break;
 		case CameraMode.Kaiju:
 			KaijuSelfieModel.SetActive (true);
 			Kaiju selectedKaiju = mainMenu.SelectedKaiju;
-			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			KaijuSelfieModel.GetComponent<MonsterCreator> ().setUpMonster (selectedKaiju.HeadType, selectedKaiju.HandType, selectedKaiju.BodyType, selectedKaiju.MonsterColor);
 			break;
 		case CameraMode.EggCheckin:
 			EggCheckinModel.SetActive (true);
 			GameObject CheckinEgg = GameObject.Find ("CheckinEgg");
 			CheckinEgg.GetComponent<SpriteRenderer> ().sprite = mainController.selectedEgg.Sprite;
-			CheckinEgg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
+			//CheckinEgg.transform.localScale = new Vector3 (873.0f / mainController.selectedEgg.Sprite.texture.width, 878.0f / mainController.selectedEgg.Sprite.texture.height);
 			break;
 		default:
 			break;	
@@ -107,6 +113,12 @@ public class PhoneImageController : MonoBehaviour {
 		camDisplayCanvas.SetActive (false);
 		shareCanvas.SetActive (false);
 
+	}
+
+	IEnumerator ShowKaijuHead(GameObject head)
+	{
+		yield return new WaitForSeconds (1.0f);
+		head.SetActive (false);
 	}
 
 	void Update()

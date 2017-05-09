@@ -63,10 +63,6 @@ public class MessageController : MonoBehaviour
 
     public void displayError(Canvas sender, string errorText)
     {
-        foreach(MonoBehaviour b in gameObject.GetComponentsInChildren<MonoBehaviour>())
-		    b.StopAllCoroutines ();
-        if (SpatialClient2.single.isLoggedIn())
-            StartCoroutine(SpatialClient2.single.checkInternetConnection());
         _canvasesWaiting = 0;
         _errorMessage.text = errorText;
         if (_pleaseWaitCanvas.enabled)
@@ -79,6 +75,10 @@ public class MessageController : MonoBehaviour
             hidePreviousScreen();
         }
         _errorCanvas.enabled = true;
+		foreach(MonoBehaviour b in gameObject.GetComponentsInChildren<MonoBehaviour>())
+			b.StopAllCoroutines ();
+		if (SpatialClient2.single.isLoggedIn())
+			StartCoroutine(SpatialClient2.single.checkInternetConnection());
     }
 
     public void closeWaitScreen(bool showMapView)

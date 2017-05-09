@@ -88,7 +88,7 @@ public class MainMenuScript : MonoBehaviour
 		get { return kaijuCanvas; }
 		private set { kaijuCanvas = value; }
 	}
-
+		
     private static Canvas tutorialCanvas;
     public static Canvas TutorialCanvas
     {
@@ -105,7 +105,7 @@ public class MainMenuScript : MonoBehaviour
         get { return friendSearchCanvas; }
         private set { friendSearchCanvas = value; }
     }
-
+		
     private static UniWebView webView;
     /*public static UniWebView WebView
     {
@@ -131,8 +131,11 @@ public class MainMenuScript : MonoBehaviour
     private Text _enterYourFriendsUsernameText;
     [SerializeField]
     private Text _userFoundText;
-    [SerializeField]
-    private Button _addFriendButton;
+	[SerializeField]
+	private Text _addFriendSucceedText;
+    //[SerializeField]
+    //private Button _addFriendButton;
+
     [SerializeField]
     private Canvas _eggsCanvas;
     [SerializeField]
@@ -203,7 +206,7 @@ public class MainMenuScript : MonoBehaviour
     {
         get { return _kaijuCanvas.GetComponent<KaijuScreenController>().SelectedKaiju; }
     }
-
+		
     string justRegisteredUsername = null;
 
     // Use this for initialization
@@ -231,12 +234,17 @@ public class MainMenuScript : MonoBehaviour
         _wrongPasswordText.enabled = false;
         _connectionErrorText.enabled = false;
         _tutorialCanvas.enabled = false;
-        _addFriendButton.enabled = false;
         _userNotFoundText.enabled = false;
         _userFoundText.enabled = false;
+		_addFriendSucceedText.enabled = false;
+
         _enterYourFriendsUsernameText.enabled = false;
         _friendSearchCanvas.enabled = false;
         _userSearchResult = null;
+        //_mainMenuCanvas.enabled = false;
+        //_mapCanvas.enabled = false;
+        
+        _kaijuCanvas.enabled = false;
         mapLoaded = false;
 
         _webView.url = UniWebViewHelper.streamingAssetURLForPath(MAP_ADDRESS);
@@ -296,9 +304,10 @@ public class MainMenuScript : MonoBehaviour
                     showTutorial();
                 }
                 else
-                {
+				{
                     _webView.Load();
                 }
+
                 break;
             case false:
                 // wrong credentials
@@ -323,7 +332,7 @@ public class MainMenuScript : MonoBehaviour
 		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		StartCoroutine (submit());
 	}
-
+		
     void showTutorial()
     {
         tutorialCanvas.enabled = true;
@@ -391,21 +400,24 @@ public class MainMenuScript : MonoBehaviour
     public void openRegisterScreen()
 	{
 		_loginCanvas.enabled = false;
+		_wrongPasswordText.enabled = false;
+		_connectionErrorText.enabled = false;
+		_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (false);
 		_registerCanvas.enabled = true;
 	}
 
     public void onBackFromKaiju()
     {
         _kaijuCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_kaijuCanvas);
-        _webView.Show();
+		MessageController.single.displayWaitScreen (null);
+        _webView.Load();
     }
 
     public void onBackFromEggs()
     {
         _eggsCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_eggsCanvas);
-        _webView.Show();
+		MessageController.single.displayWaitScreen (null);
+        _webView.Load();
     }
 
     /** Called when uniwebview successfully loads the HTML page */
@@ -428,10 +440,10 @@ public class MainMenuScript : MonoBehaviour
                 */
             
 			_webView.EvaluatingJavaScript(JS_INIT_MAP_METHOD_NAME + '(' +
-				//Input.location.lastData.latitude.ToString() + ',' +
-				//Input.location.lastData.longitude.ToString() + ",\"" +
-				"40.442557" + ',' +
-				"-79.942535" + ",\"" +
+				Input.location.lastData.latitude.ToString() + ',' +
+				Input.location.lastData.longitude.ToString() + ",\"" +
+				//"40.442557" + ',' +
+				//"-79.942535" + ",\"" +
 				SpatialClient2.baseURL + "\",\"" +
 				SpatialClient2.PROJECT_ID + "\"," +
 				SpatialClient2.single.getScore().ToString() + ',' +
@@ -465,10 +477,10 @@ public class MainMenuScript : MonoBehaviour
             if (Input.location.status == LocationServiceStatus.Running)
             {
 				_webView.EvaluatingJavaScript (JS_UPDATE_CURRENT_LOCATION_NAME + '(' +
-                //Input.location.lastData.latitude.ToString() + ',' +
-                //Input.location.lastData.longitude.ToString() + ')');
-				"40.442557" + ',' +
-				"-79.942535" + ')');
+                Input.location.lastData.latitude.ToString() + ',' +
+                Input.location.lastData.longitude.ToString() + ')');
+				//"40.442557" + ',' +
+				//"-79.942535" + ')');
             }
             yield return new WaitForSeconds(LOCATION_MARKER_UPDATE_INTERVAL);
         }
@@ -528,13 +540,17 @@ public class MainMenuScript : MonoBehaviour
             case "resetscore":
                 StartCoroutine(SpatialClient2.single.resetStreak());
                 break;
-            case "camera":
-                // TODO transfer to camera
+			case "addfriend":
+				_disableWebview ();
+				_friendSearchCanvas.enabled = true;
                 break;
             case "kaiju":
                 _disableWebview();
                 _kaijuCanvas.enabled = true;
                 break;
+		case "print":
+			Debug.Log (message.args ["msg"]);
+			break;
             default:
                 break;
         }
@@ -757,7 +773,8 @@ public class MainMenuScript : MonoBehaviour
     {
 		foreach (Canvas c in FindObjectsOfType<Canvas>())
 			c.enabled = false;
-        webView.Show();
+		//MessageController.single.displayWaitScreen (null);
+		webView.Show();
     }
 
     public static void hideWebView()
@@ -836,6 +853,7 @@ public class MainMenuScript : MonoBehaviour
 		case true:
             justRegisteredUsername = _registerCanvas.transform.FindChild("UserNameField").GetComponent<InputField>().text;
             _loginCanvas.enabled = true;
+
 			_loginCanvas.transform.Find ("RegisterSucceedText").gameObject.SetActive (true);
 			_registerCanvas.enabled = false;
 			break;
@@ -856,6 +874,8 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromRegister()
     {
         _registerCanvas.enabled = false;
+		_connectionErrorText.enabled = false;
+		_wrongPasswordText.enabled = false;
         _loginCanvas.enabled = true;
     }
 
@@ -906,15 +926,18 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromUserSearch()
     {
         _friendSearchCanvas.enabled = false;
-        showWebView();
+		MessageController.single.displayWaitScreen (null);
+		_webView.Load();
     }
 
     public void onSearch()
     {
         _userNotFoundText.enabled = false;
         _userFoundText.enabled = false;
+		_addFriendSucceedText.enabled = false;
         _userSearchResult = null;
-        _addFriendButton.enabled = false;
+        //_addFriendButton.enabled = false;
+
         if (_friendSearchBox.text == "")
         {
             _enterYourFriendsUsernameText.enabled = true;
@@ -937,13 +960,16 @@ public class MainMenuScript : MonoBehaviour
             if (SpatialClient2.single.alreadyFriend(_userSearchResult.Id))
             {
                 _userFoundText.text = YOU_ARE_ALREADY_FRIENDS_WITH + _userSearchResult.getName() + '.';
+				_userFoundText.enabled = true;
             }
             else
             {
-                _userFoundText.text = ADD + _userSearchResult.getName() + AS_FRIEND;
-                _addFriendButton.enabled = true;
+                //_userFoundText.text = ADD + _userSearchResult.getName() + AS_FRIEND;
+                //_addFriendButton.enabled = true;
+
+				onAddFriend ();
             }
-            _userFoundText.enabled = true;
+            //_userFoundText.enabled = true;
         }
         else
         {
@@ -957,6 +983,7 @@ public class MainMenuScript : MonoBehaviour
         StartCoroutine(addFriend());
     }
 
+
     private IEnumerator addFriend()
     {
         MessageController.single.displayWaitScreen(_friendsCanvas);
@@ -966,12 +993,14 @@ public class MainMenuScript : MonoBehaviour
         {
             yield return SpatialClient2.single.GetFriends(true);
             refreshFriendButtons();
-            _addFriendButton.enabled = false;
+            //_addFriendButton.enabled = false;
             _userNotFoundText.enabled = false;
             _userFoundText.enabled = false;
-            _enterYourFriendsUsernameText.enabled = false;
+			_addFriendSucceedText.enabled = true;
+            _enterYourFriendsUsernameText.enabled = true;
             _userSearchResult = null;
-            _friendSearchCanvas.enabled = false;
+            //_friendSearchCanvas.enabled = false;
+
         }
         MessageController.single.closeWaitScreen(false);
     }

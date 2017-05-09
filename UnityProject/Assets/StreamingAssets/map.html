@@ -20,15 +20,15 @@
     #scoretextdiv { position: absolute; top: 5%; left: 5%; width: 50%; height: 30%; }
     #timertextdiv { position: absolute; bottom: 35%; left: 5%; width: 50%; height: 30%; }
     
-    #eggsDiv { position: absolute; right: 15%; bottom: 5%; width: 30%; z-index: 99 }
-    #eggsDummy { height: 0; margin-top: 66%; }
-    #eggsButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
-    #kaijuDiv { position: absolute; left: 15%; bottom: 5%; width: 30%; z-index: 99 }
+    #kaijuDiv { position: absolute; right: 7%; bottom: 5%; width: 35%; z-index: 99 }
     #kaijuDummy { height: 0; margin-top: 66%; }
-	#kaijuButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
-    #cameraDiv { position: absolute; bottom: 5%; margin-left: auto; margin-right: auto; left: 0; right: 0; width: 18%; z-index: 99 }
-    #cameraDummy { height: 0; margin-top: 100%; }
-	#cameraButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+    #kaijuButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+    #eggsDiv { position: absolute; left: 7%; bottom: 5%; width: 35%; z-index: 99 }
+    #eggsDummy { height: 0; margin-top: 66%; }
+	#eggsButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+    #addfriendDiv { position: absolute; bottom: 4%; margin-left: auto; margin-right: auto; left: 0; right: 0; width: 23%; z-index: 99 }
+    #addfriendDummy { height: 0; margin-top: 100%; }
+	#addfriendButton { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
     
 </style>
 <div id="wrapper">
@@ -50,9 +50,9 @@
 		<div id="multipliervalue"><h1 id="multiplier"></h1></div>
          -->
     </div>
-    <div id="kaijuDiv"><div id="kaijuDummy"></div><img id="kaijuButton" src="Kaiju_button.png" onclick="toKaiju()"></img></div>
-    <div id="cameraDiv"><div id="cameraDummy"></div><img id="cameraButton" src="Minus_button.png"></img></div>
-    <div id="eggsDiv"><div id="eggsDummy"></div><img id="eggsButton" src="Egg_button.png" onclick="toEggs()"></img></div>
+    <div id="eggsDiv"><div id="eggsDummy"></div><img id="eggsButton" src="Egg_button_new.png" onclick="toEggs()"></img></div>
+    <div id="addfriendDiv"><div id="addfriendDummy"></div><img id="addfriendButton" src="Plus_button.png" onclick= "toAddFriend()"></img></div>
+    <div id="kaijuDiv"><div id="kaijuDummy"></div><img id="kaijuButton" src="Kaiju_button_new.png" onclick="toKaiju()"></img></div>
 	<!--
     <button id="eggsButton" onclick="toEggs()">Look at Your Eggs</button>
 	<button id="kaijuButton" onclick="toKaiju()">Select Your Kaiju</button>
@@ -65,7 +65,7 @@ markerRadius = 6000;
 score = 0;
 maxCheckInDistance = 50;
 document.getElementById("time").innerHTML = "00" + ": " + "00";
-
+var maxZoomLevel = 19;
 
 
 function toEggs() {
@@ -76,8 +76,8 @@ function toKaiju() {
 	window.location.href = "uniwebview://kaiju";
 }
 
-function toCamera() {
-	window.location.href = "uniwebview://camera";
+function toAddFriend() {
+	window.location.href = "uniwebview://addfriend";
 }
 
 function deg2rad(deg) {
@@ -106,8 +106,8 @@ function updateCurrentLocation(lat, lon){
     latitude = lat;
     longitude = lon;
     var newLatLng = new google.maps.LatLng(latitude, longitude);
-    //meLocation.setPosition(newLatLng);
-	meLocation.setCenter(newLatLng);
+    meLocation.setPosition(newLatLng);
+	//meLocation.setCenter(newLatLng);
 }
 
 function resizeMap() {
@@ -167,12 +167,12 @@ function timeout()
 }
 
 function onMarkerClick(markerId, markerPosition) {
-	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {  OLD CODE
-	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {  NEW CODE
+	if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
+	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {
 		window.location.href = "uniwebview://destroy?id=" + markerId;
-	//} else {
+	} else {
 		// TODO show error screen
-	//}
+	}
 }
 
 function updatePath() {
@@ -204,7 +204,8 @@ function updatePath() {
 function initializeMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: latitude, lng: longitude},
-		zoom: 16
+		zoom: 18,
+        disableDefaultUI: true
 	});
 	mapCenter = map.getCenter();
 	google.maps.event.addDomListener(map, 'idle', function() {
@@ -213,24 +214,29 @@ function initializeMap() {
 	google.maps.event.addDomListener(window, 'resize', function() {
 		map.setCenter(mapCenter);
 	});
+    google.maps.event.addListener(map, 'zoom_changed', function() {
+                                  if (map.getZoom() > maxZoomLevel) map.setZoom(maxZoomLevel);
+    });
 	
-    /*meLocation = new google.maps.Marker({
+    meLocation = new google.maps.Marker({
                                               position: {lat: latitude, lng: longitude},
                                               map: map,
                                               icon: {
                                               anchor: {
-                                              x: 15,
-                                              y: 15
+                                              x: 35,
+                                              y: 84
                                               },
                                               scaledSize: {
-                                              width: 30,
-                                              height: 30
+                                              width: 70,
+                                              height: 84
                                               },
                                               //url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
-                                                url: "http://matthewestone.com/PhotoTest/58deb4c133627.png"
+                                                //url: "http://matthewestone.com/PhotoTest/58deb4c133627.png"
+                                                url: "http://tuesday-tales.etc.cmu.edu/Photos/590b6dd9cfd6e.png"
                                               }
-    }); */
+    });
 	
+    /*
 	meLocation = new google.maps.Circle({
                                               center: {lat: latitude, lng: longitude},
 											  map: map,
@@ -241,6 +247,7 @@ function initializeMap() {
 											  fillColor: "#2062B3",
 											  fillOpacity: 0.3
     });
+    */
 
 	destroyPath = new google.maps.Polyline({
                                               path: [],
@@ -314,12 +321,13 @@ function initializeMap() {
 // projectID = the Spatial project ID
     //function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
 function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarkerIds) {
+    window.location.href = "uniwebview://print?msg=loadedthemap0";
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
 	
 	pathMarkerSpatialIds = pathMarkerIds.list;
-	
+	window.location.href = "uniwebview://print?msg=loadedthemap1";
 	// get markers and store them into a global variable
 	var getReq = new XMLHttpRequest();
 	getReq.onreadystatechange = function() {
@@ -340,6 +348,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 		longitude.toString() + "&latitude=" + latitude.toString() + "&projectId=" +
 		projectID + "&meters=" + markerRadius.toString(), true);
 	getReq.send();
+    //window.location.href = "uniwebview://print?msg=loadedthemap2";
     
     updateScore(startScore);
     updateMultiplier(multiplier);
@@ -357,7 +366,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
 </script>
 </body>
 </html>

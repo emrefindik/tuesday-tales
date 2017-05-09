@@ -70,7 +70,7 @@ public class LevelControl : MonoBehaviour {
 	GameObject[] blocks;
 
 	public AudioClip smeshAudio;
-	public AudioClip screamAudio;
+	public AudioClip[] screamAudio;
 
 	[HideInInspector]
 	public AudioSource smesh;
@@ -121,7 +121,6 @@ public class LevelControl : MonoBehaviour {
 		smesh.playOnAwake = false;
 
 		scream = gameObject.AddComponent<AudioSource> ();
-		scream.clip = screamAudio;
 		scream.playOnAwake = false;
     }
 
@@ -212,13 +211,11 @@ public class LevelControl : MonoBehaviour {
 		kaiju = GameObject.Find ("Kaiju").gameObject;
 		selectedKaiju = mainMenu.SelectedKaiju;
 		if (selectedKaiju != null) {
-			Debug.Log ("Kaiju: " + kaiju);
-			Debug.Log ("Kaiju Head" + selectedKaiju.HeadSprite);
 			kaiju.GetComponent<MonsterCreator> ().
-				setUpMonster (selectedKaiju.HeadSprite, selectedKaiju.HandSprite, selectedKaiju.BodySprite, selectedKaiju.MonsterColor);
+			setUpMonster (selectedKaiju.HeadType, selectedKaiju.HandType, selectedKaiju.BodyType, selectedKaiju.MonsterColor);
 		} else {
 			kaiju.GetComponent<MonsterCreator> ().
-			setUpMonster (1,1,1, Color.green);
+			setUpMonster (6,1,1, Color.white);
 		}
 
 		Debug.Log ("Setup Kaiju");
@@ -443,7 +440,18 @@ public class LevelControl : MonoBehaviour {
 	{
 		editEggNameCanvas.SetActive (true);
 	}
-		
+
+	public void playScream()
+	{
+		scream.clip = screamAudio[Random.Range (0, screamAudio.Length - 1)];
+		scream.Play ();
+	}
+
+	public void playSmesh()
+	{
+		smesh.Play ();
+	}
+
 
 	/**********************************
 	 * 
