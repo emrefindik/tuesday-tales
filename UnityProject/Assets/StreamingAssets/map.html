@@ -106,8 +106,8 @@ function updateCurrentLocation(lat, lon){
     latitude = lat;
     longitude = lon;
     var newLatLng = new google.maps.LatLng(latitude, longitude);
-    //meLocation.setPosition(newLatLng);
-	meLocation.setCenter(newLatLng);
+    meLocation.setPosition(newLatLng);
+	//meLocation.setCenter(newLatLng);
 }
 
 function resizeMap() {
@@ -167,8 +167,8 @@ function timeout()
 }
 
 function onMarkerClick(markerId, markerPosition) {
-	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {  OLD CODE
-	if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {
+	if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {
+	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {
 		window.location.href = "uniwebview://destroy?id=" + markerId;
 	} else {
 		// TODO show error screen
@@ -321,12 +321,13 @@ function initializeMap() {
 // projectID = the Spatial project ID
     //function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
 function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarkerIds) {
+    window.location.href = "uniwebview://print?msg=loadedthemap0";
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
 	
 	pathMarkerSpatialIds = pathMarkerIds.list;
-	
+	window.location.href = "uniwebview://print?msg=loadedthemap1";
 	// get markers and store them into a global variable
 	var getReq = new XMLHttpRequest();
 	getReq.onreadystatechange = function() {
@@ -347,6 +348,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 		longitude.toString() + "&latitude=" + latitude.toString() + "&projectId=" +
 		projectID + "&meters=" + markerRadius.toString(), true);
 	getReq.send();
+    //window.location.href = "uniwebview://print?msg=loadedthemap2";
     
     updateScore(startScore);
     updateMultiplier(multiplier);
@@ -364,7 +366,7 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
 </script>
 </body>
 </html>

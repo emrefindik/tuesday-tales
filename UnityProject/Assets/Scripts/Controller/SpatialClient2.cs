@@ -159,6 +159,7 @@ public class SpatialClient2 : MonoBehaviour
     {
 		//StartCoroutine(DeleteMarkerById("5910f41726cdfb0011032bc6"));
 
+
         //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
 		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
@@ -1133,7 +1134,7 @@ public class SpatialClient2 : MonoBehaviour
 		header["auth-token"] = userSession.Token;
 		WWW www = new WWW(url, form.data, header);
 		yield return www;
-
+		Debug.Log ("update metadata requested");
 		// Post Process
 		if (!string.IsNullOrEmpty(www.error))
 		{
