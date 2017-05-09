@@ -350,7 +350,6 @@ public class MainMenuScript : MonoBehaviour
         else
         {
             _tutorialCanvas.enabled = false;
-			MessageController.single.displayWaitScreen (null);
             _webView.Load();
         }
     }
