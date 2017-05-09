@@ -168,11 +168,11 @@ function timeout()
 
 function onMarkerClick(markerId, markerPosition) {
 	//if (withinDistance(meLocation.getPosition(), markerPosition, maxCheckInDistance)) {  OLD CODE
-	if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {  
+	//if (withinDistance(meLocation.getCenter(), markerPosition, maxCheckInDistance)) {
 		window.location.href = "uniwebview://destroy?id=" + markerId;
-	} else {
+	//} else {
 		// TODO show error screen
-	}
+	//}
 }
 
 function updatePath() {

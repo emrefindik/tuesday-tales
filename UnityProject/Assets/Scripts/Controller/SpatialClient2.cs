@@ -157,6 +157,8 @@ public class SpatialClient2 : MonoBehaviour
 
     private void setUpMarkers()
     {
+		//StartCoroutine(DeleteMarkerById("5910f41726cdfb0011032bc6"));
+
         //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
 		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
@@ -169,10 +171,12 @@ public class SpatialClient2 : MonoBehaviour
 
 		/*
         List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
-        lst.Add(new KaijuWithFrequency(new Kaiju(Color.yellow, 1, 3, 3, "Gelb"), 5));
-        lst.Add(new KaijuWithFrequency(new Kaiju(Color.red, 4, 5, 1, "Blaze"), 3));
-        lst.Add(new KaijuWithFrequency(new Kaiju(Color.green, 2, 2, 2, "Stomper"), 2));
-        lst.Add(new KaijuWithFrequency(new Kaiju(Color.blue, 3, 1, 4, "Buster"), 1));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 1, 1, 1, "Gelb"), 5));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 4, 2, 2, "Blaze"), 3));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 3, 5, 3, "Stomper"), 2));
+        lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 1, 3, 1, "Buster"), 1));
+		lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 2, 4, 4, "Vice"), 1));
+		lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 5, 6, 4, "Groon"), 1));
 
         List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
         List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
@@ -207,7 +211,7 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
 
-		*/
+
 
 		/*List<string> str2 = new List<string>();
 		str2.Add("58fd43ac8bd5410011d11150"); // mount everest

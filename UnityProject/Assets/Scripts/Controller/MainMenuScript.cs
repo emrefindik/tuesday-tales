@@ -409,14 +409,12 @@ public class MainMenuScript : MonoBehaviour
     public void onBackFromKaiju()
     {
         _kaijuCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_kaijuCanvas);
         _webView.Show();
     }
 
     public void onBackFromEggs()
     {
         _eggsCanvas.enabled = false;
-        MessageController.single.displayWaitScreen(_eggsCanvas);
         _webView.Show();
     }
 
