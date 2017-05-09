@@ -1339,6 +1339,14 @@ public class UserMetadata// : ISerializationCallbackReceiver
         private set { streakMarkers = value; }
     }
 
+    /*[SerializeField]
+    // e-mail addresses that this user sent invites to
+    private List<string> _invites;
+    public IEnumerable<string> invites
+    {
+        get { return _invites; }
+    } */
+
     public static long currentTimestamp()
     {
         return Convert.ToInt64(DateTime.UtcNow.Subtract(startTime).TotalSeconds);
