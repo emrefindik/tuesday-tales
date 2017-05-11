@@ -40,10 +40,11 @@ public class MainController : MonoBehaviour
 		markerIdAnalytics = null;
         single = this;
 		gameState = GameState.MapView;
+        gameObject.GetComponent<AudioSource>().loop = true;
 
-		// FOR TEST: NICKY
-		//phoneCameraScene = Instantiate(phoneCameraPrefab);
-		//phoneCameraScene.GetComponent<PhoneImageController>().initCamera (PhoneImageController.CameraMode.EggHatching);
+        // FOR TEST: NICKY
+        //phoneCameraScene = Instantiate(phoneCameraPrefab);
+        //phoneCameraScene.GetComponent<PhoneImageController>().initCamera (PhoneImageController.CameraMode.EggHatching);
     }
 
     // Update is called once per frame

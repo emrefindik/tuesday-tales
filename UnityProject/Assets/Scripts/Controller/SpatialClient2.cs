@@ -12,7 +12,7 @@ public class SpatialClient2 : MonoBehaviour
 
     // Test Project ID: 588fb546604ae700118697c5
     public const string baseURL = "https://spatial-api-poc.herokuapp.com";
-    public const string PROJECT_ID = "58b070d3b4c96e00118b66ee"; // main project ID     "58fec2f29e38830011d2ed05"; // generate random marker test project ID          
+    public const string PROJECT_ID = "59134219347a490011812673"; // map overlay test project ID  "58b070d3b4c96e00118b66ee"; // main project ID     "58fec2f29e38830011d2ed05"; // generate random marker test project ID          
     public const string GOOGLE_API_KEY = "AIzaSyCejidwxDYN4APVvtlE7ZPsBtVdhB7JG70";
 
     // URL to connect to to check whether user has internet connection
@@ -85,8 +85,13 @@ public class SpatialClient2 : MonoBehaviour
         userSession = null;
 
         List<ItemWithFrequency<Kaiju>> defaultKaijuFrequencies = new List<ItemWithFrequency<Kaiju>>();
-        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.blue, 1, 1, 1, "Defaultzilla"), 1));
-        // TODO add other default kaiju
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 1, 1, 1, "Gelb"), 5));
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 4, 2, 2, "Blaze"), 3));
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 3, 5, 3, "Stomper"), 2));
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 1, 3, 1, "Buster"), 1));
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 2, 4, 4, "Vice"), 1));
+        defaultKaijuFrequencies.Add(new KaijuWithFrequency(new Kaiju(Color.white, 5, 6, 4, "Groon"), 1));
+        // TODO rearrange default kaiju
 
         _defaultKaiju = new KaijuFrequencyList(defaultKaijuFrequencies);
 
@@ -157,21 +162,42 @@ public class SpatialClient2 : MonoBehaviour
 
     private void setUpMarkers()
     {
-		//StartCoroutine(DeleteMarkerById("5910f41726cdfb0011032bc6"));
+        //StartCoroutine(DeleteMarkerById("5910f41726cdfb0011032bc6"));
 
 
         //StartCoroutine(DeleteMarkerById("58f3f96b4e973b0011f5f6b9"));
-        //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/cmumap.jpg", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635))));
-		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
-		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Mount Everest", "", MarkerMetadata.newCheckInLocationMetadata()));
-		//StartCoroutine(CreateMarker(40.442557, -79.942535, "Hawaii", "", MarkerMetadata.newCheckInLocationMetadata()));
-		//StartCoroutine(DeleteMarkerById("58f3eb594e973b0011f5f6b5"));
-		//StartCoroutine (CreateMarker (40.44334, -79.943345, "Purnell Center for the Arts", "Home to Carnegie Mellon University's School of Drama and the Philip Chosky Theater.", MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.jpg", "", new ImageBounds (40.4435, 40.4431, -79.9431, -79.9435))));
-        /* StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "The Entertainment Technology Center at Carnegie Mellon University", MarkerMetadata.newCheckInLocationMetadata()));
-        StartCoroutine(DeleteMarkerById("58f00e3f2aac62001128c2c8")); */
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU map overlay", "map overlay for the Carnegie Mellon campus", MarkerMetadata.newMapOverlayMetadata("http://tuesday-tales.etc.cmu.edu/Photos/mapwithintact.png", "http://tuesday-tales.etc.cmu.edu/Photos/mapwithdestroyed.png", new ImageBounds(40.445924, 40.439190, -79.936435, -79.948635)), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "Paris", "", MarkerMetadata.newCheckInLocationMetadata()));
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "Mount Everest", "", MarkerMetadata.newCheckInLocationMetadata()));
+        //StartCoroutine(CreateMarker(40.442557, -79.942535, "Hawaii", "", MarkerMetadata.newCheckInLocationMetadata()));
 
-		/*
-        List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
+        //StartCoroutine(CreateMarker(40.441088, -79.943757, "Hunt Library", "Main library on the Carnegie Mellon University campus.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.432791, -79.964793, "ETC", "The Entertainment Technology Center at Carnegie Mellon University.", MarkerMetadata.newBuildingMetadata(40.432791, -79.964793), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.441349, -79.942905, "College of Fine Arts", "Carnegie Mellon University College of Fine Arts", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.443493, -79.946632, "FMS Building", "Carnegie Mellon University Facilities Management Services building", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.443304, -79.942219, "Cohon University Center", "Student center on the Carnegie Mellon University campus.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.441495, -79.945129, "Baker Hall", "Home to the Dietrich College of Humanities and Social Sciences at Carnegie Mellon University.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.442605, -79.945658, "Wean Hall", "A Carnegie Mellon University building housing some of CMU's science and engineering.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.442454, -79.946443, "Hamerschlag Hall", "Home to the Department of Electrical and Computer Engineering at Carnegie Mellon University.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.442472, -79.944327, "Doherty Hall", "Home to the Department of Chemical Engineering at Carnegie Mellon University.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.442014, -79.941449, "Margaret Morrison Carnegie Hall", "Home to the Carnegie Mellon University School of Design.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+        //StartCoroutine(CreateMarker(40.443899, -79.943471, "Purnell Center for the Arts", "Home to the Carnegie Mellon University School of Drama, the Philip Chosky Theater and the Miller Gallery.", MarkerMetadata.newBuildingMetadata("591376fc58a5f10011338f8d"), new CoroutineResponse()));
+
+        //StartCoroutine(DeleteMarkerById("5913ceca6a3f6f0011a8075e"));
+
+        /*MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata();
+        StartCoroutine(CreateMarker(40.442199, -79.943468, "The Fence", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.443992, -79.949329, "Carnegie Museum of Art", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.443569, -79.951436, "Dippy the Dinosaur", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.444218, -79.953204, "Cathedral of Learning", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.439157, -79.947426, "Phipps Conservatory", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.440970, -79.943119, "Peace Garden", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.443185, -79.940265, "Gesling Stadium", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.456874, -80.012222, "Mattress Factory", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.432791, -79.964793, "Entertainment Technology Center", "", mMete, new CoroutineResponse()));
+        StartCoroutine(CreateMarker(40.433727, -80.004363, "Schell Games Studio", "", mMete, new CoroutineResponse())); */
+
+        /*List<ItemWithFrequency<Kaiju>> lst = new List<ItemWithFrequency<Kaiju>>();
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 1, 1, 1, "Gelb"), 5));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 4, 2, 2, "Blaze"), 3));
         lst.Add(new KaijuWithFrequency(new Kaiju(Color.white, 3, 5, 3, "Stomper"), 2));
@@ -182,25 +208,25 @@ public class SpatialClient2 : MonoBehaviour
         List<ItemWithFrequency<LocationCombinationData>> lst2 = new List<ItemWithFrequency<LocationCombinationData>>();
         List<LocationTypeCountTuple> ltct = new List<LocationTypeCountTuple>();
         List<string> str1 = new List<string>();
-        str1.Add("58f00e3f2aac62001128c2c1"); // cathedral of learning - right off campus
+        str1.Add("5913d1316a3f6f0011a80764"); // cathedral of learning - right off campus
         List<string> str2 = new List<string>();
-        str2.Add("58f00e3f2aac62001128c2c2"); // peace garden - on campus
+        str2.Add("5913d1316a3f6f0011a80760"); // peace garden - on campus
         List<string> str3 = new List<string>();
-        str3.Add("58f00e3f2aac62001128c2c3"); // phipps conservatory - right off campus
+        str3.Add("5913d1316a3f6f0011a80769"); // phipps conservatory - right off campus
         List<string> str4 = new List<string>();
-        str4.Add("58f00e3f2aac62001128c2c4"); // mattress factory
+        str4.Add("5913d1316a3f6f0011a80762"); // mattress factory
         List<string> str5 = new List<string>();
-        str5.Add("58f00e3f2aac62001128c2c5"); // carnegie museum of art - right off campus
+        str5.Add("5913d1316a3f6f0011a80768"); // carnegie museum of art - right off campus
         List<string> str6 = new List<string>();
-        str6.Add("58f00e3f2aac62001128c2c6"); // the fence - on campus
+        str6.Add("5913d1316a3f6f0011a80766"); // the fence - on campus
         List<string> str7 = new List<string>();
-        str7.Add("58f00e402aac62001128c2c7"); // centerfield gesling stadium - on campus
+        str7.Add("5913d1316a3f6f0011a80765"); // gesling stadium - on campus
         List<string> str8 = new List<string>();
-        str8.Add("58f12cd1a30d230011f0f123"); // ETC
+        str8.Add("5913d1316a3f6f0011a80761"); // ETC
         List<string> str9 = new List<string>();
-        str9.Add("58f00e402aac62001128c2c9"); // Dippy the Dinosaur - right off campus
+        str9.Add("5913d1316a3f6f0011a80767"); // Dippy the Dinosaur - right off campus
         List<string> str0 = new List<string>();
-        str0.Add("58f00e402aac62001128c2ca"); // Schell Games Studio
+        str0.Add("5913d1316a3f6f0011a80763"); // Schell Games Studio
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str1), 3));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str2), 4));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 3));
@@ -210,10 +236,10 @@ public class SpatialClient2 : MonoBehaviour
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str7), 4));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str8), 2));
         lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str9), 3));
-        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));
+        lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str0), 2));*/
 
 
-
+        // ONLY FOR SOFTS
 		/*List<string> str2 = new List<string>();
 		str2.Add("58fd43ac8bd5410011d11150"); // mount everest
 		List<string> str3 = new List<string>();
@@ -225,8 +251,9 @@ public class SpatialClient2 : MonoBehaviour
 		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str3), 1));
 		lst2.Add(new LocationWithFrequency(new LocationCombinationData(ltct, str4), 1)); */
 
+
         //StartCoroutine(CreateMarker(40.442557, -79.942535, "CMU kaiju spawn point", "kaiju spawn point", MarkerMetadata.newKaijuSpawnPointMetadata(new KaijuFrequencyList(lst), new LocationFrequencyList(lst2)), new CoroutineResponse()));
-		
+
     }
 
     private void Update()
@@ -886,7 +913,7 @@ public class SpatialClient2 : MonoBehaviour
         foreach (BasicMarker googleMarker in allGoogleMarkers)
         {
             CoroutineResponse markerResponse = new CoroutineResponse();
-            StartCoroutine(CreateMarker(googleMarker.Loc.Latitude, googleMarker.Loc.Longitude, googleMarker.Name, "", MarkerMetadata.newBuildingMetadata(), markerResponse));
+            StartCoroutine(CreateMarker(googleMarker.Loc.Latitude, googleMarker.Loc.Longitude, googleMarker.Name, "", MarkerMetadata.newBuildingMetadata(googleMarker.Loc.Latitude, googleMarker.Loc.Longitude), markerResponse));
             responses.Add(markerResponse);
         }
         yield return waitUntilCoroutinesReturn(responses);
@@ -1757,6 +1784,11 @@ public class ImageBounds
 [System.Serializable]
 public class MarkerMetadata
 {
+    public const float BUILDING_OVERLAY_HALF_HEIGHT = 0.00047f;
+
+    private const string DEFAULT_INTACT_BUILDING_IMAGE = "http://tuesday-tales.etc.cmu.edu/Photos/building1.jpg";
+    private const string DEFAULT_DESTROYED_BUILDING_IMAGE = "http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png";
+
     private const string MAP_OVERLAY = "overlay";
     private const string BUILDING_TO_DESTROY = "building";
     private const string CHECK_IN_LOCATION = "checkin";
@@ -1791,6 +1823,8 @@ public class MarkerMetadata
     [SerializeField]
     private string intactImagePath;
     [SerializeField]
+    private string mapOverlayId;
+    [SerializeField]
     private ImageBounds imageBounds;
     [SerializeField]
     private KaijuFrequencyList kaiju;
@@ -1815,10 +1849,11 @@ public class MarkerMetadata
 
     // TODO figure the fields out
 
-    public static MarkerMetadata newMapOverlayMetadata(string imagePath, ImageBounds bounds)
+    public static MarkerMetadata newMapOverlayMetadata(string intactImagePath, string destroyedImagePath, ImageBounds bounds)
     {
         MarkerMetadata mm = new MarkerMetadata(MarkerType.MAP_OVERLAY);
-        mm.intactImagePath = imagePath;
+        mm.intactImagePath = intactImagePath;
+        mm.destroyedImagePath = destroyedImagePath;
         mm.imageBounds = bounds;
         return mm;
     }
@@ -1827,13 +1862,25 @@ public class MarkerMetadata
     {
         MarkerMetadata mm = new MarkerMetadata(MarkerType.BUILDING_TO_DESTROY);
         mm.intactImagePath = intactImage;
+        mm.destroyedImagePath = destroyedImage;
         mm.imageBounds = bounds;
         return mm;
     }
 
-    public static MarkerMetadata newBuildingMetadata()
+    public static MarkerMetadata newBuildingMetadata(string mapOverlayMarkerId)
     {
-        return new MarkerMetadata(MarkerType.BUILDING_TO_DESTROY);
+        MarkerMetadata mm = new MarkerMetadata(MarkerType.BUILDING_TO_DESTROY);
+        mm.mapOverlayId = mapOverlayMarkerId;
+        return mm;
+    }
+
+    public static MarkerMetadata newBuildingMetadata(double latitude, double longitude)
+    {
+        MarkerMetadata mm = new MarkerMetadata(MarkerType.BUILDING_TO_DESTROY);
+        mm.intactImagePath = DEFAULT_INTACT_BUILDING_IMAGE;
+        mm.destroyedImagePath = DEFAULT_DESTROYED_BUILDING_IMAGE;
+        mm.imageBounds = new ImageBounds(latitude + BUILDING_OVERLAY_HALF_HEIGHT, latitude - BUILDING_OVERLAY_HALF_HEIGHT, longitude + BUILDING_OVERLAY_HALF_HEIGHT, longitude - BUILDING_OVERLAY_HALF_HEIGHT);
+        return mm;
     }
 
     public static MarkerMetadata newCheckInLocationMetadata()

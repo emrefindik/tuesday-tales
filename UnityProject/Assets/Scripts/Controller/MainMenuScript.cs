@@ -449,7 +449,8 @@ public class MainMenuScript : MonoBehaviour
 				SpatialClient2.single.getScore().ToString() + ',' +
 				//SpatialClient2.single.getTimer().ToString() + ',' +
 				SpatialClient2.single.getMultiplier().ToString() + ',' +
-				SpatialClient2.single.getStreakPathAsJsonString() + ')');
+				SpatialClient2.single.getStreakPathAsJsonString() + ',' +
+                MarkerMetadata.BUILDING_OVERLAY_HALF_HEIGHT.ToString() + ')');
 
 
 			// TODO add selected kaiju information to loadMap in map.html

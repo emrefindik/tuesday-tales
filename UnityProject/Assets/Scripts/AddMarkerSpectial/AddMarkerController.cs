@@ -34,15 +34,15 @@ public class AddMarkerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (!ok) {	
-			StartCoroutine (SpatialClient2.single.GetUsersByProject ());
-			//MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
-			//MarkerMetadata mMete = MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.png", 
-				//"http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png", new ImageBounds (40.4329, 40.4325, -79.9646, -79.9650));
+		if (!ok) {
+            //StartCoroutine (SpatialClient2.single.GetUsersByProject ());
+            //MarkerMetadata mMete = MarkerMetadata.newBuildingMetadata ("http://tuesday-tales.etc.cmu.edu/Photos/building1.png", 
+            //"http://tuesday-tales.etc.cmu.edu/Photos/building1destroyed.png", new ImageBounds (40.4329, 40.4325, -79.9646, -79.9650));
 
-			//StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
-			//StartCoroutine (SpatialClient2.single.DeleteMarkerById ("58f18bdb6ad13600117881d0"));
-			/*
+            //StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
+            //StartCoroutine (SpatialClient2.single.DeleteMarkerById ("58f18bdb6ad13600117881d0"));
+            /*
+            MarkerMetadata mMete = MarkerMetadata.newCheckInLocationMetadata ();
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.442199, -79.943468, "The Fence", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.443992, -79.949329, "Carnegie Museum of Art", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.443569, -79.951436, "Dippy the Dinosaur", "", mMete));
@@ -52,9 +52,9 @@ public class AddMarkerController : MonoBehaviour {
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.443185, -79.940265, "Centerfield Gesling Stadium", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.456874, -80.012222, "Mattress Factory", "", mMete));
 			StartCoroutine(SpatialClient2.single.CreateMarker(40.432791, -79.964793, "ETC", "", mMete));
-			StartCoroutine(SpatialClient2.single.CreateMarker(40.433727, -80.004363, "Schell Games Studio", "", 
+			StartCoroutine(SpatialClient2.single.CreateMarker(40.433727, -80.004363, "Schell Games Studio", "", mMete));
 			*/
-			ok = true;
+            ok = true;
 			/*
 			StartCoroutine(SpatialClient2.single.CreateUser("1", "1"));
 			StartCoroutine(SpatialClient2.single.CreateUser("2", "2"));
@@ -65,12 +65,12 @@ public class AddMarkerController : MonoBehaviour {
 			ok = true;
 			*/
 		}
-		if (SpatialClient2.single.allUser.Users.Count != 0) {
+		/*if (SpatialClient2.single.allUser.Users.Count != 0) {
 			List<UserData> users = SpatialClient2.single.allUser.Users;
 			for (int i = 0; i < users.Count; i++) {
 				// Can not delete users.... No such function
 			}
-		}
+		} */
 	}
 		
 	IEnumerator UploadImage(string imageName){

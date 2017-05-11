@@ -66,7 +66,9 @@ score = 0;
 maxCheckInDistance = 50;
 document.getElementById("time").innerHTML = "00" + ": " + "00";
 var maxZoomLevel = 19;
-
+mapOverlayDictionary = {};
+MARKER_DISPLAY_ZOOM_LIMIT = 14;
+svgNS = 'http://www.w3.org/2000/svg';
 
 function toEggs() {
 	window.location.href = "uniwebview://eggs";
@@ -107,7 +109,7 @@ function updateCurrentLocation(lat, lon){
     longitude = lon;
     var newLatLng = new google.maps.LatLng(latitude, longitude);
     meLocation.setPosition(newLatLng);
-	//meLocation.setCenter(newLatLng);
+	meLocationCircle.setCenter(newLatLng);
 }
 
 function resizeMap() {
@@ -139,6 +141,7 @@ function updateDisplayedTime(secondsRemaining)
     if (secondsRemaining < 0)
     {
         if (score > 0) timeout();
+		document.getElementById("time").innerHTML = "0: 00";
     }
     else
     {
@@ -155,7 +158,7 @@ function timeout()
     //clearInterval(timer);
     updateScore(0);
 	updateMultiplier(1);
-	pathMarkerSpatialIds = []
+	pathMarkerSpatialIds = [];
 	updatePath();
 	
 	// no need to display the timer
@@ -184,14 +187,14 @@ function updatePath() {
                 marker.inPath = true;
 				marker.setMap(null);
 				marker.intactOverlay.setMap(null);
-				if (map.getZoom() > 15)
+				//if (map.getZoom() > MARKER_DISPLAY_ZOOM_LIMIT)
                     marker.destroyedOverlay.setMap(map);
 				return;
 			}
 		}
 		// we know marker is not in path
         marker.inPath = false;
-        if (map.getZoom() > 15) {
+        if (map.getZoom() > MARKER_DISPLAY_ZOOM_LIMIT) {
             marker.setMap(map);
             marker.intactOverlay.setMap(map);
         }
@@ -201,7 +204,194 @@ function updatePath() {
 	destroyPath.setPath(newPath);
 }
 
+function BuildingMapOverlay(lat, lon, mapOverlayMarkerId) {
+  this.latitude = lat;
+  this.longitude = lon;
+  this.mapOverlayId = mapOverlayMarkerId;
+  this.rect = null;
+}
+
+function DummyOverlay() {}
+
+function DestroyedMapOverlay(bounds, image, markerId) {
+	this.bounds_ = bounds;
+    this.image_ = image;
+	this.div_ = null;
+	this.img_ = null;
+	
+	var svg = document.createElementNS(svgNS, 'svg');
+	svg.setAttributeNS(null, 'height', '0');
+	svg.setAttributeNS(null, 'width', '0');
+	document.getElementsByTagName("body")[0].appendChild(svg);
+	
+	var defs = document.createElementNS(svgNS, 'defs');
+	svg.appendChild(defs);
+	
+	this.clipPath = document.createElementNS(svgNS, 'clipPath');
+	this.clipPath.setAttributeNS(null, 'id', markerId);
+	defs.appendChild(this.clipPath);
+	
+	mapOverlayDictionary[markerId] = this;
+}
+
+function IntactMapOverlay(bounds, image) {
+	this.bounds_ = bounds;
+    this.image_ = image;
+	this.div_ = null;
+}
+
 function initializeMap() {
+	BuildingMapOverlay.prototype = new google.maps.OverlayView();
+	DummyOverlay.prototype = new google.maps.OverlayView();
+	IntactMapOverlay.prototype = new google.maps.OverlayView();
+	DestroyedMapOverlay.prototype = new google.maps.OverlayView();
+	
+	DummyOverlay.prototype.onAdd = function() {}
+	DummyOverlay.prototype.draw = function() {}
+	DummyOverlay.prototype.onRemove = function() {}
+	
+	BuildingMapOverlay.prototype.onAdd = function() {
+		this.rect = document.createElementNS(svgNS, 'rect');		
+		mapOverlayDictionary[this.mapOverlayId].clipPath.appendChild(this.rect);
+	}
+	
+	BuildingMapOverlay.prototype.draw = function() {
+		var mapOverlayWidth = mapOverlayDictionary[this.mapOverlayId].img_.width;
+		var mapOverlayHeight = mapOverlayDictionary[this.mapOverlayId].img_.height;
+		var mapOverlayN = mapOverlayDictionary[this.mapOverlayId].bounds_.getNorthEast().lat();
+		var mapOverlayE = mapOverlayDictionary[this.mapOverlayId].bounds_.getNorthEast().lng();
+		var mapOverlayS = mapOverlayDictionary[this.mapOverlayId].bounds_.getSouthWest().lat();
+		var mapOverlayW = mapOverlayDictionary[this.mapOverlayId].bounds_.getSouthWest().lng();
+				
+		var x = Math.round(mapOverlayWidth * ((this.longitude - defaultBuildingHalfHeight - mapOverlayW) / (mapOverlayE - mapOverlayW)));
+		if (x < 0) x = 0;
+		if (x > mapOverlayWidth) x = mapOverlayWidth;
+		this.rect.setAttributeNS(null, 'x', x.toString());
+		
+		var y = Math.round(mapOverlayHeight * (1 - ((this.latitude + defaultBuildingHalfHeight - mapOverlayS) / (mapOverlayN - mapOverlayS))));
+		if (y < 0) y = 0;
+		if (y > mapOverlayHeight) y = mapOverlayHeight;
+		this.rect.setAttributeNS(null, 'y', y.toString());
+		
+		var width = Math.round(mapOverlayWidth * ((defaultBuildingHalfHeight * 2) / (mapOverlayE - mapOverlayW)));
+		if (width < 0) width = 0;
+		if (width > mapOverlayWidth - x) width = mapOverlayWidth - x;
+		this.rect.setAttributeNS(null, 'width', width.toString());
+		
+		var height = Math.round(mapOverlayHeight * ((defaultBuildingHalfHeight * 2) / (mapOverlayN - mapOverlayS)));
+		if (height < 0) height = 0;
+		if (height > mapOverlayHeight - y) height = mapOverlayHeight - y;
+		this.rect.setAttributeNS(null, 'height', height.toString());
+	}
+	
+	BuildingMapOverlay.prototype.onRemove = function() {
+        this.rect.parentNode.removeChild(this.rect);
+        this.rect = null;
+      };
+	
+	DestroyedMapOverlay.prototype.onAdd = function() {
+
+        var div = document.createElement('div');
+        div.style.borderStyle = 'none';
+        div.style.borderWidth = '0px';
+        div.style.position = 'absolute';
+
+        // Create the img element and attach it to the div.
+        this.img_ = document.createElement('img');
+        this.img_.src = this.image_;
+        this.img_.style.width = '100%';
+        this.img_.style.height = '100%';
+        this.img_.style.position = 'absolute';
+		this.img_.style.clipPath = 'url(#' + this.clipPath.id + ')';
+        div.appendChild(this.img_);
+		
+		//document.getElementsByTagName("body")[0].appendChild(this.img_);
+		
+        this.div_ = div;
+
+        // Add the element to the "overlayLayer" pane.
+        var panes = this.getPanes();
+        panes.overlayLayer.appendChild(div);
+      };
+
+      DestroyedMapOverlay.prototype.draw = function() {
+
+        // We use the south-west and north-east
+        // coordinates of the overlay to peg it to the correct position and size.
+        // To do this, we need to retrieve the projection from the overlay.
+        var overlayProjection = this.getProjection();
+
+        // Retrieve the south-west and north-east coordinates of this overlay
+        // in LatLngs and convert them to pixel coordinates.
+        // We'll use these coordinates to resize the div.
+        var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+        var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+
+        // Resize the image's div to fit the indicated dimensions.
+        var div = this.div_;
+        div.style.left = sw.x + 'px';
+        div.style.top = ne.y + 'px';
+        div.style.width = (ne.x - sw.x) + 'px';
+        div.style.height = (sw.y - ne.y) + 'px';
+      };
+
+      // The onRemove() method will be called automatically from the API if
+      // we ever set the overlay's map property to 'null'.
+      DestroyedMapOverlay.prototype.onRemove = function() {
+        this.div_.parentNode.removeChild(this.div_);
+        this.div_ = null;
+		this.img_ = null;
+      };
+	  
+	  IntactMapOverlay.prototype.onAdd = function() {
+
+        var div = document.createElement('div');
+        div.style.borderStyle = 'none';
+        div.style.borderWidth = '0px';
+        div.style.position = 'absolute';
+
+        // Create the img element and attach it to the div.
+        var img = document.createElement('img');
+        img.src = this.image_;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.position = 'absolute';
+        div.appendChild(img);
+
+        this.div_ = div;
+
+        // Add the element to the "mapPane" pane.
+        var panes = this.getPanes();
+        panes.mapPane.appendChild(div);
+      };
+
+      IntactMapOverlay.prototype.draw = function() {		
+        // We use the south-west and north-east
+        // coordinates of the overlay to peg it to the correct position and size.
+        // To do this, we need to retrieve the projection from the overlay.
+        var overlayProjection = this.getProjection();
+
+        // Retrieve the south-west and north-east coordinates of this overlay
+        // in LatLngs and convert them to pixel coordinates.
+        // We'll use these coordinates to resize the div.
+        var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+        var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+
+        // Resize the image's div to fit the indicated dimensions.
+        var div = this.div_;
+        div.style.left = sw.x + 'px';
+        div.style.top = ne.y + 'px';
+        div.style.width = (ne.x - sw.x) + 'px';
+        div.style.height = (sw.y - ne.y) + 'px';
+      };
+
+      // The onRemove() method will be called automatically from the API if
+      // we ever set the overlay's map property to 'null'.
+      IntactMapOverlay.prototype.onRemove = function() {
+        this.div_.parentNode.removeChild(this.div_);
+        this.div_ = null;
+      };
+
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: latitude, lng: longitude},
 		zoom: 18,
@@ -216,38 +406,39 @@ function initializeMap() {
 	});
     google.maps.event.addListener(map, 'zoom_changed', function() {
                                   if (map.getZoom() > maxZoomLevel) map.setZoom(maxZoomLevel);
-    });
+    });	
 	
     meLocation = new google.maps.Marker({
                                               position: {lat: latitude, lng: longitude},
                                               map: map,
                                               icon: {
                                               anchor: {
-                                              x: 35,
-                                              y: 84
+                                              x: 31,
+                                              y: 68
                                               },
                                               scaledSize: {
-                                              width: 70,
-                                              height: 84
+                                              width: 61,
+                                              height: 74
                                               },
                                               //url: "http://www.etc.cmu.edu/wp-content/uploads/2013/08/Xiao-Bao-1.png"
                                                 //url: "http://matthewestone.com/PhotoTest/58deb4c133627.png"
-                                                url: "http://tuesday-tales.etc.cmu.edu/Photos/590b6dd9cfd6e.png"
+                                                //url: "http://tuesday-tales.etc.cmu.edu/Photos/590b6dd9cfd6e.png"
+												url: "Player_location.png"
                                               }
     });
 	
-    /*
-	meLocation = new google.maps.Circle({
+    
+	meLocationCircle = new google.maps.Circle({
                                               center: {lat: latitude, lng: longitude},
 											  map: map,
                                               radius: maxCheckInDistance,
 											  strokeColor: "#161616",
-											  strokeOpacity: 0.3,
+											  strokeOpacity: 0.1,
 											  strokeWeight: 2,
 											  fillColor: "#2062B3",
-											  fillOpacity: 0.3
+											  fillOpacity: 0.15
     });
-    */
+    
 
 	destroyPath = new google.maps.Polyline({
                                               path: [],
@@ -274,14 +465,30 @@ function initializeMap() {
 				googleMarker.spatialId = spatialMarker._id;
                 googleMarker.inPath = false;
 				googleMarker.addListener('click', function() { onMarkerClick(spatialMarker._id, googleMarker.getPosition()); });
-				googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
-				googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
+				
+				if (spatialMarker.metadata.mapOverlayId)
+				{
+					googleMarker.intactOverlay = new DummyOverlay();
+					googleMarker.destroyedOverlay = new BuildingMapOverlay(spatialMarker.loc.coordinates[1], spatialMarker.loc.coordinates[0], spatialMarker.metadata.mapOverlayId);
+				}
+				else
+				{
+					googleMarker.intactOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds);
+					googleMarker.destroyedOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.destroyedImagePath, spatialMarker.metadata.imageBounds);
+				}
+				
 				// TODO check if intactImagePath or destroyedImagePath exists, otherwise load map overlay
 				googleMarkers.push(googleMarker);
 				break;
 			case "overlay":
-				var mapOverlay = new google.maps.GroundOverlay(spatialMarker.metadata.intactImagePath, spatialMarker.metadata.imageBounds, {opacity: 1.0});
-				mapOverlay.setMap(map);
+				var imageBounds = new google.maps.LatLngBounds(
+					new google.maps.LatLng(spatialMarker.metadata.imageBounds.south, spatialMarker.metadata.imageBounds.west),
+					new google.maps.LatLng(spatialMarker.metadata.imageBounds.north, spatialMarker.metadata.imageBounds.east));
+				var destroyedMapOverlay = new DestroyedMapOverlay(imageBounds, spatialMarker.metadata.destroyedImagePath, spatialMarker._id);
+				destroyedMapOverlay.setMap(map);
+				var intactMapOverlay = new IntactMapOverlay(imageBounds, spatialMarker.metadata.intactImagePath);
+				intactMapOverlay.setMap(map);
+				
 				break;
 			default:
 				break;
@@ -290,19 +497,15 @@ function initializeMap() {
 	updatePath();
 	
 	google.maps.event.addListener(map, 'zoom_changed', function() {
-		if (map.getZoom() <= 15) {
+		if (map.getZoom() <= MARKER_DISPLAY_ZOOM_LIMIT) {
 			googleMarkers.forEach(function(marker){
 				marker.setMap(null);
                 marker.intactOverlay.setMap(null);
-                marker.destroyedOverlay.setMap(null);
+                //marker.destroyedOverlay.setMap(null);
 			});
 		} else {                           
 			googleMarkers.forEach(function(marker){
-                if (marker.inPath)
-                {
-                    marker.destroyedOverlay.setMap(map);
-                }
-                else
+                if (!marker.inPath)
                 {
                     marker.setMap(map);
                     marker.intactOverlay.setMap(map);
@@ -320,11 +523,12 @@ function initializeMap() {
 // baseURL = the Spatial server base URL
 // projectID = the Spatial project ID
     //function loadMap(lat, lon, baseURL, projectID, startScore, timerSeconds, multiplier, pathMarkerIds) {
-function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarkerIds) {
+function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarkerIds, defaultHalfHeight) {
     window.location.href = "uniwebview://print?msg=loadedthemap0";
 	// initialize location variables globally
 	latitude = lat;
 	longitude = lon;
+	defaultBuildingHalfHeight = defaultHalfHeight;
 	
 	pathMarkerSpatialIds = pathMarkerIds.list;
 	window.location.href = "uniwebview://print?msg=loadedthemap1";
@@ -352,11 +556,11 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
     
     updateScore(startScore);
     updateMultiplier(multiplier);
-    if (score == 0)
+    /*if (score == 0)
     {
         // no need to display the timer
         document.getElementById("timetext").innerHTML = "";
-    }
+    } */
     /*else
     {
         startTimer(timerSeconds);
@@ -366,7 +570,8 @@ function loadMap(lat, lon, baseURL, projectID, startScore, multiplier, pathMarke
 
 resizeMap();
 //loadCheckInMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 0, 1, [], 40, {_markersToTake: [], _genericLocationsToTake: []});
-//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] });
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "58b070d3b4c96e00118b66ee", 0, 1, { list: [] }, 0.0004);
+//loadMap(40.43, -79.96, "https://spatial-api-poc.herokuapp.com", "59134219347a490011812673", 0, 1, { list: ["5913798c58a5f10011338f8e", "5913c84c6a3f6f0011a80751", "5913cd546a3f6f0011a80757", "5913cd546a3f6f0011a80759"] }, 0.00047);
 </script>
 </body>
 </html>
